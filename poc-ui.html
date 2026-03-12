@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WinSpeak</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0A0B0F;
+    --card: #13151C;
+    --border: #1E2130;
+    --accent: #7C5CFC;
+    --accent-glow: #7C5CFC44;
+    --green: #22D37A;
+    --red: #FF4D6A;
+    --yellow: #FFB830;
+    --text: #F0F2FF;
+    --muted: #6B7194;
+    --surface: #1A1D2E;
+  }
+  html, body { height: 100%; }
+  body { background: #05060A; font-family: 'DM Sans', sans-serif; color: var(--text); }
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+
+  /* ── SCREEN NAV ── */
+  #screen-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: #05060A; border-bottom: 1px solid var(--border);
+    padding: 10px 16px; display: flex; gap: 6px; overflow-x: auto;
+  }
+  #screen-nav .nav-label {
+    color: var(--muted); font-size: 11px; font-weight: 700;
+    align-self: center; margin-right: 6px; white-space: nowrap;
+  }
+  .nav-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 8px; padding: 6px 12px;
+    font-size: 11px; font-weight: 700; cursor: pointer;
+    white-space: nowrap; font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .nav-btn.active {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+  }
+
+  /* ── PHONE FRAME ── */
+  #app { padding-top: 52px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding-bottom: 40px; }
+  .phone {
+    width: 390px; background: var(--bg); border-radius: 44px; overflow: hidden;
+    box-shadow: 0 0 0 1px #ffffff18, 0 40px 80px #000, 0 0 60px var(--accent-glow);
+    min-height: 844px; position: relative; display: flex; flex-direction: column;
+    margin-top: 20px;
+  }
+  .notch {
+    height: 44px; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); flex-shrink: 0; position: relative; z-index: 10;
+  }
+  .notch-pill {
+    width: 120px; height: 30px; background: #000; border-radius: 20px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .notch-cam { width: 10px; height: 10px; border-radius: 50%; background: #1a1a1a; border: 1px solid #333; }
+  .notch-bar { width: 60px; height: 6px; border-radius: 3px; background: #111; }
+  .notch-time { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 600; color: var(--text); }
+  .phone-body { flex: 1; overflow-y: auto; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── COMMON COMPONENTS ── */
+  .badge {
+    border-radius: 6px; padding: 3px 10px; font-size: 10px; font-weight: 700;
+    letter-spacing: 1px; display: inline-block;
+  }
+  .badge-active { background: #22D37A22; color: #22D37A; border: 1px solid #22D37A44; }
+  .badge-completed { background: #7C5CFC22; color: #7C5CFC; border: 1px solid #7C5CFC44; }
+  .badge-locked { background: #6B719422; color: #6B7194; border: 1px solid #6B719444; }
+
+  .progress-wrap { background: var(--border); border-radius: 99px; overflow: hidden; width: 100%; }
+  .progress-bar { height: 100%; border-radius: 99px; transition: width 1s ease; }
+
+  .btn {
+    border-radius: 14px; padding: 16px 24px; font-size: 15px; font-weight: 700;
+    cursor: pointer; width: 100%; font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.3px; border: none; transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: linear-gradient(135deg, #7C5CFC, #9B7BFF); color: #fff;
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border) !important; }
+  .btn-danger { background: #FF4D6A22; color: #FF4D6A; border: 1px solid #FF4D6A44 !important; }
+  .btn-success { background: #22D37A22; color: #22D37A; border: 1px solid #22D37A44 !important; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .back-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    border-radius: 10px; padding: 8px 14px; cursor: pointer; font-size: 18px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ── STEP PROGRESS ── */
+  .step-prog { display: flex; gap: 6px; padding: 0 20px; }
+  .step-item { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .step-bar { height: 3px; border-radius: 99px; }
+  .step-label { font-size: 9px; font-weight: 600; text-align: center; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes waveform {
+    0%, 100% { height: 8px; }
+    50% { height: 40px; }
+  }
+
+  .pulse { animation: pulse 1s infinite; }
+  .fadein { animation: fadeIn 0.3s ease; }
+
+  /* ── WAVEFORM ── */
+  .waveform { display: flex; align-items: center; justify-content: center; gap: 3px; height: 50px; }
+  .wave-bar {
+    width: 3px; border-radius: 99px;
+    background: linear-gradient(to top, var(--accent), #C084FC);
+  }
+  .waveform-large { height: 60px; gap: 2px; }
+  .wave-bar-lg { width: 4px; border-radius: 99px; background: linear-gradient(to top, #FF4D6A, #7C5CFC); opacity: 0.7; }
+
+  /* ── SKILL ACCORDION ── */
+  .skill-row { cursor: pointer; padding: 14px 20px; border: none; width: 100%; text-align: left; transition: background 0.2s; border-left: 3px solid transparent; background: transparent; }
+  .skill-feedback { padding: 0 20px 16px 23px; animation: fadeIn 0.2s ease; }
+
+  /* ── ANALYSING ORB ── */
+  .orb-ring {
+    position: absolute; width: 180px; height: 180px; border-radius: 50%;
+    padding: 6px;
+  }
+  .orb-inner {
+    width: 100%; height: 100%; border-radius: 50%; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- SCREEN NAV -->
+<div id="screen-nav">
+  <div class="nav-label">SCREENS:</div>
+  <button class="nav-btn active" data-screen="dashboard">🏠 Dashboard</button>
+  <button class="nav-btn" data-screen="audiocheck">🎙 Audio</button>
+  <button class="nav-btn" data-screen="question">📋 Question</button>
+  <button class="nav-btn" data-screen="recording">⏺ Record</button>
+  <button class="nav-btn" data-screen="analysing">⏳ Loading</button>
+  <button class="nav-btn" data-screen="report">📊 Report</button>
+</div>
+
+<div id="app">
+  <div class="phone">
+    <div class="notch">
+      <div class="notch-pill">
+        <div class="notch-cam"></div>
+        <div class="notch-bar"></div>
+      </div>
+      <span class="notch-time">9:41</span>
+    </div>
+    <div class="phone-body">
+
+      <!-- ══ SCREEN 1: DASHBOARD ══ -->
+      <div id="screen-dashboard" class="screen active">
+        <div style="padding: 0 20px 32px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px 0 24px;">
+            <div>
+              <div style="color:var(--muted); font-size:12px; font-weight:500;">GOOD MORNING</div>
+              <div style="font-size:22px; font-weight:800;">Sameer 👋</div>
+            </div>
+            <div style="width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg,#7C5CFC,#C084FC); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 16px var(--accent-glow);">S</div>
+          </div>
+
+          <!-- XP -->
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px 16px; margin-bottom:20px; display:flex; align-items:center; gap:12px;">
+            <div style="font-size:24px;">⚡</div>
+            <div style="flex:1;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="font-size:13px; font-weight:700;">Total XP: 3,450</span>
+                <span style="color:var(--muted); font-size:12px;">Level 8</span>
+              </div>
+              <div class="progress-wrap" style="height:8px;"><div class="progress-bar" style="width:72%; background:linear-gradient(90deg,#FFB830,#FFB830cc); box-shadow:0 0 8px #FFB83088;"></div></div>
+            </div>
+          </div>
+
+          <!-- Weekly Challenge -->
+          <div style="margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <div>
+                <div style="color:var(--muted); font-size:11px; font-weight:600; letter-spacing:1.5px; margin-bottom:2px;">WEEKLY CHALLENGE</div>
+                <div style="font-size:16px; font-weight:800;">Week 2</div>
+              </div>
+              <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:8px 14px; text-align:center;">
+                <div id="countdown" style="color:var(--yellow); font-size:16px; font-weight:800;">1d 00h 00m</div>
+                <div style="color:var(--muted); font-size:10px; margin-top:1px;">remaining</div>
+              </div>
+            </div>
+
+            <div style="background:linear-gradient(135deg,#1A1D2E,#13151C); border:1px solid #7C5CFC44; border-radius:22px; padding:20px; position:relative; overflow:hidden; margin-bottom:16px;">
+              <div style="position:absolute; top:-30px; right:-30px; width:120px; height:120px; border-radius:50%; background:var(--accent-glow); filter:blur(40px);"></div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <span class="badge badge-active">ACTIVE</span>
+                <div style="background:#FFB83022; color:#FFB830; border:1px solid #FFB83044; border-radius:8px; padding:4px 10px; font-size:12px; font-weight:700;">⚡ 1000 XP</div>
+              </div>
+              <div style="font-size:20px; font-weight:800; margin-bottom:6px;">Persuasion Master</div>
+              <div style="color:var(--muted); font-size:13px; line-height:1.5; margin-bottom:16px;">Convince the AI investor to fund your startup idea in 60 seconds.</div>
+              <div style="color:#FFB830; font-size:12px; font-weight:600; margin-bottom:16px;">🗓 Complete by Sunday to earn 1000 XP</div>
+              <button class="btn btn-primary" onclick="goTo('audiocheck')">Start Challenge →</button>
+            </div>
+
+            <div style="background:var(--card); border:1px solid var(--border); border-radius:18px; padding:16px 18px; display:flex; align-items:center; gap:14px; margin-bottom:10px;">
+              <div style="width:44px; height:44px; border-radius:12px; background:var(--surface); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:var(--muted);">W1</div>
+              <div style="flex:1;"><div style="font-size:15px; font-weight:700;">Story Starter</div><div style="color:var(--muted); font-size:12px;">800 XP</div></div>
+              <span class="badge badge-completed">COMPLETED</span>
+            </div>
+            <div style="background:var(--card); border:1px solid var(--border); border-radius:18px; padding:16px 18px; display:flex; align-items:center; gap:14px; margin-bottom:10px; opacity:0.5;">
+              <div style="width:44px; height:44px; border-radius:12px; background:var(--surface); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:var(--muted);">W3</div>
+              <div style="flex:1;"><div style="font-size:15px; font-weight:700;">Debate Club</div><div style="color:var(--muted); font-size:12px;">1200 XP</div></div>
+              <span class="badge badge-locked">LOCKED</span>
+            </div>
+          </div>
+
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:16px; padding:12px 16px; display:flex; justify-content:space-around;">
+            <div style="color:var(--accent); font-size:11px; font-weight:600; text-align:center;">🏠 Home</div>
+            <div style="color:var(--muted); font-size:11px; font-weight:600; text-align:center;">📊 Stats</div>
+            <div style="color:var(--muted); font-size:11px; font-weight:600; text-align:center;">🏆 Leaderboard</div>
+            <div style="color:var(--muted); font-size:11px; font-weight:600; text-align:center;">👤 Profile</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SCREEN 2: AUDIO CHECK ══ -->
+      <div id="screen-audiocheck" class="screen">
+        <div style="padding:20px 20px 32px; display:flex; flex-direction:column; gap:20px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <button class="back-btn" onclick="goTo('dashboard')">←</button>
+            <div>
+              <div style="color:var(--muted); font-size:11px; font-weight:600; letter-spacing:1px;">STEP 1 OF 3</div>
+              <div style="font-size:18px; font-weight:800;">Audio Check</div>
+            </div>
+          </div>
+
+          <div class="step-prog" style="padding:0;">
+            <div class="step-item"><div class="step-bar" style="background:var(--accent);"></div><div class="step-label" style="color:var(--accent);">Audio Check</div></div>
+            <div class="step-item"><div class="step-bar" style="background:var(--border);"></div><div class="step-label" style="color:var(--muted);">Rules & Question</div></div>
+            <div class="step-item"><div class="step-bar" style="background:var(--border);"></div><div class="step-label" style="color:var(--muted);">Record</div></div>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#1A1D2E,#0F1018); border:1px solid var(--border); border-radius:22px; aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; position:relative; overflow:hidden;">
+            <div style="position:absolute; inset:0; background:radial-gradient(ellipse at 60% 40%, var(--accent-glow), transparent 60%);"></div>
+            <div style="width:70px; height:70px; border-radius:50%; background:linear-gradient(135deg,#7C5CFC,#C084FC); display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 0 30px var(--accent-glow); position:relative; z-index:1;">🤖</div>
+            <div style="font-size:13px; font-weight:600; position:relative; z-index:1;">Avatar Intro Video</div>
+            <div id="audio-subtitle" style="position:absolute; bottom:12px; left:12px; right:12px; background:#000000BB; border-radius:10px; padding:8px 12px; font-size:12px; z-index:2;">"Hi! I'm your coach. Let's do a quick audio check. Say: <strong>'Hello, how are you?'</strong>"</div>
+            <div style="position:absolute; top:12px; right:12px; background:#FF4D6A; border-radius:6px; padding:3px 8px; font-size:10px; font-weight:700; color:#fff; z-index:2;">● LIVE</div>
+          </div>
+
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px 14px; font-size:13px; line-height:1.5; text-align:center;">
+            Please say: <span style="color:var(--accent); font-weight:700;">"Hello, how are you?"</span>
+          </div>
+
+          <div id="audio-intro">
+            <button class="btn btn-primary" onclick="startAudioCheck()">🎙 Start Audio Check</button>
+          </div>
+          <div id="audio-recording" style="display:none; flex-direction:column; gap:14px;">
+            <div style="background:var(--card); border:1px solid #FF4D6A44; border-radius:18px; padding:20px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:14px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="pulse" style="width:10px; height:10px; border-radius:50%; background:#FF4D6A;"></div>
+                  <span style="color:#FF4D6A; font-weight:700; font-size:13px;">Recording</span>
+                </div>
+                <span id="audio-timer" style="color:var(--yellow); font-weight:800; font-size:18px;">30s</span>
+              </div>
+              <div class="waveform" id="waveform-audio"></div>
+              <div class="progress-wrap" style="height:6px; margin-top:10px;"><div id="audio-vol-bar" class="progress-bar" style="width:60%; background:linear-gradient(90deg,#FF4D6A,#FF4D6Acc); box-shadow:0 0 8px #FF4D6A88;"></div></div>
+              <div id="audio-vol-label" style="color:var(--muted); font-size:11px; text-align:center; margin-top:6px;">Audio level: 60%</div>
+            </div>
+            <button class="btn btn-secondary" onclick="passAudioCheck()">■ Stop Recording</button>
+          </div>
+          <div id="audio-pass" style="display:none; flex-direction:column; gap:14px;">
+            <div style="background:#22D37A11; border:1px solid #22D37A44; border-radius:18px; padding:20px; text-align:center;">
+              <div style="font-size:40px; margin-bottom:8px;">✅</div>
+              <div style="color:#22D37A; font-weight:800; font-size:17px; margin-bottom:4px;">Audio Detected!</div>
+              <div style="color:var(--muted); font-size:13px;">Mic is working perfectly. You're ready to go!</div>
+            </div>
+            <button class="btn btn-primary" onclick="goTo('question')">Start Challenge →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SCREEN 3: QUESTION ══ -->
+      <div id="screen-question" class="screen">
+        <div style="padding:20px 20px 32px; display:flex; flex-direction:column; gap:20px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <button class="back-btn" onclick="goTo('audiocheck')">←</button>
+            <div>
+              <div style="color:var(--muted); font-size:11px; font-weight:600; letter-spacing:1px;">STEP 2 OF 3</div>
+              <div style="font-size:18px; font-weight:800;">Rules & Question</div>
+            </div>
+          </div>
+
+          <div class="step-prog" style="padding:0;">
+            <div class="step-item"><div class="step-bar" style="background:var(--accent);"></div><div class="step-label" style="color:var(--accent);">Audio Check</div></div>
+            <div class="step-item"><div class="step-bar" style="background:var(--accent);"></div><div class="step-label" style="color:var(--accent);">Rules & Question</div></div>
+            <div class="step-item"><div class="step-bar" style="background:var(--border);"></div><div class="step-label" style="color:var(--muted);">Record</div></div>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#1A1D2E,#0F1018); border:1px solid var(--border); border-radius:22px; aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; position:relative; overflow:hidden;">
+            <div style="position:absolute; inset:0; background:radial-gradient(ellipse at 40% 50%, #22D37A22, transparent 60%);"></div>
+            <div style="width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,#22D37A,#7C5CFC); display:flex; align-items:center; justify-content:center; font-size:28px;">🤖</div>
+            <div style="font-size:13px; font-weight:600;">Explaining Rules...</div>
+            <div style="position:absolute; bottom:0; left:0; right:0; height:4px; background:var(--border);">
+              <div id="question-progress-bar" style="height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#22D37A); transition:width 0.1s;"></div>
+            </div>
+          </div>
+
+          <div style="background:var(--card); border:1px solid #7C5CFC44; border-radius:20px; padding:20px;">
+            <div style="color:var(--muted); font-size:11px; font-weight:600; letter-spacing:1px; margin-bottom:8px;">THIS WEEK'S CHALLENGE</div>
+            <div style="font-size:17px; font-weight:800; margin-bottom:10px; line-height:1.4;">Persuasion Master 🎯</div>
+            <div style="background:var(--surface); border-radius:14px; padding:14px 16px; border-left:3px solid var(--accent);">
+              <div style="color:var(--muted); font-size:11px; margin-bottom:6px; font-weight:600;">QUESTION</div>
+              <div style="font-size:14px; line-height:1.6;">"Convince an AI investor to fund your startup idea in 60 seconds. Present your pitch with confidence and clarity."</div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:14px;">
+              <div style="flex:1; background:var(--surface); border-radius:10px; padding:10px 12px; text-align:center;"><div style="color:var(--accent); font-size:18px; font-weight:800;">60s</div><div style="color:var(--muted); font-size:10px;">Max Time</div></div>
+              <div style="flex:1; background:var(--surface); border-radius:10px; padding:10px 12px; text-align:center;"><div style="color:#22D37A; font-size:18px; font-weight:800;">2</div><div style="color:var(--muted); font-size:10px;">Retries Left</div></div>
+              <div style="flex:1; background:var(--surface); border-radius:10px; padding:10px 12px; text-align:center;"><div style="color:#FFB830; font-size:18px; font-weight:800;">1000</div><div style="color:var(--muted); font-size:10px;">XP Reward</div></div>
+            </div>
+          </div>
+
+          <button onclick="resetQuestionVideo()" style="background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:12px; padding:12px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; width:100%;">🔁 Repeat Question</button>
+          <button id="start-recording-btn" class="btn btn-primary" onclick="goTo('recording')" disabled>Watch the full video to continue...</button>
+        </div>
+      </div>
+
+      <!-- ══ SCREEN 4: RECORDING ══ -->
+      <div id="screen-recording" class="screen">
+        <div style="padding:20px 20px 32px; display:flex; flex-direction:column; gap:20px;">
+          <div id="rec-header">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+              <button class="back-btn" onclick="goTo('question')">←</button>
+              <div>
+                <div style="color:var(--muted); font-size:11px; font-weight:600; letter-spacing:1px;">STEP 3 OF 3</div>
+                <div style="font-size:18px; font-weight:800;">Record Your Answer</div>
+              </div>
+            </div>
+          </div>
+          <div class="step-prog" style="padding:0;">
+            <div class="step-item"><div class="step-bar" style="background:var(--accent);"></div><div class="step-label" style="color:var(--accent);">Audio Check</div></div>
+            <div class="step-item"><div class="step-bar" style="background:var(--accent);"></div><div class="step-label" style="color:var(--accent);">Rules & Question</div></div>
+            <div class="step-item"><div class="step-bar" style="background:var(--accent);"></div><div class="step-label" style="color:var(--accent);">Record</div></div>
+          </div>
+
+          <div id="rec-timer-section">
+            <div style="display:flex; justify-content:center; align-items:center; padding:20px 0;">
+              <div style="position:relative; width:200px; height:200px;">
+                <svg style="position:absolute; inset:0; transform:rotate(-90deg);" width="200" height="200">
+                  <circle cx="100" cy="100" r="88" fill="none" stroke="var(--border)" stroke-width="8"/>
+                  <circle id="timer-circle" cx="100" cy="100" r="88" fill="none" stroke="var(--accent)" stroke-width="8"
+                    stroke-dasharray="552.9" stroke-dashoffset="552.9" stroke-linecap="round"
+                    style="transition: stroke-dashoffset 1s linear, stroke 0.3s;"/>
+                </svg>
+                <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <div id="rec-timer-display" style="color:var(--text); font-size:48px; font-weight:900; line-height:1;">60</div>
+                  <div style="color:var(--muted); font-size:12px; margin-top:4px;">seconds</div>
+                  <div id="rec-indicator" style="display:none; align-items:center; gap:6px; margin-top:8px;">
+                    <div style="width:8px; height:8px; border-radius:50%; background:#FF4D6A;"></div>
+                    <span style="color:#FF4D6A; font-size:11px; font-weight:700;">RECORDING</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="rec-waveform-wrap" style="display:none; background:var(--card); border:1px solid #FF4D6A33; border-radius:18px; padding:16px 20px; margin-bottom:0;">
+              <div class="waveform waveform-large" id="waveform-rec"></div>
+            </div>
+
+            <div id="rec-start-btn" style="margin-top:0;">
+              <button class="btn btn-primary" onclick="startRecording()">🔴 Start Recording</button>
+            </div>
+            <div id="rec-stop-btn" style="display:none;">
+              <button class="btn btn-danger" onclick="stopRecording()">■ Stop Recording</button>
+            </div>
+          </div>
+
+          <div id="rec-review" style="display:none; flex-direction:column; gap:16px;">
+            <div style="background:#22D37A11; border:1px solid #22D37A44; border-radius:20px; padding:16px 20px; display:flex; align-items:center; gap:14px;">
+              <div style="font-size:32px;">🎙️</div>
+              <div>
+                <div style="color:#22D37A; font-weight:800; font-size:15px;">Recording Saved!</div>
+                <div id="rec-duration" style="color:var(--muted); font-size:12px; margin-top:2px;">Duration: 0s · Ready to review</div>
+              </div>
+            </div>
+            <div style="background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px;">
+              <div style="color:var(--muted); font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:12px;">YOUR RESPONSE</div>
+              <div style="display:flex; align-items:center; gap:14px;">
+                <button id="play-btn" onclick="togglePlay()" style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#9B7BFF); border:none; color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 14px var(--accent-glow);">▶</button>
+                <div style="flex:1;">
+                  <div class="progress-wrap" style="height:6px;"><div id="play-progress" class="progress-bar" style="width:0%; background:linear-gradient(90deg,var(--accent),var(--accent)cc); box-shadow:0 0 8px var(--accent-glow);"></div></div>
+                  <div style="display:flex; justify-content:space-between; margin-top:5px;">
+                    <span id="play-time" style="color:var(--muted); font-size:10px;">0:00</span>
+                    <span id="play-total" style="color:var(--muted); font-size:10px;">0:00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button id="retry-btn" class="btn btn-danger" onclick="retryRecording()">🔄 Retry · 2 attempts left</button>
+            <button class="btn btn-primary" onclick="goTo('analysing')">Submit →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SCREEN 5: ANALYSING ══ -->
+      <div id="screen-analysing" class="screen">
+        <div style="padding:40px 20px 32px; display:flex; flex-direction:column; align-items:center; gap:30px; min-height:700px;">
+          <div style="text-align:center;">
+            <div style="color:var(--muted); font-size:11px; font-weight:600; letter-spacing:2px; margin-bottom:8px;">PROCESSING</div>
+            <div style="font-size:24px; font-weight:800;">Analysing your answer...</div>
+            <div style="color:var(--muted); font-size:13px; margin-top:6px;">This will take ~30 seconds</div>
+          </div>
+
+          <div style="position:relative; width:180px; height:180px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <canvas id="orb-canvas" width="180" height="180" style="position:absolute; inset:0;"></canvas>
+            <div class="orb-inner" style="position:relative; z-index:1; width:168px; height:168px;">
+              <div style="font-size:40px;">🤖</div>
+              <div id="orb-pct" style="color:var(--accent); font-weight:900; font-size:20px;">0%</div>
+            </div>
+          </div>
+
+          <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
+            <div id="step-1" class="analysis-step" style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 16px; display:flex; align-items:center; gap:12px; transition:border-color 0.5s;">
+              <div class="step-check" style="width:24px; height:24px; border-radius:50%; background:var(--surface); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; color:var(--muted);">○</div>
+              <span style="color:var(--muted); font-size:13px;">Transcribing audio</span>
+            </div>
+            <div id="step-2" class="analysis-step" style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 16px; display:flex; align-items:center; gap:12px; transition:border-color 0.5s;">
+              <div class="step-check" style="width:24px; height:24px; border-radius:50%; background:var(--surface); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; color:var(--muted);">○</div>
+              <span style="color:var(--muted); font-size:13px;">Analysing fluency & grammar</span>
+            </div>
+            <div id="step-3" class="analysis-step" style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 16px; display:flex; align-items:center; gap:12px; transition:border-color 0.5s;">
+              <div class="step-check" style="width:24px; height:24px; border-radius:50%; background:var(--surface); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; color:var(--muted);">○</div>
+              <span style="color:var(--muted); font-size:13px;">Scoring vocabulary & clarity</span>
+            </div>
+            <div id="step-4" class="analysis-step" style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 16px; display:flex; align-items:center; gap:12px; transition:border-color 0.5s;">
+              <div class="step-check" style="width:24px; height:24px; border-radius:50%; background:var(--surface); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; color:var(--muted);">○</div>
+              <span style="color:var(--muted); font-size:13px;">Generating personalized feedback</span>
+            </div>
+          </div>
+
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px 18px; width:100%; min-height:70px; display:flex; align-items:center;">
+            <div id="tip-text" style="font-size:13px; line-height:1.6; transition:opacity 0.5s;">💡 Tip: Pausing for 1–2 seconds between points makes you sound more confident.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SCREEN 6: REPORT ══ -->
+      <div id="screen-report" class="screen">
+        <div style="padding:20px 20px 40px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <div>
+              <div style="color:var(--muted); font-size:11px; font-weight:600; letter-spacing:1px;">CHALLENGE COMPLETE</div>
+              <div style="font-size:20px; font-weight:800;">Your Report 📊</div>
+            </div>
+            <span class="badge badge-completed">COMPLETED</span>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#1A1D2E,#13151C); border:1px solid #7C5CFC44; border-radius:24px; padding:24px; text-align:center; margin-bottom:20px; position:relative; overflow:hidden;">
+            <div style="position:absolute; top:-40px; right:-40px; width:150px; height:150px; border-radius:50%; background:var(--accent-glow); filter:blur(50px);"></div>
+            <div style="color:var(--muted); font-size:11px; font-weight:600; letter-spacing:1.5px; margin-bottom:12px;">OVERALL SCORE</div>
+            <div style="display:flex; align-items:baseline; justify-content:center; gap:4px; margin-bottom:8px;">
+              <span style="color:var(--accent); font-size:72px; font-weight:900; line-height:1;">80</span>
+              <span style="color:var(--muted); font-size:24px; font-weight:700;">/100</span>
+            </div>
+            <div style="color:#FFB830; font-size:14px; font-weight:700;">⚡ +1000 XP Earned!</div>
+            <div style="display:flex; justify-content:center; gap:6px; margin-top:12px;">
+              <span style="font-size:18px;">⭐</span><span style="font-size:18px;">⭐</span><span style="font-size:18px;">⭐</span><span style="font-size:18px;">⭐</span><span style="font-size:18px; opacity:0.2;">⭐</span>
+            </div>
+          </div>
+
+          <!-- Skill Breakdown -->
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:20px; margin-bottom:16px; overflow:hidden;">
+            <div style="padding:16px 20px 14px; border-bottom:1px solid var(--border);">
+              <div style="font-size:15px; font-weight:800;">Skill Breakdown</div>
+              <div style="color:var(--muted); font-size:11px; margin-top:2px;">Tap any skill to see feedback</div>
+            </div>
+            <div id="skill-list"></div>
+          </div>
+
+          <!-- Pause Analysis -->
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:20px; padding:20px; margin-bottom:16px;">
+            <div style="font-size:15px; font-weight:800; margin-bottom:14px;">⏸ Pause Analysis</div>
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1; background:var(--surface); border-radius:12px; padding:12px 10px; text-align:center;"><div style="color:var(--accent); font-size:16px; font-weight:800;">Good</div><div style="color:var(--muted); font-size:10px; margin-top:2px;">Status</div></div>
+              <div style="flex:1; background:var(--surface); border-radius:12px; padding:12px 10px; text-align:center;"><div style="color:var(--accent); font-size:16px; font-weight:800;">3</div><div style="color:var(--muted); font-size:10px; margin-top:2px;">Count</div></div>
+              <div style="flex:1; background:var(--surface); border-radius:12px; padding:12px 10px; text-align:center;"><div style="color:var(--accent); font-size:16px; font-weight:800;">1.2s</div><div style="color:var(--muted); font-size:10px; margin-top:2px;">Avg Duration</div></div>
+            </div>
+            <div style="margin-top:12px; background:var(--surface); border-radius:10px; padding:10px 12px; font-size:12px; color:var(--muted); line-height:1.5;">💡 Suggestion: Your pauses are natural and well-timed. Consider pausing slightly longer after key points.</div>
+          </div>
+
+          <!-- Grammar Issues -->
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:20px; padding:20px; margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <div style="font-size:15px; font-weight:800;">📝 Grammar Issues</div>
+              <span style="background:#FF4D6A22; color:#FF4D6A; border-radius:8px; padding:3px 10px; font-size:12px; font-weight:700;">2 found</span>
+            </div>
+            <div style="background:var(--surface); border-radius:12px; padding:10px 14px; margin-bottom:8px;">
+              <div style="color:#FF4D6A; font-size:12px; text-decoration:line-through; margin-bottom:2px;">We was planning</div>
+              <div style="color:#22D37A; font-size:12px; font-weight:700;">→ We were planning</div>
+            </div>
+            <div style="background:var(--surface); border-radius:12px; padding:10px 14px;">
+              <div style="color:#FF4D6A; font-size:12px; text-decoration:line-through; margin-bottom:2px;">More easier</div>
+              <div style="color:#22D37A; font-size:12px; font-weight:700;">→ Easier</div>
+            </div>
+          </div>
+
+          <!-- Filler Words -->
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:20px; padding:20px; margin-bottom:16px;">
+            <div style="font-size:15px; font-weight:800; margin-bottom:12px;">🗣 Filler Words</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <div style="background:#FFB83022; border:1px solid #FFB83044; border-radius:8px; padding:6px 12px; font-size:12px; color:#FFB830; font-weight:600;">"um" ×4</div>
+              <div style="background:#FFB83022; border:1px solid #FFB83044; border-radius:8px; padding:6px 12px; font-size:12px; color:#FFB830; font-weight:600;">"like" ×2</div>
+              <div style="background:#FFB83022; border:1px solid #FFB83044; border-radius:8px; padding:6px 12px; font-size:12px; color:#FFB830; font-weight:600;">"you know" ×1</div>
+            </div>
+            <div style="margin-top:12px; font-size:12px; color:var(--muted);">💡 Try replacing "um" with a brief pause.</div>
+          </div>
+
+          <!-- WinSpeak Analysis -->
+          <div style="background:linear-gradient(135deg,#7C5CFC11,#1A1D2E); border:1px solid #7C5CFC44; border-radius:20px; padding:20px; margin-bottom:16px;">
+            <div style="font-size:15px; font-weight:800; margin-bottom:12px;">✨ WinSpeak Analysis</div>
+            <div style="color:var(--muted); font-size:13px; line-height:1.7;">Your delivery showed strong conviction and clear structure. The opening hook was compelling, and your use of specific metrics added credibility. To take your pitch to the next level, focus on reducing filler words and adding a stronger call-to-action at the close.</div>
+          </div>
+
+          <!-- Strengths & Improve -->
+          <div style="display:flex; gap:12px; margin-bottom:20px;">
+            <div style="flex:1; background:#22D37A11; border:1px solid #22D37A33; border-radius:18px; padding:16px;">
+              <div style="color:#22D37A; font-size:13px; font-weight:800; margin-bottom:10px;">💪 Strengths</div>
+              <div style="color:var(--text); font-size:11px; margin-bottom:6px; display:flex; gap:6px;"><span style="color:#22D37A;">✓</span>High relevancy score</div>
+              <div style="color:var(--text); font-size:11px; margin-bottom:6px; display:flex; gap:6px;"><span style="color:#22D37A;">✓</span>Clear structure</div>
+              <div style="color:var(--text); font-size:11px; margin-bottom:6px; display:flex; gap:6px;"><span style="color:#22D37A;">✓</span>Strong vocabulary</div>
+            </div>
+            <div style="flex:1; background:#FF4D6A11; border:1px solid #FF4D6A33; border-radius:18px; padding:16px;">
+              <div style="color:#FF4D6A; font-size:13px; font-weight:800; margin-bottom:10px;">🎯 Improve</div>
+              <div style="color:var(--text); font-size:11px; margin-bottom:6px; display:flex; gap:6px;"><span style="color:#FF4D6A;">→</span>Reduce filler words</div>
+              <div style="color:var(--text); font-size:11px; margin-bottom:6px; display:flex; gap:6px;"><span style="color:#FF4D6A;">→</span>Stronger structure</div>
+              <div style="color:var(--text); font-size:11px; margin-bottom:6px; display:flex; gap:6px;"><span style="color:#FF4D6A;">→</span>Fewer grammar slips</div>
+            </div>
+          </div>
+
+          <!-- Ideal Response -->
+          <div style="background:linear-gradient(135deg,#FFB83008,#1A1D2E); border:1px solid #FFB83044; border-radius:20px; padding:20px; margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <div style="font-size:15px; font-weight:800;">✨ Ideal Response</div>
+              <div style="background:#FFB83022; border:1px solid #FFB83044; border-radius:8px; padding:3px 10px; font-size:10px; font-weight:700; color:#FFB830;">Andhra English</div>
+            </div>
+            <div style="color:var(--muted); font-size:11px; margin-bottom:16px;">121 words · ~60 sec speaking time</div>
+            <div style="background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px 16px; margin-bottom:16px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <button id="ideal-play-btn" onclick="toggleIdealPlay()" style="width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,#FFB830,#FF8C00); border:none; color:#000; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 12px #FFB83044;">▶</button>
+                <div style="flex:1;">
+                  <div class="progress-wrap" style="height:6px;"><div id="ideal-progress" class="progress-bar" style="width:0%; background:linear-gradient(90deg,#FFB830,#FFB830cc); box-shadow:0 0 8px #FFB83088;"></div></div>
+                  <div style="display:flex; justify-content:space-between; margin-top:5px;">
+                    <span id="ideal-time" style="color:var(--muted); font-size:10px;">0:00</span>
+                    <span style="color:var(--muted); font-size:10px;">1:00</span>
+                  </div>
+                </div>
+              </div>
+              <div id="ideal-playing-indicator" style="display:none; margin-top:10px; align-items:center; gap:6px;">
+                <div style="width:6px; height:6px; border-radius:50%; background:#FFB830;"></div>
+                <span style="color:#FFB830; font-size:10px; font-weight:700;">Playing in Andhra English accent</span>
+              </div>
+            </div>
+            <div style="background:var(--surface); border-radius:14px; padding:14px 16px; border-left:3px solid #FFB830;">
+              <div style="color:var(--muted); font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:10px;">TRANSCRIPT</div>
+              <div style="font-size:12px; line-height:1.8; white-space:pre-line; color:var(--text);">Good evening! My name is Arjun and I'm here to pitch SoilSense — an AI-powered precision farming assistant built for small and marginal farmers across India.
+
+The problem is straightforward: 70% of Indian farmers lack real-time soil and weather data, leading to 30% crop wastage every season. SoilSense solves this with a ₹299-per-season subscription that delivers hyper-local soil analysis, irrigation alerts, and crop recommendations directly to a farmer's basic smartphone — no internet required.
+
+We've already onboarded 1,200 farmers in Andhra Pradesh in just three months, with an 87% retention rate. Our unit economics are strong — ₹180 cost per acquisition, ₹600 lifetime value per season.
+
+We're seeking ₹2 crore to expand to three new states and build multilingual voice support. The Indian agri-tech market is ₹35,000 crore and growing at 25% annually.
+
+Invest in SoilSense — and let's grow India's food future together.</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="goTo('dashboard')">← Back to Home</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let currentScreen = 'dashboard';
+let countdownSeconds = 87600;
+let audioTimerInterval = null;
+let audioTimerSecs = 30;
+let questionProgressInterval = null;
+let questionProgress = 0;
+let recTimerInterval = null;
+let recTimerSecs = 60;
+let recRecording = false;
+let recDone = false;
+let retriesLeft = 2;
+let analysingInterval = null;
+let analysingProgress = 0;
+let tipInterval = null;
+let tipIndex = 0;
+let isPlaying = false;
+let isIdealPlaying = false;
+let idealInterval = null;
+let idealProgress = 0;
+
+const tips = [
+  "💡 Tip: Pausing for 1–2 seconds between points makes you sound more confident.",
+  "🎯 Tip: Use the rule of three — structure ideas in groups of three.",
+  "🗣 Tip: Varying your pitch keeps listeners engaged.",
+  "⚡ Tip: Filler words like 'um' reduce your perceived credibility by 20%.",
+  "🌟 Tip: Start with a strong hook — it sets the tone for everything.",
+];
+
+const skillData = {
+  Fluency:    { score: 78, feedback: "Your speech flowed naturally with minimal unplanned stops. Work on smoothing out the mid-section where pacing dipped slightly." },
+  Grammar:    { score: 85, feedback: "Strong grammatical accuracy throughout. Two minor errors detected — review your subject-verb agreement in complex sentences." },
+  Vocabulary: { score: 72, feedback: "Good range of industry terms, though some word choices were repetitive. Try varying synonyms for high-frequency words like 'good' and 'great'." },
+  Clarity:    { score: 88, feedback: "Excellent articulation and enunciation. Your key points came through clearly and were easy to follow." },
+  Structure:  { score: 65, feedback: "Your intro and body were solid, but the conclusion felt abrupt. Aim for a clear closing statement that reinforces your main idea." },
+  Relevancy:  { score: 91, feedback: "Stayed tightly on-topic throughout. Every point connected back to the core pitch — this is your strongest area." },
+};
+
+// ── NAVIGATION ──
+function goTo(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  document.querySelector(`[data-screen="${screen}"]`).classList.add('active');
+  currentScreen = screen;
+
+  clearAllIntervals();
+
+  if (screen === 'dashboard') startCountdown();
+  if (screen === 'audiocheck') resetAudioCheck();
+  if (screen === 'question') startQuestionVideo();
+  if (screen === 'recording') resetRecording();
+  if (screen === 'analysing') startAnalysing();
+  if (screen === 'report') renderSkillBreakdown();
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => goTo(btn.dataset.screen));
+});
+
+function clearAllIntervals() {
+  clearInterval(audioTimerInterval);
+  clearInterval(questionProgressInterval);
+  clearInterval(recTimerInterval);
+  clearInterval(analysingInterval);
+  clearInterval(tipInterval);
+  clearInterval(idealInterval);
+}
+
+// ── COUNTDOWN ──
+function startCountdown() {
+  clearInterval(window._countdownInterval);
+  window._countdownInterval = setInterval(() => {
+    if (countdownSeconds > 0) countdownSeconds--;
+    const d = Math.floor(countdownSeconds / 86400);
+    const h = Math.floor((countdownSeconds % 86400) / 3600);
+    const m = Math.floor((countdownSeconds % 3600) / 60);
+    document.getElementById('countdown').textContent = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m`;
+  }, 1000);
+}
+
+// ── AUDIO CHECK ──
+function resetAudioCheck() {
+  audioTimerSecs = 30;
+  document.getElementById('audio-intro').style.display = 'block';
+  document.getElementById('audio-recording').style.display = 'none';
+  document.getElementById('audio-pass').style.display = 'none';
+  document.getElementById('audio-subtitle').style.display = 'block';
+}
+
+function startAudioCheck() {
+  document.getElementById('audio-intro').style.display = 'none';
+  document.getElementById('audio-recording').style.display = 'flex';
+  document.getElementById('audio-subtitle').style.display = 'none';
+  audioTimerSecs = 30;
+
+  // Build waveform
+  const wf = document.getElementById('waveform-audio');
+  wf.innerHTML = '';
+  for (let i = 0; i < 28; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'wave-bar';
+    bar.style.height = (Math.random() * 40 + 8) + 'px';
+    bar.style.opacity = (0.6 + Math.random() * 0.4);
+    wf.appendChild(bar);
+  }
+
+  audioTimerInterval = setInterval(() => {
+    audioTimerSecs--;
+    document.getElementById('audio-timer').textContent = String(audioTimerSecs).padStart(2,'0') + 's';
+    const vol = Math.floor(Math.random() * 80 + 20);
+    document.getElementById('audio-vol-bar').style.width = vol + '%';
+    document.getElementById('audio-vol-label').textContent = `Audio level: ${vol}%`;
+    // animate waveform
+    wf.querySelectorAll('.wave-bar').forEach(b => {
+      b.style.height = (Math.random() * 40 + 8) + 'px';
+    });
+    if (audioTimerSecs <= 0) { clearInterval(audioTimerInterval); passAudioCheck(); }
+  }, 1000);
+}
+
+function passAudioCheck() {
+  clearInterval(audioTimerInterval);
+  document.getElementById('audio-recording').style.display = 'none';
+  document.getElementById('audio-pass').style.display = 'flex';
+}
+
+// ── QUESTION VIDEO ──
+function startQuestionVideo() {
+  questionProgress = 0;
+  document.getElementById('question-progress-bar').style.width = '0%';
+  document.getElementById('start-recording-btn').disabled = true;
+  document.getElementById('start-recording-btn').textContent = 'Watch the full video to continue...';
+  questionProgressInterval = setInterval(() => {
+    questionProgress += 2;
+    document.getElementById('question-progress-bar').style.width = Math.min(questionProgress, 100) + '%';
+    if (questionProgress >= 100) {
+      clearInterval(questionProgressInterval);
+      document.getElementById('start-recording-btn').disabled = false;
+      document.getElementById('start-recording-btn').textContent = '🎙 Start Recording →';
+    }
+  }, 100);
+}
+
+function resetQuestionVideo() {
+  clearInterval(questionProgressInterval);
+  startQuestionVideo();
+}
+
+// ── RECORDING ──
+function resetRecording() {
+  recTimerSecs = 60;
+  recRecording = false;
+  recDone = false;
+  retriesLeft = 2;
+  document.getElementById('rec-timer-section').style.display = 'block';
+  document.getElementById('rec-review').style.display = 'none';
+  document.getElementById('rec-start-btn').style.display = 'block';
+  document.getElementById('rec-stop-btn').style.display = 'none';
+  document.getElementById('rec-waveform-wrap').style.display = 'none';
+  document.getElementById('rec-indicator').style.display = 'none';
+  document.getElementById('rec-timer-display').textContent = '60';
+  document.getElementById('rec-timer-display').style.color = 'var(--text)';
+  const circle = document.getElementById('timer-circle');
+  circle.style.strokeDashoffset = '552.9';
+  circle.style.stroke = 'var(--accent)';
+}
+
+function startRecording() {
+  recRecording = true;
+  document.getElementById('rec-start-btn').style.display = 'none';
+  document.getElementById('rec-stop-btn').style.display = 'block';
+  document.getElementById('rec-indicator').style.display = 'flex';
+  document.getElementById('rec-waveform-wrap').style.display = 'block';
+
+  // Build waveform
+  const wf = document.getElementById('waveform-rec');
+  wf.innerHTML = '';
+  for (let i = 0; i < 40; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'wave-bar-lg';
+    bar.style.height = (Math.random() * 50 + 10) + 'px';
+    wf.appendChild(bar);
+  }
+
+  recTimerInterval = setInterval(() => {
+    recTimerSecs--;
+    const elapsed = 60 - recTimerSecs;
+    const pct = elapsed / 60;
+    const circumference = 2 * Math.PI * 88;
+    const offset = circumference * (1 - pct);
+    const circle = document.getElementById('timer-circle');
+    circle.style.strokeDashoffset = offset;
+    const color = recTimerSecs > 20 ? 'var(--accent)' : '#FF4D6A';
+    circle.style.stroke = color;
+    const display = document.getElementById('rec-timer-display');
+    display.textContent = String(recTimerSecs).padStart(2, '0');
+    display.style.color = recTimerSecs > 20 ? 'var(--accent)' : '#FF4D6A';
+    // animate waveform
+    wf.querySelectorAll('.wave-bar-lg').forEach(b => {
+      b.style.height = (Math.random() * 50 + 10) + 'px';
+    });
+    if (recTimerSecs <= 0) { clearInterval(recTimerInterval); finishRecording(); }
+  }, 1000);
+}
+
+function stopRecording() {
+  clearInterval(recTimerInterval);
+  finishRecording();
+}
+
+function finishRecording() {
+  recRecording = false;
+  recDone = true;
+  const elapsed = 60 - recTimerSecs;
+  document.getElementById('rec-timer-section').style.display = 'none';
+  document.getElementById('rec-review').style.display = 'flex';
+  document.getElementById('rec-duration').textContent = `Duration: ${elapsed}s · Ready to review`;
+  document.getElementById('play-total').textContent = `0:${String(elapsed).padStart(2,'0')}`;
+  document.getElementById('retry-btn').textContent = `🔄 Retry · ${retriesLeft} attempt${retriesLeft !== 1 ? 's' : ''} left`;
+  if (retriesLeft === 0) {
+    document.getElementById('retry-btn').disabled = true;
+    document.getElementById('retry-btn').textContent = 'No retries remaining';
+  }
+}
+
+function retryRecording() {
+  if (retriesLeft <= 0) return;
+  retriesLeft--;
+  resetRecording();
+}
+
+function togglePlay() {
+  isPlaying = !isPlaying;
+  document.getElementById('play-btn').textContent = isPlaying ? '⏸' : '▶';
+  if (isPlaying) {
+    let p = 0;
+    const iv = setInterval(() => {
+      p += 3;
+      document.getElementById('play-progress').style.width = Math.min(p, 100) + '%';
+      document.getElementById('play-time').textContent = '0:' + String(Math.floor(p * 0.6)).padStart(2,'0');
+      if (p >= 100) { clearInterval(iv); isPlaying = false; document.getElementById('play-btn').textContent = '▶'; }
+    }, 500);
+  }
+}
+
+// ── ANALYSING ──
+function startAnalysing() {
+  analysingProgress = 0;
+  tipIndex = 0;
+  document.getElementById('tip-text').textContent = tips[0];
+  document.getElementById('orb-pct').textContent = '0%';
+  // Reset steps
+  for (let i = 1; i <= 4; i++) resetStep(i);
+
+  analysingInterval = setInterval(() => {
+    analysingProgress++;
+    document.getElementById('orb-pct').textContent = analysingProgress + '%';
+    drawOrb(analysingProgress);
+    if (analysingProgress > 20) markStep(1);
+    if (analysingProgress > 45) markStep(2);
+    if (analysingProgress > 65) markStep(3);
+    if (analysingProgress > 85) markStep(4);
+    if (analysingProgress >= 100) {
+      clearInterval(analysingInterval);
+      setTimeout(() => goTo('report'), 800);
+    }
+  }, 300);
+
+  tipInterval = setInterval(() => {
+    tipIndex = (tipIndex + 1) % tips.length;
+    const el = document.getElementById('tip-text');
+    el.style.opacity = '0';
+    setTimeout(() => { el.textContent = tips[tipIndex]; el.style.opacity = '1'; }, 300);
+  }, 3000);
+}
+
+function drawOrb(pct) {
+  const canvas = document.getElementById('orb-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 90, cy = 90, r = 84;
+  ctx.clearRect(0, 0, 180, 180);
+  // Track
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.strokeStyle = '#1E2130'; ctx.lineWidth = 8; ctx.stroke();
+  // Fill
+  const start = -Math.PI / 2;
+  const end = start + (Math.PI * 2 * pct / 100);
+  ctx.beginPath(); ctx.arc(cx, cy, r, start, end);
+  ctx.strokeStyle = '#7C5CFC'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke();
+}
+
+function markStep(n) {
+  const el = document.getElementById('step-' + n);
+  if (!el) return;
+  el.style.borderColor = '#7C5CFC44';
+  const check = el.querySelector('.step-check');
+  check.style.background = '#22D37A22'; check.style.borderColor = '#22D37A'; check.style.color = '#22D37A';
+  check.textContent = '✓';
+  el.querySelector('span').style.color = 'var(--text)';
+  el.querySelector('span').style.fontWeight = '700';
+}
+function resetStep(n) {
+  const el = document.getElementById('step-' + n);
+  if (!el) return;
+  el.style.borderColor = 'var(--border)';
+  const check = el.querySelector('.step-check');
+  check.style.background = 'var(--surface)'; check.style.borderColor = 'var(--border)'; check.style.color = 'var(--muted)';
+  check.textContent = '○';
+  el.querySelector('span').style.color = 'var(--muted)';
+  el.querySelector('span').style.fontWeight = '400';
+}
+
+// ── SKILL BREAKDOWN ──
+function renderSkillBreakdown() {
+  const container = document.getElementById('skill-list');
+  container.innerHTML = '';
+  const entries = Object.entries(skillData);
+  entries.forEach(([name, { score, feedback }], idx) => {
+    const color = score >= 80 ? '#22D37A' : score >= 60 ? '#FFB830' : '#FF4D6A';
+    const label = score >= 80 ? 'Good' : score >= 60 ? 'Fair' : 'Needs work';
+    const isLast = idx === entries.length - 1;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `border-bottom: ${isLast ? 'none' : '1px solid var(--border)'};`;
+    wrap.innerHTML = `
+      <button onclick="toggleSkill('${name}')" style="width:100%; background:transparent; border:none; cursor:pointer; padding:14px 20px; display:flex; flex-direction:column; gap:10px; text-align:left; border-left:3px solid transparent;" id="skill-btn-${name}">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="color:var(--text); font-size:13px; font-weight:700; flex:1; font-family:'DM Sans',sans-serif;">${name}</span>
+          <span style="background:${color}22; color:${color}; border:1px solid ${color}44; border-radius:6px; padding:2px 8px; font-size:10px; font-weight:700;">${label}</span>
+          <span style="color:${color}; font-weight:900; font-size:14px; min-width:36px; text-align:right;">${score}</span>
+          <span id="chevron-${name}" style="color:var(--muted); font-size:14px; margin-left:4px; display:inline-block; transition:transform 0.25s ease;">⌄</span>
+        </div>
+        <div style="background:var(--border); border-radius:99px; height:5px; overflow:hidden; width:100%;">
+          <div style="width:${score}%; height:100%; background:linear-gradient(90deg,${color},${color}cc); border-radius:99px; box-shadow:0 0 8px ${color}88;"></div>
+        </div>
+      </button>
+      <div id="skill-feedback-${name}" style="display:none; padding:0 20px 16px 23px; background:${color}06; border-left:3px solid ${color}; animation:fadeIn 0.2s ease;">
+        <div style="background:var(--surface); border-radius:12px; padding:12px 14px;">
+          <div style="color:var(--muted); font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:6px;">FEEDBACK</div>
+          <div style="color:var(--text); font-size:12px; line-height:1.7;">${feedback}</div>
+        </div>
+      </div>`;
+    container.appendChild(wrap);
+  });
+}
+
+function toggleSkill(name) {
+  const feedback = document.getElementById('skill-feedback-' + name);
+  const btn = document.getElementById('skill-btn-' + name);
+  const chevron = document.getElementById('chevron-' + name);
+  const isOpen = feedback.style.display !== 'none';
+  feedback.style.display = isOpen ? 'none' : 'block';
+  chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  btn.style.borderLeft = isOpen ? '3px solid transparent' : btn.style.borderLeft;
+}
+
+// ── IDEAL RESPONSE PLAYER ──
+function toggleIdealPlay() {
+  isIdealPlaying = !isIdealPlaying;
+  document.getElementById('ideal-play-btn').textContent = isIdealPlaying ? '⏸' : '▶';
+  document.getElementById('ideal-playing-indicator').style.display = isIdealPlaying ? 'flex' : 'none';
+  if (isIdealPlaying) {
+    idealProgress = 0;
+    idealInterval = setInterval(() => {
+      idealProgress += 1.67;
+      document.getElementById('ideal-progress').style.width = Math.min(idealProgress, 100) + '%';
+      const elapsed = Math.floor((idealProgress / 100) * 60);
+      document.getElementById('ideal-time').textContent = '0:' + String(elapsed).padStart(2,'0');
+      if (idealProgress >= 100) {
+        clearInterval(idealInterval);
+        isIdealPlaying = false;
+        document.getElementById('ideal-play-btn').textContent = '▶';
+        document.getElementById('ideal-playing-indicator').style.display = 'none';
+      }
+    }, 1000);
+  } else {
+    clearInterval(idealInterval);
+  }
+}
+
+// ── INIT ──
+startCountdown();
+</script>
+</body>
+</html>
+"
