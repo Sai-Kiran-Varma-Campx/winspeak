@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const SCREENS = [
@@ -10,22 +11,21 @@ const SCREENS = [
 ];
 
 export default function ScreenNav() {
-  if (!import.meta.env.DEV) return null;
-
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Add class to body so .phone-shell can subtract nav height
+  useEffect(() => {
+    document.body.classList.add("has-dev-nav");
+    return () => document.body.classList.remove("has-dev-nav");
+  }, []);
+
+  if (!import.meta.env.DEV) return null;
+
   return (
-    <div
-      className="fixed top-0 left-0 right-0 z-50 flex items-center gap-1.5 overflow-x-auto px-4 py-2.5"
-      style={{
-        background: "#05060A",
-        borderBottom: "1px solid var(--border)",
-        scrollbarWidth: "none",
-      }}
-    >
+    <nav className="screen-nav">
       <span
-        className="text-[11px] font-bold mr-1.5 whitespace-nowrap self-center"
+        className="text-[11px] font-bold mr-1.5 whitespace-nowrap"
         style={{ color: "var(--muted)" }}
       >
         SCREENS:
@@ -36,7 +36,7 @@ export default function ScreenNav() {
           <button
             key={path}
             onClick={() => navigate(path)}
-            className="whitespace-nowrap rounded-lg px-3 py-1.5 text-[11px] font-bold border transition-all cursor-pointer"
+            className="whitespace-nowrap rounded-lg px-3 py-1 text-[11px] font-bold border transition-all cursor-pointer"
             style={{
               background: isActive ? "var(--accent)" : "var(--card)",
               borderColor: isActive ? "var(--accent)" : "var(--border)",
@@ -48,6 +48,6 @@ export default function ScreenNav() {
           </button>
         );
       })}
-    </div>
+    </nav>
   );
 }

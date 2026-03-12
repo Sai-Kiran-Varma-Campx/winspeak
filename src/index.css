@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Brand tokens ── */
 :root {
   --bg: #0A0B0F;
   --card: #13151C;
@@ -17,8 +18,10 @@
   --muted: #6B7194;
   --surface: #1A1D2E;
   --radius: 0.5rem;
+  --nav-h: 0px;           /* updated to 48px when DEV nav is present */
 }
 
+/* ── Reset ── */
 *,
 *::before,
 *::after {
@@ -26,43 +29,259 @@
 }
 
 html,
-body {
+body,
+#root {
   height: 100%;
-}
-
-body {
-  background: #05060A;
-  font-family: 'DM Sans', sans-serif;
-  color: var(--text);
   margin: 0;
   padding: 0;
 }
 
-/* Hide scrollbars globally */
-::-webkit-scrollbar {
+body {
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background: #05060A;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbars everywhere */
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+
+/* ─────────────────────────────────────────
+   APP ROOT
+───────────────────────────────────────── */
+.app-root {
+  position: relative;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ─────────────────────────────────────────
+   DESKTOP ATMOSPHERIC BACKGROUND
+   (only visible on ≥ 768 px)
+───────────────────────────────────────── */
+.desktop-bg {
   display: none;
 }
 
-* {
-  scrollbar-width: none;
+@media (min-width: 768px) {
+  .desktop-bg {
+    display: block;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(ellipse 80% 70% at 50% 0%, #0D0E16 0%, #05060A 100%);
+  }
+
+  .glow-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.18;
+  }
+
+  .glow-blob-tl {
+    width: 600px;
+    height: 600px;
+    top: -200px;
+    left: -200px;
+    background: #7C5CFC;
+  }
+
+  .glow-blob-br {
+    width: 500px;
+    height: 500px;
+    bottom: -150px;
+    right: -150px;
+    background: #C084FC;
+    opacity: 0.12;
+  }
+
+  .glow-blob-mid {
+    width: 400px;
+    height: 400px;
+    top: 40%;
+    left: 60%;
+    background: #22D37A;
+    opacity: 0.05;
+  }
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
+/* ─────────────────────────────────────────
+   PHONE SHELL  (outer positioning wrapper)
+───────────────────────────────────────── */
+.phone-shell {
+  position: relative;
+  z-index: 1;
+
+  /* Mobile: fill the whole viewport */
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* When DEV nav is present, subtract its height */
+body.has-dev-nav .phone-shell {
+  height: calc(100dvh - 48px);
+  margin-top: 48px;
+}
+
+.desktop-brand {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .phone-shell {
+    /* Desktop: center the phone frame vertically + horizontally */
+    min-height: 100dvh;
+    height: auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px 40px;
   }
-  50% {
-    opacity: 0.5;
-    transform: scale(0.8);
+
+  body.has-dev-nav .phone-shell {
+    min-height: calc(100dvh - 48px);
+    height: auto;
+    margin-top: 48px;
+  }
+
+  .desktop-brand {
+    display: block;
+    margin-top: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--muted);
+    opacity: 0.35;
+    text-align: center;
   }
 }
 
-@keyframes fadeIn {
+/* ─────────────────────────────────────────
+   PHONE FRAME
+───────────────────────────────────────── */
+.phone-frame {
+  /* Mobile: fill entire shell */
+  width: 100%;
+  flex: 1;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* No rounded corners on real mobile */
+  border-radius: 0;
+}
+
+@media (min-width: 768px) {
+  .phone-frame {
+    /* Desktop: phone mockup */
+    width: 390px;
+    flex: none;
+    min-height: 844px;
+    border-radius: 44px;
+    box-shadow:
+      0 0 0 1px #ffffff18,
+      0 40px 80px rgba(0, 0, 0, 0.9),
+      0 0 80px var(--accent-glow);
+  }
+}
+
+/* ── Notch ── */
+.phone-notch {
+  /* Hidden on mobile — real devices have their own status bar */
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .phone-notch {
+    display: flex;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+}
+
+.notch-pill {
+  width: 120px;
+  height: 30px;
+  background: #000;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.notch-cam {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.notch-bar {
+  width: 60px;
+  height: 6px;
+  border-radius: 3px;
+  background: #111;
+}
+
+.notch-time {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── Scrollable phone body ── */
+.phone-body {
+  flex: 1;
+  overflow-y: auto;
+  /* iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─────────────────────────────────────────
+   SCREEN NAV (DEV only)
+───────────────────────────────────────── */
+.screen-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 48px;
+  background: rgba(5, 6, 10, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  overflow-x: auto;
+}
+
+/* ─────────────────────────────────────────
+   PAGE TRANSITION
+───────────────────────────────────────── */
+@keyframes pageSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -70,26 +289,33 @@ body {
   }
 }
 
+.page-enter {
+  animation: pageSlideIn 0.22s ease-out;
+}
+
+/* ─────────────────────────────────────────
+   KEYFRAMES (shared)
+───────────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes accordion-down {
-  from {
-    height: 0;
-  }
-  to {
-    height: var(--radix-accordion-content-height);
-  }
+  from { height: 0; }
+  to   { height: var(--radix-accordion-content-height); }
 }
 
 @keyframes accordion-up {
-  from {
-    height: var(--radix-accordion-content-height);
-  }
-  to {
-    height: 0;
-  }
+  from { height: var(--radix-accordion-content-height); }
+  to   { height: 0; }
 }
