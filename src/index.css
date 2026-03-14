@@ -39,7 +39,7 @@ body,
 body {
   font-family: 'DM Sans', sans-serif;
   color: var(--text);
-  background: #05060A;
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -48,211 +48,91 @@ body {
 ::-webkit-scrollbar { display: none; }
 * { scrollbar-width: none; }
 
+/* ── Loading animations ── */
+@keyframes soundwave {
+  from { transform: scaleY(0.4); }
+  to   { transform: scaleY(1.2); }
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50%       { transform: translateY(-4px); opacity: 1; }
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ─────────────────────────────────────────
    APP ROOT
 ───────────────────────────────────────── */
 .app-root {
-  position: relative;
-  min-height: 100dvh;
-  overflow-x: hidden;
-}
-
-/* ─────────────────────────────────────────
-   DESKTOP ATMOSPHERIC BACKGROUND
-   (only visible on ≥ 768 px)
-───────────────────────────────────────── */
-.desktop-bg {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .desktop-bg {
-    display: block;
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background: radial-gradient(ellipse 80% 70% at 50% 0%, #0D0E16 0%, #05060A 100%);
-  }
-
-  .glow-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.18;
-  }
-
-  .glow-blob-tl {
-    width: 600px;
-    height: 600px;
-    top: -200px;
-    left: -200px;
-    background: #7C5CFC;
-  }
-
-  .glow-blob-br {
-    width: 500px;
-    height: 500px;
-    bottom: -150px;
-    right: -150px;
-    background: #C084FC;
-    opacity: 0.12;
-  }
-
-  .glow-blob-mid {
-    width: 400px;
-    height: 400px;
-    top: 40%;
-    left: 60%;
-    background: #22D37A;
-    opacity: 0.05;
-  }
-}
-
-/* ─────────────────────────────────────────
-   PHONE SHELL  (outer positioning wrapper)
-───────────────────────────────────────── */
-.phone-shell {
-  position: relative;
-  z-index: 1;
-
-  /* Mobile: fill the whole viewport */
-  width: 100%;
-  height: 100dvh;
   display: flex;
   flex-direction: column;
+  min-height: 100dvh;
+  background: var(--bg);
 }
 
-/* When DEV nav is present, subtract its height */
-body.has-dev-nav .phone-shell {
-  height: calc(100dvh - 48px);
+/* ─────────────────────────────────────────
+   APP BODY  (sidebar + main side-by-side)
+───────────────────────────────────────── */
+.app-body {
+  display: flex;
+  flex: 1;
+}
+
+/* When DEV nav is present, push body below it */
+body.has-dev-nav .app-body {
   margin-top: 48px;
 }
 
-.desktop-brand {
+/* ─────────────────────────────────────────
+   SIDEBAR  (desktop only, ≥ 1024px)
+───────────────────────────────────────── */
+.app-sidebar {
   display: none;
 }
 
-@media (min-width: 768px) {
-  .phone-shell {
-    /* Desktop: center the phone frame vertically + horizontally */
-    min-height: 100dvh;
-    height: auto;
+@media (min-width: 1024px) {
+  .app-sidebar {
+    display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 24px 40px;
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow-y: auto;
+    z-index: 10;
   }
 
-  body.has-dev-nav .phone-shell {
-    min-height: calc(100dvh - 48px);
-    height: auto;
-    margin-top: 48px;
-  }
-
-  .desktop-brand {
-    display: block;
-    margin-top: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    color: var(--muted);
-    opacity: 0.35;
-    text-align: center;
+  body.has-dev-nav .app-sidebar {
+    top: 48px;
+    height: calc(100dvh - 48px);
   }
 }
 
 /* ─────────────────────────────────────────
-   PHONE FRAME
+   MAIN CONTENT AREA
 ───────────────────────────────────────── */
-.phone-frame {
-  /* Mobile: fill entire shell */
-  width: 100%;
-  flex: 1;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-
-  /* No rounded corners on real mobile */
-  border-radius: 0;
-}
-
-@media (min-width: 768px) {
-  .phone-frame {
-    /* Desktop: phone mockup */
-    width: 390px;
-    flex: none;
-    min-height: 844px;
-    border-radius: 44px;
-    box-shadow:
-      0 0 0 1px #ffffff18,
-      0 40px 80px rgba(0, 0, 0, 0.9),
-      0 0 80px var(--accent-glow);
-  }
-}
-
-/* ── Notch ── */
-.phone-notch {
-  /* Hidden on mobile — real devices have their own status bar */
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .phone-notch {
-    display: flex;
-    height: 44px;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg);
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
-  }
-}
-
-.notch-pill {
-  width: 120px;
-  height: 30px;
-  background: #000;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.notch-cam {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #1a1a1a;
-  border: 1px solid #333;
-}
-
-.notch-bar {
-  width: 60px;
-  height: 6px;
-  border-radius: 3px;
-  background: #111;
-}
-
-.notch-time {
-  position: absolute;
-  right: 24px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-/* ── Scrollable phone body ── */
-.phone-body {
+.app-main {
   flex: 1;
   overflow-y: auto;
-  /* iOS momentum scrolling */
-  -webkit-overflow-scrolling: touch;
+  min-height: 100dvh;
+}
+
+body.has-dev-nav .app-main {
+  min-height: calc(100dvh - 48px);
+}
+
+/* ─────────────────────────────────────────
+   SCREEN WRAPPER
+   Thin full-width container; each screen
+   handles its own internal padding.
+───────────────────────────────────────── */
+.screen-wrapper {
+  width: 100%;
 }
 
 /* ─────────────────────────────────────────

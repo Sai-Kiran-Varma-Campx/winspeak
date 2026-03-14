@@ -1,6 +1,9 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import ScreenNav from "@/components/ScreenNav";
-import PhoneFrame from "@/components/PhoneFrame";
+import AppSidebar from "@/components/AppSidebar";
+import { SessionProvider } from "@/context/SessionContext";
+import { UserStoreProvider } from "@/context/UserStoreContext";
+import { useStore } from "@/context/UserStoreContext";
+import Login from "@/screens/Login";
 import Dashboard from "@/screens/Dashboard";
 import AudioCheck from "@/screens/AudioCheck";
 import Question from "@/screens/Question";
@@ -11,7 +14,7 @@ import Report from "@/screens/Report";
 function AnimatedRoutes() {
   const location = useLocation();
   return (
-    <div key={location.pathname} className="page-enter h-full">
+    <div key={location.pathname} className="page-enter">
       <Routes location={location}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/audiocheck" element={<AudioCheck />} />
@@ -24,27 +27,33 @@ function AnimatedRoutes() {
   );
 }
 
-export default function App() {
+function AppContent() {
+  const store = useStore();
+
+  if (!store.hasOnboarded) {
+    return <Login />;
+  }
+
   return (
     <div className="app-root">
-      <ScreenNav />
-
-      {/* ── Desktop atmospheric background ── */}
-      <div className="desktop-bg" aria-hidden="true">
-        <div className="glow-blob glow-blob-tl" />
-        <div className="glow-blob glow-blob-br" />
-        <div className="glow-blob glow-blob-mid" />
-      </div>
-
-      {/* ── Phone / App shell ── */}
-      <div className="phone-shell">
-        <PhoneFrame>
-          <AnimatedRoutes />
-        </PhoneFrame>
-
-        {/* Desktop-only branding label below phone */}
-        <p className="desktop-brand">WINSPEAK · AI SPEAKING COACH</p>
+      <div className="app-body">
+        <AppSidebar />
+        <main className="app-main">
+          <div className="screen-wrapper">
+            <AnimatedRoutes />
+          </div>
+        </main>
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <UserStoreProvider>
+      <SessionProvider>
+        <AppContent />
+      </SessionProvider>
+    </UserStoreProvider>
   );
 }

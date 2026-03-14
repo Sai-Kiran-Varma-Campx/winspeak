@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import StepProgress from "@/components/StepProgress";
 import CircularTimer from "@/components/CircularTimer";
 import Waveform from "@/components/Waveform";
 import { useCountdown } from "@/hooks/useCountdown";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { useSession } from "@/context/SessionContext";
 import { MAX_RETRIES, RECORDING_DURATION_SECS } from "@/constants";
 
 type Phase = "timer" | "review";
@@ -17,67 +19,77 @@ const STEPS = [
 
 export default function Recording() {
   const navigate = useNavigate();
+  const session = useSession();
   const [phase, setPhase] = useState<Phase>("timer");
-  const [isRecording, setIsRecording] = useState(false);
   const [retriesLeft, setRetriesLeft] = useState(MAX_RETRIES);
-  const [elapsed, setElapsed] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playProgress, setPlayProgress] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const { seconds, start, reset } = useCountdown(RECORDING_DURATION_SECS);
+  const { startRecording, stopRecording, isRecording } = useAudioRecorder();
 
-  function handleStartRecording() {
-    setIsRecording(true);
+  // Clean up blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+    };
+  }, [blobUrl]);
+
+  async function handleStartRecording() {
     reset(RECORDING_DURATION_SECS);
-    start();
+    try {
+      await startRecording();
+      start();
+    } catch {
+      // mic denied — user will see frozen timer
+    }
   }
 
-  function finishRecording(secs: number) {
-    setIsRecording(false);
-    setElapsed(RECORDING_DURATION_SECS - secs);
+  async function handleStop() {
+    const blob = await stopRecording();
+    const recElapsed = RECORDING_DURATION_SECS - seconds;
+    setElapsed(recElapsed > 0 ? recElapsed : RECORDING_DURATION_SECS);
+    session.setRecordingBlob(blob);
+    const url = URL.createObjectURL(blob);
+    setBlobUrl(url);
     setPhase("review");
   }
 
-  function handleStop() {
-    finishRecording(seconds);
-  }
-
-  // Auto-stop when timer hits 0
-  if (isRecording && seconds === 0 && phase === "timer") {
-    finishRecording(0);
-  }
+  // Auto-stop when countdown hits 0
+  useEffect(() => {
+    if (isRecording && seconds === 0) {
+      handleStop();
+    }
+  }, [seconds, isRecording]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleRetry() {
     if (retriesLeft <= 0) return;
     setRetriesLeft((r) => r - 1);
     setPhase("timer");
-    setIsRecording(false);
-    setPlayProgress(0);
     setIsPlaying(false);
+    setPlayProgress(0);
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+    setBlobUrl(null);
     reset(RECORDING_DURATION_SECS);
   }
 
   function handlePlay() {
+    const audio = audioRef.current;
+    if (!audio) return;
     if (isPlaying) {
+      audio.pause();
       setIsPlaying(false);
-      return;
+    } else {
+      audio.play();
+      setIsPlaying(true);
     }
-    setIsPlaying(true);
-    let p = playProgress;
-    const iv = setInterval(() => {
-      p += 3;
-      setPlayProgress(Math.min(p, 100));
-      if (p >= 100) {
-        clearInterval(iv);
-        setIsPlaying(false);
-      }
-    }, 500);
   }
 
-  const playTimeSecs = Math.floor((playProgress / 100) * elapsed);
-
   return (
-    <div className="p-5 pb-8 flex flex-col gap-5">
+    <div className="p-5 pb-8 flex flex-col gap-5 max-w-2xl mx-auto">
       {/* Back + title — only in timer phase */}
       {phase === "timer" && (
         <div className="flex items-center gap-3">
@@ -136,7 +148,7 @@ export default function Recording() {
             style={{ background: "#22D37A11", borderColor: "#22D37A44" }}
           >
             <div className="text-[32px]">🎙️</div>
-            <div>
+            <div className="flex-1">
               <div className="font-extrabold text-[15px]" style={{ color: "#22D37A" }}>
                 Recording Saved!
               </div>
@@ -144,11 +156,32 @@ export default function Recording() {
                 Duration: {elapsed}s · Ready to review
               </div>
             </div>
+            <div
+              className="border rounded-[10px] px-2.5 py-1.5 flex items-center gap-1.5 flex-shrink-0"
+              style={{ background: "#7C5CFC11", borderColor: "#7C5CFC33" }}
+            >
+              <span className="text-[11px]">💾</span>
+              <span className="text-[10px] font-semibold" style={{ color: "var(--accent)" }}>
+                Stored locally
+              </span>
+            </div>
           </div>
 
-          {/* Player */}
+          {/* Audio player */}
+          {blobUrl && (
+            <audio
+              ref={audioRef}
+              src={blobUrl}
+              onTimeUpdate={(e) => {
+                const a = e.currentTarget;
+                if (a.duration) setPlayProgress((a.currentTime / a.duration) * 100);
+              }}
+              onEnded={() => { setIsPlaying(false); setPlayProgress(100); }}
+            />
+          )}
+
           <div
-            className="border rounded-[18px] p-4.5"
+            className="border rounded-[18px]"
             style={{ background: "var(--card)", borderColor: "var(--border)", padding: "18px" }}
           >
             <div
@@ -160,7 +193,8 @@ export default function Recording() {
             <div className="flex items-center gap-3.5">
               <button
                 onClick={handlePlay}
-                className="w-12 h-12 rounded-full border-none flex items-center justify-center text-[18px] cursor-pointer flex-shrink-0 text-white"
+                disabled={!blobUrl}
+                className="w-12 h-12 rounded-full border-none flex items-center justify-center text-[18px] cursor-pointer flex-shrink-0 text-white disabled:opacity-40"
                 style={{
                   background: "linear-gradient(135deg,var(--accent),#9B7BFF)",
                   boxShadow: "0 4px 14px var(--accent-glow)",
@@ -174,7 +208,7 @@ export default function Recording() {
                   style={{ background: "var(--border)" }}
                 >
                   <div
-                    className="h-full rounded-full"
+                    className="h-full rounded-full transition-all"
                     style={{
                       width: `${playProgress}%`,
                       background: "linear-gradient(90deg,var(--accent),var(--accent)cc)",
@@ -184,7 +218,9 @@ export default function Recording() {
                 </div>
                 <div className="flex justify-between mt-1.5">
                   <span className="text-[10px]" style={{ color: "var(--muted)" }}>
-                    0:{String(playTimeSecs).padStart(2, "0")}
+                    {blobUrl && audioRef.current
+                      ? `0:${String(Math.floor(audioRef.current.currentTime)).padStart(2, "0")}`
+                      : "0:00"}
                   </span>
                   <span className="text-[10px]" style={{ color: "var(--muted)" }}>
                     0:{String(elapsed).padStart(2, "0")}

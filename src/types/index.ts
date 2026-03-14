@@ -46,3 +46,22 @@ export interface FillerWord {
 export interface AnalysisStep {
   label: string;
 }
+
+export interface AnalysisResult {
+  overallScore: number;
+  xpEarned: number;
+  transcript: string;
+  skills: SkillMap;
+  pauseAnalysis: {
+    status: string;
+    count: number;
+    avgDuration: string;
+    suggestion: string;
+  };
+  grammarIssues: GrammarIssue[];
+  fillerWords: FillerWord[];
+  winSpeakAnalysis: string;
+  strengths: string[];
+  improvements: string[];
+  idealResponse: string;
+}
