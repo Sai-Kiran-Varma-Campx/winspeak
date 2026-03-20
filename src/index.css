@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,10 +15,17 @@
   --red: #FF4D6A;
   --yellow: #FFB830;
   --text: #F0F2FF;
-  --muted: #6B7194;
+  --text-bright: #FFFFFF;
+  --text-secondary: #B8BCDA;
+  --muted: #8892B8;        /* raised from #6B7194 — passes WCAG AA on all dark surfaces */
+  --muted-soft: #A4ABCC;   /* for body copy inside tinted/coloured card backgrounds */
   --surface: #1A1D2E;
   --radius: 0.5rem;
   --nav-h: 0px;           /* updated to 48px when DEV nav is present */
+
+  /* ── Typography scale ── */
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
 
 /* ── Reset ── */
@@ -37,11 +44,72 @@ body,
 }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+}
+
+/* Display headings (h1–h3) use Plus Jakarta Sans */
+h1, h2, h3,
+.font-extrabold,
+.font-black {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+/* ── Background-specific text contrast helpers ── */
+
+/* On dark bg (#0A0B0F) — slightly brighter body text */
+.bg-surface-text    { color: var(--text-secondary); }
+
+/* On accent (purple) cards — white text */
+.on-accent          { color: var(--text-bright); }
+
+/* On green success cards */
+.on-success         { color: #A6F5CF; }
+
+/* On red / error cards */
+.on-error           { color: #FFB3BF; }
+
+/* On yellow / warning cards */
+.on-warning         { color: #FFF0CC; }
+
+/* ── Guarantee legibility inside tinted card backgrounds ──
+   These rules ensure body copy on coloured surfaces is
+   readable without relying on Tailwind inline styles.     */
+
+/* Green tint cards  (#22D37A11 bg) */
+[style*="#22D37A11"] p,
+[style*="#22D37A11"] span:not([style]),
+[style*="22D37A11"] div:not([style]) {
+  color: #D4FAE9;
+}
+
+/* Red tint cards (#FF4D6A11 bg) */
+[style*="#FF4D6A11"] p,
+[style*="#FF4D6A11"] span:not([style]),
+[style*="FF4D6A11"] div:not([style]) {
+  color: #FFD6DD;
+}
+
+/* Accent/purple tint cards (#7C5CFC11) */
+[style*="#7C5CFC11"] p,
+[style*="#7C5CFC11"] span:not([style]) {
+  color: #E0D9FF;
+}
+
+/* Yellow tint cards (#FFB83008 / #FFB83011) */
+[style*="#FFB83008"] p,
+[style*="#FFB83011"] p {
+  color: #FFF3D6;
+}
+
+/* Muted text should always clear the surface */
+.text-muted-readable {
+  color: #9CA3C8;   /* brighter than --muted on dark surfaces */
 }
 
 /* Hide scrollbars everywhere */

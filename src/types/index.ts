@@ -23,14 +23,21 @@ export interface SkillData {
 
 export type SkillMap = Record<SkillName, SkillData>;
 
+export type ChallengeTier = "Beginner" | "Intermediate" | "Advanced";
+
 export interface Challenge {
   id: string;
   title: string;
-  description: string;
+  description: string;  // Short dashboard card copy
+  scenario: string;     // Real-world situation briefing shown in Question screen
+  prompt: string;       // The exact task/question the student responds to
   xp: number;
   status: BadgeVariant;
   week: string;
   deadline?: string;
+  tier?: ChallengeTier;
+  passingScore: number;
+  maxAttempts: number;
 }
 
 export interface GrammarIssue {

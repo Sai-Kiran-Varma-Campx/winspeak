@@ -2,8 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import StepProgress from "@/components/StepProgress";
-import { synthesizeSpeech } from "@/services/gemini";
+import { synthesizeSpeechCached } from "@/services/gemini";
+import { VOICE_KEY_PREFIX } from "@/lib/audioStorage";
 import { useInterval } from "@/hooks/useInterval";
+import { useStore } from "@/context/UserStoreContext";
+import { CHALLENGES } from "@/constants";
+import type { ChallengeTier } from "@/types";
 
 const STEPS = [
   { label: "Audio Check", status: "completed" as const },
@@ -11,56 +15,50 @@ const STEPS = [
   { label: "Record", status: "pending" as const },
 ];
 
-const COACH_SCRIPT =
-  "This week's challenge: Persuasion Master. Convince an AI investor to fund your startup idea in 60 seconds. You have 2 retries and can earn 1000 XP. Speak clearly, stay on topic, and make every second count. Tap 'Start Recording' when you're ready. Good luck!";
+const TIER_STYLES: Record<ChallengeTier, { bg: string; color: string; border: string }> = {
+  "Beginner": { bg: "#22D37A11", color: "#22D37A", border: "#22D37A44" },
+  "Intermediate": { bg: "#7C5CFC11", color: "#7C5CFC", border: "#7C5CFC44" },
+  "Advanced": { bg: "#FFB83011", color: "#FFB830", border: "#FFB83044" },
+};
+
+function getActiveChallenge(completedIds: string[]) {
+  return (
+    CHALLENGES.find((c, i) => {
+      if (completedIds.includes(c.id)) return false;
+      return CHALLENGES.slice(0, i).every((ch) => completedIds.includes(ch.id));
+    }) ?? CHALLENGES[0]
+  );
+}
 
 export default function Question() {
   const navigate = useNavigate();
+  const store = useStore();
+  const challenge = getActiveChallenge(store.completedChallengeIds);
+
+  const coachScript = `${challenge.week}: ${challenge.title}. ${challenge.scenario} Your task: ${challenge.prompt} You have up to 60 seconds. Speak clearly, stay on topic. Tap Start Recording when you're ready. Good luck!`;
+
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [progress, setProgress] = useState(0);
   const [videoComplete, setVideoComplete] = useState(false);
   const [loadingTTS, setLoadingTTS] = useState(false);
   const didSpeak = useRef(false);
 
-  // Animate progress bar while TTS is playing
   useInterval(
-    () => {
-      setProgress((p) => Math.min(p + 1.5, 95));
-    },
+    () => setProgress((p) => Math.min(p + 1.5, 95)),
     isSpeaking ? 300 : null
   );
 
-  // Run TTS on mount (once)
   useEffect(() => {
     if (didSpeak.current) return;
     didSpeak.current = true;
-
-    async function speak() {
-      setLoadingTTS(true);
-      setIsSpeaking(false);
-      try {
-        await synthesizeSpeech(COACH_SCRIPT, () => {
-          setLoadingTTS(false);
-          setIsSpeaking(true);
-        });
-      } finally {
-        setIsSpeaking(false);
-        setProgress(100);
-        setVideoComplete(true);
-        setLoadingTTS(false);
-      }
-    }
-
     speak();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function handleReplay() {
-    if (isSpeaking || loadingTTS) return;
-    setProgress(0);
-    setVideoComplete(false);
+  async function speak() {
     setLoadingTTS(true);
+    setIsSpeaking(false);
     try {
-      await synthesizeSpeech(COACH_SCRIPT, () => {
+      await synthesizeSpeechCached(coachScript, VOICE_KEY_PREFIX + challenge.id, () => {
         setLoadingTTS(false);
         setIsSpeaking(true);
       });
@@ -72,9 +70,18 @@ export default function Question() {
     }
   }
 
+  async function handleReplay() {
+    if (isSpeaking || loadingTTS) return;
+    setProgress(0);
+    setVideoComplete(false);
+    await speak();
+  }
+
+  const tierStyle = challenge.tier ? TIER_STYLES[challenge.tier] : null;
+
   return (
     <div className="p-5 pb-8">
-      {/* Back + title — full width */}
+      {/* Back + title */}
       <div className="flex items-center gap-3 mb-5">
         <button
           onClick={() => navigate("/audiocheck")}
@@ -95,14 +102,12 @@ export default function Question() {
         </div>
       </div>
 
-      {/* Step progress — full width */}
       <div className="mb-5">
         <StepProgress steps={STEPS} />
       </div>
 
-      {/* 2-col on desktop: video | question+repeat+submit */}
       <div className="flex flex-col gap-5 lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start">
-        {/* LEFT: Video / TTS panel */}
+        {/* LEFT: AI Coach TTS panel */}
         <div>
           <div
             className="border rounded-[22px] flex flex-col items-center justify-center gap-2.5 relative overflow-hidden"
@@ -156,7 +161,6 @@ export default function Question() {
                 "Preparing..."
               )}
             </div>
-            {/* Progress bar at bottom */}
             <div
               className="absolute bottom-0 left-0 right-0 h-1"
               style={{ background: "var(--border)" }}
@@ -171,7 +175,6 @@ export default function Question() {
             </div>
           </div>
 
-          {/* Replay button */}
           <button
             onClick={handleReplay}
             disabled={isSpeaking || loadingTTS}
@@ -180,52 +183,84 @@ export default function Question() {
               background: "transparent",
               borderColor: "var(--border)",
               color: "var(--muted)",
-              fontFamily: "DM Sans, sans-serif",
             }}
           >
             🔊 Replay Instructions
           </button>
         </div>
 
-        {/* RIGHT: Question card + submit */}
+        {/* RIGHT: Challenge card + submit */}
         <div className="flex flex-col gap-5">
-          {/* Question card */}
           <div
-            className="border rounded-[20px] p-5"
+            className="border rounded-[20px] p-5 relative overflow-hidden"
             style={{ background: "var(--card)", borderColor: "#7C5CFC44" }}
           >
             <div
-              className="text-[11px] font-semibold tracking-[1px] mb-2"
-              style={{ color: "var(--muted)" }}
-            >
-              THIS WEEK'S CHALLENGE
-            </div>
-            <div className="text-[17px] font-extrabold mb-2.5 leading-snug">
-              Persuasion Master 🎯
-            </div>
-            <div
-              className="rounded-[14px] p-3.5 pl-4"
-              style={{
-                background: "var(--surface)",
-                borderLeft: "3px solid var(--accent)",
-              }}
-            >
+              className="absolute"
+              style={{ top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: "var(--accent-glow)", filter: "blur(30px)" }}
+            />
+
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-3">
               <div
-                className="text-[11px] mb-1.5 font-semibold"
+                className="text-[10px] font-semibold tracking-[1px]"
                 style={{ color: "var(--muted)" }}
               >
-                QUESTION
+                {challenge.week} · ACTIVE CHALLENGE
               </div>
-              <div className="text-[14px] leading-relaxed">
-                "Convince an AI investor to fund your startup idea in 60 seconds. Present your
-                pitch with confidence and clarity."
-              </div>
+              {tierStyle && challenge.tier && (
+                <span
+                  className="border rounded-[5px] px-1.5 py-0.5 text-[9px] font-bold"
+                  style={{
+                    background: tierStyle.bg,
+                    color: tierStyle.color,
+                    borderColor: tierStyle.border,
+                  }}
+                >
+                  {challenge.tier}
+                </span>
+              )}
             </div>
-            <div className="flex gap-2.5 mt-3.5">
+
+            <div className="text-[18px] font-extrabold mb-3 leading-snug">
+              {challenge.title}
+            </div>
+
+            {/* Scenario */}
+            <div
+              className="rounded-[12px] p-3.5 mb-3"
+              style={{ background: "var(--surface)", borderLeft: "3px solid #FFB830" }}
+            >
+              <div className="text-[10px] font-bold tracking-[1px] mb-1.5" style={{ color: "#FFB830" }}>
+                THE SITUATION
+              </div>
+              <p className="text-[12px] leading-relaxed" style={{ color: "#C8CCEC" }}>
+                {challenge.scenario}
+              </p>
+            </div>
+
+            {/* Prompt */}
+            <div
+              className="rounded-[12px] p-3.5 mb-4"
+              style={{ background: "var(--surface)", borderLeft: "3px solid var(--accent)" }}
+            >
+              <div
+                className="text-[10px] font-bold tracking-[1px] mb-1.5"
+                style={{ color: "var(--muted)" }}
+              >
+                YOUR TASK
+              </div>
+              <p className="text-[13px] leading-relaxed font-medium">
+                {challenge.prompt}
+              </p>
+            </div>
+
+            {/* Stats */}
+            <div className="flex gap-2.5">
               {[
                 { value: "60s", label: "Max Time", color: "var(--accent)" },
-                { value: "2", label: "Retries Left", color: "#22D37A" },
-                { value: "1000", label: "XP Reward", color: "#FFB830" },
+                { value: "2", label: "Retries", color: "#22D37A" },
+                { value: `${challenge.xp}`, label: "XP Reward", color: "#FFB830" },
               ].map(({ value, label, color }) => (
                 <div
                   key={label}

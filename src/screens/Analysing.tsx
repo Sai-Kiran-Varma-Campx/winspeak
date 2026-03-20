@@ -2,12 +2,20 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import OrbCanvas from "@/components/OrbCanvas";
 import { useSession } from "@/context/SessionContext";
-import { transcribeAudio, analyzeAnswer } from "@/services/gemini";
+import { useStore } from "@/context/UserStoreContext";
+import { transcribeAudio, analyzeAnswer, preRenderSpeech } from "@/services/gemini";
 import { TIPS, ANALYSIS_STEPS, ANALYSIS_STEP_THRESHOLDS, CHALLENGES } from "@/constants";
-import { loadAudioBlob, deleteAudioBlob, RECORDING_KEY } from "@/lib/audioStorage";
+import { loadAudioBlob, deleteAudioBlob, RECORDING_KEY, IDEAL_RESPONSE_KEY } from "@/lib/audioStorage";
 import type { AnalysisResult, SkillMap } from "@/types";
 
-const QUESTION = CHALLENGES[0]?.description ?? "";
+function getActiveChallenge(completedIds: string[]) {
+  return (
+    CHALLENGES.find((c, i) => {
+      if (completedIds.includes(c.id)) return false;
+      return CHALLENGES.slice(0, i).every((ch) => completedIds.includes(ch.id));
+    }) ?? CHALLENGES[0]
+  );
+}
 
 // Minimal fallback used when no recording blob is available
 function buildMockResult(): AnalysisResult {
@@ -37,6 +45,8 @@ function buildMockResult(): AnalysisResult {
 export default function Analysing() {
   const navigate = useNavigate();
   const session = useSession();
+  const store = useStore();
+  const activeChallenge = getActiveChallenge(store.completedChallengeIds);
   const [progress, setProgress] = useState(0);
   const [tipIndex, setTipIndex] = useState(0);
   const [tipVisible, setTipVisible] = useState(true);
@@ -75,7 +85,11 @@ export default function Analysing() {
           setProgress(ANALYSIS_STEP_THRESHOLDS[i] + 5);
         }
         setProgress(100);
-        session.setAnalysisResult(buildMockResult());
+        const mockResult = buildMockResult();
+        session.setAnalysisResult(mockResult);
+        // Clear stale ideal response audio before generating new one
+        deleteAudioBlob(IDEAL_RESPONSE_KEY).catch(() => {});
+        preRenderSpeech(mockResult.idealResponse, IDEAL_RESPONSE_KEY).catch(() => {});
         setTimeout(() => navigate("/report"), 800);
         return;
       }
@@ -94,18 +108,25 @@ export default function Analysing() {
           setProgress(stepProgress);
         }, 500);
 
-        const result = await analyzeAnswer(transcript, QUESTION);
+        const previousAttempts = store.getAttemptsForChallenge(activeChallenge.id);
+        const result = await analyzeAnswer(transcript, activeChallenge.prompt, activeChallenge, previousAttempts);
         clearInterval(ticker);
 
         session.setAnalysisResult(result);
         setProgress(100);
+        // Clear stale ideal response audio, then pre-render new one
+        deleteAudioBlob(IDEAL_RESPONSE_KEY).catch(() => {});
+        preRenderSpeech(result.idealResponse, IDEAL_RESPONSE_KEY).catch(() => {});
         // Clean up stored blob — it's been consumed
         deleteAudioBlob(RECORDING_KEY).catch(() => {});
         setTimeout(() => navigate("/report"), 800);
       } catch (err) {
         console.error("Analysis failed:", err);
         setProgress(100);
-        session.setAnalysisResult(buildMockResult());
+        const fallback = buildMockResult();
+        session.setAnalysisResult(fallback);
+        deleteAudioBlob(IDEAL_RESPONSE_KEY).catch(() => {});
+        preRenderSpeech(fallback.idealResponse, IDEAL_RESPONSE_KEY).catch(() => {});
         setTimeout(() => navigate("/report"), 800);
       }
     }
@@ -125,7 +146,7 @@ export default function Analysing() {
         </div>
         <div className="text-[24px] font-extrabold">Analysing your answer...</div>
         <div className="text-[13px] mt-1.5" style={{ color: "var(--muted)" }}>
-          {session.recordingBlob ? "Gemini AI is evaluating your pitch" : "This will take ~30 seconds"}
+          {session.recordingBlob ? "Gemini AI is evaluating your response" : "This will take ~30 seconds"}
         </div>
       </div>
 

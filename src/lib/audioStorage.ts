@@ -49,3 +49,5 @@ export async function deleteAudioBlob(key: string): Promise<void> {
 }
 
 export const RECORDING_KEY = "challenge_recording";
+export const VOICE_KEY_PREFIX = "coach_voice_";
+export const IDEAL_RESPONSE_KEY = "ideal_response_audio";
