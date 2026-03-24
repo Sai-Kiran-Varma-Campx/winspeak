@@ -164,28 +164,28 @@ export default function Recording() {
 
   return (
     <div className="p-4 sm:p-5 pb-8 flex flex-col gap-4 sm:gap-5 max-w-2xl mx-auto">
-      {/* Back + title — only in timer phase */}
-      {phase === "timer" && (
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate("/question")}
-            className="rounded-[10px] px-3 sm:px-3.5 py-2 text-[18px] cursor-pointer border"
-            style={{
-              background: "var(--surface)",
-              borderColor: "var(--border)",
-              color: "var(--text)",
-            }}
-          >
-            ←
-          </button>
-          <div>
-            <div className="text-[11px] font-semibold tracking-[1px]" style={{ color: "var(--muted)" }}>
-              STEP 3 OF 3
-            </div>
-            <div className="text-[18px] font-extrabold">Record Your Answer</div>
+      {/* Back + title */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => navigate("/question")}
+          className="rounded-[10px] px-3 sm:px-3.5 py-2 text-[18px] cursor-pointer border"
+          style={{
+            background: "var(--surface)",
+            borderColor: "var(--border)",
+            color: "var(--text)",
+          }}
+        >
+          ←
+        </button>
+        <div>
+          <div className="text-[11px] font-semibold tracking-[1px]" style={{ color: "var(--muted)" }}>
+            STEP 3 OF 3
+          </div>
+          <div className="text-[18px] font-extrabold">
+            {phase === "review" ? "Review Recording" : "Record Your Answer"}
           </div>
         </div>
-      )}
+      </div>
 
       <StepProgress steps={STEPS} />
 
@@ -354,9 +354,9 @@ export default function Recording() {
               />
               {/* Scrubber dot */}
               <div
-                className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1/2 -translate-y-1/2 w-5 h-5 sm:w-3.5 sm:h-3.5 rounded-full sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                 style={{
-                  left: `calc(${progress * 100}% - 7px)`,
+                  left: `calc(${progress * 100}% - 10px)`,
                   background: "#fff",
                   boxShadow: "0 0 8px #7C5CFC88",
                 }}
@@ -401,7 +401,9 @@ export default function Recording() {
               : `Retry · ${retriesLeft} attempt${retriesLeft !== 1 ? "s" : ""} left`}
           </Button>
 
-          <Button onClick={() => navigate("/analysing")}>Submit →</Button>
+          <div className="pb-4">
+            <Button onClick={() => navigate("/analysing")}>Submit →</Button>
+          </div>
         </div>
       )}
     </div>

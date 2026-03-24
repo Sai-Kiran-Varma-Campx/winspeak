@@ -14,11 +14,11 @@ export default function CircularTimer({ seconds, isRecording }: CircularTimerPro
   const textColor = isRed ? "#FF4D6A" : "var(--text)";
 
   return (
-    <div className="relative" style={{ width: 200, height: 200 }}>
+    <div className="relative w-[160px] h-[160px] sm:w-[200px] sm:h-[200px]">
       <svg
         style={{ position: "absolute", inset: 0, transform: "rotate(-90deg)" }}
-        width="200"
-        height="200"
+        viewBox="0 0 200 200"
+        className="w-full h-full"
       >
         <circle
           cx="100"
@@ -47,7 +47,7 @@ export default function CircularTimer({ seconds, isRecording }: CircularTimerPro
         className="absolute inset-0 flex flex-col items-center justify-center"
       >
         <span
-          className="text-[48px] font-black leading-none"
+          className="text-[38px] sm:text-[48px] font-black leading-none"
           style={{ color: textColor }}
         >
           {String(seconds).padStart(2, "0")}

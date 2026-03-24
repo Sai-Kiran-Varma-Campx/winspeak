@@ -15,13 +15,13 @@ export default function StepProgress({ steps }: StepProgressProps) {
         return (
           <div key={i} className="flex-1 flex flex-col gap-1">
             <div
-              className="h-[3px] rounded-full"
+              className="h-1 sm:h-[3px] rounded-full"
               style={{
                 background: isDone ? "var(--accent)" : "var(--border)",
               }}
             />
             <div
-              className="text-[9px] font-semibold text-center"
+              className="text-[10px] sm:text-[9px] font-semibold text-center"
               style={{
                 color: isDone ? "var(--accent)" : "var(--muted)",
               }}

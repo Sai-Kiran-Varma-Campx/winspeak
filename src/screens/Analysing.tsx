@@ -152,7 +152,7 @@ export default function Analysing() {
 
       {/* Orb */}
       <div
-        className="relative flex items-center justify-center flex-shrink-0"
+        className="relative flex items-center justify-center flex-shrink-0 scale-[0.78] sm:scale-100 origin-center"
         style={{ width: 180, height: 180 }}
       >
         <OrbCanvas progress={progress} />

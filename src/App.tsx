@@ -4,6 +4,7 @@ import AppSidebar from "@/components/AppSidebar";
 import { SessionProvider } from "@/context/SessionContext";
 import { UserStoreProvider } from "@/context/UserStoreContext";
 import { useStore } from "@/context/UserStoreContext";
+import MobileNav from "@/components/MobileNav";
 import Login from "@/screens/Login";
 import Dashboard from "@/screens/Dashboard";
 import AudioCheck from "@/screens/AudioCheck";
@@ -63,6 +64,7 @@ function AppContent() {
           </div>
         </main>
       </div>
+      <MobileNav />
     </div>
   );
 }

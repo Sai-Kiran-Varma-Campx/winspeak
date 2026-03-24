@@ -547,7 +547,7 @@ export default function Report() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleShare}
-            className="border rounded-[10px] px-3 py-1.5 text-[12px] font-bold cursor-pointer"
+            className="border rounded-[10px] px-3 py-2.5 sm:py-1.5 text-[12px] font-bold cursor-pointer"
             style={{
               background: "var(--surface)",
               borderColor: "var(--border)",
@@ -778,7 +778,7 @@ export default function Report() {
               Your performance shape across all 6 dimensions
             </div>
             <div className="flex justify-center">
-              <RadarChart skills={skillScores} size={210} />
+              <RadarChart skills={skillScores} size={180} />
             </div>
           </div>
 
@@ -912,7 +912,7 @@ export default function Report() {
           </div>
 
           {/* Strengths & Improve */}
-          <div className="flex gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
             <div className="flex-1 border rounded-[18px] p-3.5 sm:p-4" style={{ background: "#22D37A11", borderColor: "#22D37A44" }}>
               <div className="text-[13px] font-extrabold mb-2.5" style={{ color: "#4DEBA0" }}>Strengths</div>
               {strengths.map((s) => (
@@ -1065,9 +1065,9 @@ export default function Report() {
                       }}
                     />
                     <div
-                      className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1/2 -translate-y-1/2 w-5 h-5 sm:w-3.5 sm:h-3.5 rounded-full sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                       style={{
-                        left: `calc(${idealProgress * 100}% - 7px)`,
+                        left: `calc(${idealProgress * 100}% - 10px)`,
                         background: "#fff",
                         boxShadow: "0 0 8px #FFB83088",
                       }}
@@ -1268,24 +1268,26 @@ export default function Report() {
             );
           })()}
 
-          {isHistorical ? (
-            <Button onClick={() => navigate("/history")}>← Back to History</Button>
-          ) : passed ? (
-            <Button onClick={() => { session.reset(); navigate("/"); }}>← Continue to Next Challenge</Button>
-          ) : !allAttemptsUsed ? (
-            <div className="flex gap-3">
-              <Button onClick={() => { session.reset(); navigate("/audiocheck"); }}>
-                🔄 Retry Challenge
-              </Button>
-              <Button
-                onClick={() => { session.reset(); navigate("/"); }}
-              >
-                ← Back to Home
-              </Button>
-            </div>
-          ) : (
-            <Button onClick={() => { session.reset(); navigate("/"); }}>← Back to Home</Button>
-          )}
+          <div className="pb-4">
+            {isHistorical ? (
+              <Button onClick={() => navigate("/history")}>← Back to History</Button>
+            ) : passed ? (
+              <Button onClick={() => { session.reset(); navigate("/"); }}>← Continue to Next Challenge</Button>
+            ) : !allAttemptsUsed ? (
+              <div className="flex gap-3">
+                <Button onClick={() => { session.reset(); navigate("/audiocheck"); }}>
+                  🔄 Retry Challenge
+                </Button>
+                <Button
+                  onClick={() => { session.reset(); navigate("/"); }}
+                >
+                  ← Back to Home
+                </Button>
+              </div>
+            ) : (
+              <Button onClick={() => { session.reset(); navigate("/"); }}>← Back to Home</Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

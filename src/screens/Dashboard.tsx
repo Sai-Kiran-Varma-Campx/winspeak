@@ -411,7 +411,7 @@ export default function Dashboard() {
       </div>
 
       {/* Desktop 2-col grid */}
-      <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-6">
+      <div className="lg:grid lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px] lg:gap-6">
         {/* LEFT: Active challenge */}
         <div>
           <div className="flex justify-between items-center mb-3.5">
@@ -597,28 +597,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Mobile tab bar */}
-      <div
-        className="lg:hidden border rounded-[16px] p-3 flex justify-around mt-2"
-        style={{ background: "var(--card)", borderColor: "var(--border)" }}
-      >
-        <div className="text-[11px] font-semibold text-center" style={{ color: "var(--accent)" }}>🏠 Home</div>
-        <button
-          className="text-[11px] font-semibold text-center border-none cursor-pointer"
-          style={{ color: "var(--muted)", background: "transparent" }}
-          onClick={() => navigate("/history")}
-        >
-          🕐 History
-        </button>
-        <button
-          className="text-[11px] font-semibold text-center border-none cursor-pointer"
-          style={{ color: "var(--muted)", background: "transparent" }}
-          onClick={() => navigate("/leaderboard")}
-        >
-          🏆 Rank
-        </button>
-        <div className="text-[11px] font-semibold text-center" style={{ color: "var(--muted)" }}>👤 Profile</div>
-      </div>
     </div>
   );
 }

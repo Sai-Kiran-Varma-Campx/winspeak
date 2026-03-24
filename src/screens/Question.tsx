@@ -110,7 +110,7 @@ export default function Question() {
         {/* LEFT: AI Coach TTS panel */}
         <div>
           <div
-            className="border rounded-[22px] flex flex-col items-center justify-center gap-2.5 relative overflow-hidden"
+            className="border rounded-[22px] flex flex-col items-center justify-center gap-2.5 relative overflow-hidden max-h-[200px] sm:max-h-none"
             style={{
               background: "linear-gradient(135deg,#1A1D2E,#0F1018)",
               borderColor: "var(--border)",

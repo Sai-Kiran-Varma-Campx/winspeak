@@ -192,7 +192,7 @@ export default function AudioCheck() {
 
       {/* Coach avatar panel */}
       <div
-        className="border rounded-[22px] flex flex-col items-center justify-center gap-3 relative overflow-hidden"
+        className="border rounded-[22px] flex flex-col items-center justify-center gap-3 relative overflow-hidden max-h-[200px] sm:max-h-none"
         style={{
           background: "linear-gradient(135deg,#1A1D2E,#0F1018)",
           borderColor: isPlaying ? "#7C5CFC66" : "var(--border)",
@@ -353,9 +353,9 @@ export default function AudioCheck() {
             />
             {/* Scrubber dot */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-1/2 -translate-y-1/2 w-5 h-5 sm:w-3 sm:h-3 rounded-full sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               style={{
-                left: `calc(${progress * 100}% - 6px)`,
+                left: `calc(${progress * 100}% - 10px)`,
                 background: "#fff",
                 boxShadow: "0 0 6px #7C5CFC88",
               }}
@@ -469,7 +469,7 @@ export default function AudioCheck() {
 
       {/* Passed state */}
       {state === "passed" && (
-        <div className="flex flex-col gap-3.5">
+        <div className="flex flex-col gap-3.5 pb-4">
           <div
             className="border rounded-[18px] p-5 text-center"
             style={{ background: "#22D37A11", borderColor: "#22D37A44" }}

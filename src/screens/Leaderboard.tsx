@@ -79,11 +79,11 @@ export default function Leaderboard() {
 
       {/* Top 3 podium */}
       {topThree.length >= 3 && (
-        <div className="flex items-end justify-center gap-3 mb-8">
+        <div className="flex items-end justify-center gap-2 sm:gap-3 mb-8">
           {/* 2nd place */}
           <div className="flex flex-col items-center gap-2 flex-1">
             <div
-              className="w-14 h-14 rounded-full flex items-center justify-center text-[18px] font-extrabold border-2"
+              className="w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-[18px] font-extrabold border-2"
               style={{
                 background: AVATAR_COLORS[1],
                 borderColor: "#C0C0C066",
@@ -113,7 +113,7 @@ export default function Leaderboard() {
               {"\u{1F451}"}
             </div>
             <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-[20px] font-extrabold border-2"
+              className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-[20px] font-extrabold border-2"
               style={{
                 background: AVATAR_COLORS[0],
                 borderColor: "#FFD70066",
@@ -143,7 +143,7 @@ export default function Leaderboard() {
           {/* 3rd place */}
           <div className="flex flex-col items-center gap-2 flex-1">
             <div
-              className="w-14 h-14 rounded-full flex items-center justify-center text-[18px] font-extrabold border-2"
+              className="w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-[18px] font-extrabold border-2"
               style={{
                 background: AVATAR_COLORS[2],
                 borderColor: "#CD7F3266",

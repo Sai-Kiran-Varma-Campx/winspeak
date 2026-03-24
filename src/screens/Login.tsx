@@ -73,7 +73,7 @@ export default function Login() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-hidden"
       style={{ background: "var(--bg)" }}
     >
       {/* Background glows */}
@@ -96,7 +96,7 @@ export default function Login() {
 
       {/* Card */}
       <div
-        className="border rounded-[28px] p-8 w-full max-w-sm relative z-10"
+        className="border rounded-[28px] p-5 sm:p-8 w-full max-w-sm relative z-10"
         style={{
           background: "linear-gradient(135deg,#13151C,#1A1D2E)",
           borderColor: "#7C5CFC44",
