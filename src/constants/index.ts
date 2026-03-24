@@ -149,6 +149,66 @@ export const CHALLENGES: Challenge[] = [
     prompt:
       "Deliver your closing statement. Summarize your project's impact, what makes it unique, what you learned, and end with a line that makes the panel remember you.",
   },
+  {
+    id: "c10",
+    week: "W10",
+    tier: "Beginner",
+    xp: 500,
+    passingScore: 55,
+    maxAttempts: 3,
+    status: "locked",
+    title: "One App to Delete",
+    description: "If you had to delete one app from your phone — which and why?",
+    scenario:
+      "You're in a casual discussion circle with classmates. The icebreaker question is: 'If you had to permanently delete one app from your phone, which would it be and why?' Everyone's listening — make your answer interesting and honest.",
+    prompt:
+      "Pick one app you'd delete from your phone and explain why. Be specific — what would you gain by removing it? Make your reasoning engaging and relatable.",
+  },
+  {
+    id: "c11",
+    week: "W11",
+    tier: "Beginner",
+    xp: 500,
+    passingScore: 55,
+    maxAttempts: 3,
+    status: "locked",
+    title: "The Ideal Weekend",
+    description: "Describe your perfect weekend — make us want to live it.",
+    scenario:
+      "Your English class is doing a speaking exercise. The prompt is simple: 'Describe your ideal weekend.' But the catch — you need to make it vivid enough that the class can picture it. No boring lists. Paint a scene.",
+    prompt:
+      "Describe your ideal weekend in 60 seconds. Be vivid and specific — where are you, what are you doing, who are you with? Make the listener feel like they're there.",
+  },
+  {
+    id: "c12",
+    week: "W12",
+    tier: "Beginner",
+    xp: 500,
+    passingScore: 55,
+    maxAttempts: 3,
+    status: "locked",
+    title: "Change One Rule",
+    description: "If you could change one rule in your college, what would it be?",
+    scenario:
+      "The student council is collecting proposals. Each student gets 60 seconds at the mic to pitch one rule change to the college administration. The dean is in the audience. This is your chance to be heard.",
+    prompt:
+      "Propose one rule change for your college. State the current rule, why it's a problem, what you'd change, and how it would improve student life. Be persuasive.",
+  },
+  {
+    id: "c13",
+    week: "W13",
+    tier: "Beginner",
+    xp: 500,
+    passingScore: 55,
+    maxAttempts: 3,
+    status: "locked",
+    title: "Recommend a Habit",
+    description: "Share a productivity tool or habit you'd genuinely recommend.",
+    scenario:
+      "A junior student asks you: 'What's one productivity habit or tool that actually works?' They're overwhelmed with college workload and looking for real, practical advice — not generic tips from the internet.",
+    prompt:
+      "Recommend one productivity tool or habit that you genuinely use. Explain what it is, how you use it, and why it works for you. Be authentic — no generic advice.",
+  },
 ];
 
 export const ANALYSIS_STEPS: AnalysisStep[] = [
@@ -232,6 +292,34 @@ export const CHALLENGE_CHECKPOINTS: Record<string, string[]> = {
     "Share what you personally learned from the process",
     "Demonstrate passion and ownership",
     "End with a powerful closing line the panel will remember",
+  ],
+  c10: [
+    "Name a specific app — not a vague category",
+    "Give a clear reason for deleting it",
+    "Describe what you'd gain without it",
+    "Make the reasoning personal and relatable",
+    "Keep a conversational, engaging tone",
+  ],
+  c11: [
+    "Set the scene vividly — time, place, atmosphere",
+    "Include specific activities, not just a generic list",
+    "Make it personal — reveal something about your personality",
+    "Use descriptive, sensory language",
+    "Wrap up with why this weekend matters to you",
+  ],
+  c12: [
+    "Clearly state the current rule and why it exists",
+    "Explain why the rule is problematic for students",
+    "Propose a specific, actionable change",
+    "Explain the benefit to student life",
+    "Sound persuasive — this is a pitch to the administration",
+  ],
+  c13: [
+    "Name a specific tool or habit — not vague advice",
+    "Explain how you personally use it",
+    "Share a concrete result or benefit you've experienced",
+    "Make it practical and actionable for the listener",
+    "Sound authentic — not like a product ad",
   ],
 };
 

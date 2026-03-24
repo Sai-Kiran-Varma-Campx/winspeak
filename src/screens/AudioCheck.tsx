@@ -98,7 +98,7 @@ export default function AudioCheck() {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play();
+      audio.play().catch(() => setIsPlaying(false));
       setIsPlaying(true);
     }
   }, [isPlaying]);

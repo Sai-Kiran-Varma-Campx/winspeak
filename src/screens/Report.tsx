@@ -366,7 +366,7 @@ export default function Report() {
       audio.pause();
       setIdealPlaying(false);
     } else {
-      audio.play();
+      audio.play().catch(() => setIdealPlaying(false));
       setIdealPlaying(true);
     }
   }, [idealPlaying, idealReady]);

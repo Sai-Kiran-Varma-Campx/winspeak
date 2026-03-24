@@ -148,7 +148,7 @@ export default function Recording() {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play();
+      audio.play().catch(() => setIsPlaying(false));
       setIsPlaying(true);
     }
   }, [isPlaying]);

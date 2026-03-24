@@ -136,6 +136,7 @@ h1, h2, h3,
 .app-root {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg);
 }
@@ -170,6 +171,7 @@ body.has-dev-nav .app-body {
     border-right: 1px solid var(--border);
     position: sticky;
     top: 0;
+    height: 100vh;
     height: 100dvh;
     overflow-y: auto;
     z-index: 10;
@@ -177,6 +179,7 @@ body.has-dev-nav .app-body {
 
   body.has-dev-nav .app-sidebar {
     top: 48px;
+    height: calc(100vh - 48px);
     height: calc(100dvh - 48px);
   }
 }
@@ -187,10 +190,12 @@ body.has-dev-nav .app-body {
 .app-main {
   flex: 1;
   overflow-y: auto;
+  min-height: 100vh;
   min-height: 100dvh;
 }
 
 body.has-dev-nav .app-main {
+  min-height: calc(100vh - 48px);
   min-height: calc(100dvh - 48px);
 }
 

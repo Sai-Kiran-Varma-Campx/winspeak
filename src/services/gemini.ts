@@ -62,7 +62,8 @@ function pcm16Base64ToFloat32(base64: string): Float32Array {
 
 function playFloat32(samples: Float32Array, sampleRate = 24000): Promise<void> {
   return new Promise((resolve) => {
-    const ctx = new AudioContext({ sampleRate });
+    const AC = window.AudioContext || (window as any).webkitAudioContext;
+    const ctx = new AC({ sampleRate });
     const buf = ctx.createBuffer(1, samples.length, sampleRate);
     buf.getChannelData(0).set(samples);
     const src = ctx.createBufferSource();
