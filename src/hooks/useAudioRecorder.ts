@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 export function useAudioRecorder() {
   const [isRecording, setIsRecording] = useState(false);
@@ -6,9 +6,25 @@ export function useAudioRecorder() {
   const chunksRef = useRef<BlobPart[]>([]);
   const resolveRef = useRef<((blob: Blob) => void) | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const stoppedRef = useRef(false);
+
+  // Cleanup mic on unmount
+  useEffect(() => {
+    return () => {
+      try {
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+      } catch {}
+      try {
+        if (mediaRecorderRef.current?.state === "recording") {
+          mediaRecorderRef.current.stop();
+        }
+      } catch {}
+    };
+  }, []);
 
   const startRecording = useCallback(async () => {
     chunksRef.current = [];
+    stoppedRef.current = false;
 
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     streamRef.current = stream;
@@ -43,9 +59,25 @@ export function useAudioRecorder() {
   }, []);
 
   const stopRecording = useCallback((): Promise<Blob> => {
+    // Double-stop guard
+    if (stoppedRef.current) {
+      return new Promise((resolve) => {
+        // Return whatever chunks we have
+        const blob = new Blob(chunksRef.current, { type: mediaRecorderRef.current?.mimeType || "" });
+        resolve(blob);
+      });
+    }
+    stoppedRef.current = true;
+
     return new Promise((resolve) => {
       resolveRef.current = resolve;
-      mediaRecorderRef.current?.stop();
+      try {
+        mediaRecorderRef.current?.stop();
+      } catch {
+        // MediaRecorder already stopped — resolve with available chunks
+        const blob = new Blob(chunksRef.current, { type: mediaRecorderRef.current?.mimeType || "" });
+        resolve(blob);
+      }
       setIsRecording(false);
     });
   }, []);

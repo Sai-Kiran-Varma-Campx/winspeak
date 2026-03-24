@@ -1,5 +1,6 @@
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 const TOKEN_KEY = "winspeak_jwt";
+const REQUEST_TIMEOUT_MS = 30_000;
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -13,6 +14,34 @@ export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+// --- 401 Unauthorized handler ---
+let _onUnauthorized: (() => void) | null = null;
+
+export function registerUnauthorizedHandler(handler: () => void) {
+  _onUnauthorized = handler;
+}
+
+export function unregisterUnauthorizedHandler() {
+  _onUnauthorized = null;
+}
+
+// --- API error handler (for toast notifications) ---
+let _onApiError: ((message: string) => void) | null = null;
+
+export function registerApiErrorHandler(handler: (message: string) => void) {
+  _onApiError = handler;
+}
+
+export function unregisterApiErrorHandler() {
+  _onApiError = null;
+}
+
+export function reportApiError(message: string) {
+  if (_onApiError) {
+    _onApiError(message);
+  }
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -24,10 +53,33 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  });
+  // AbortController with 30s timeout
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    });
+  } catch (err: any) {
+    clearTimeout(timer);
+    if (err?.name === "AbortError") {
+      throw new Error(`Request to ${path} timed out after ${REQUEST_TIMEOUT_MS / 1000}s`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (res.status === 401) {
+    clearToken();
+    _onUnauthorized?.();
+    throw new Error("Session expired. Please log in again.");
+  }
+
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`API ${res.status}: ${body}`);

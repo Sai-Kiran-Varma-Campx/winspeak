@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 import type { AnalysisResult } from "@/types";
 import { saveAudioBlob, deleteAudioBlob, RECORDING_KEY } from "@/lib/audioStorage";
 
@@ -6,7 +6,7 @@ interface SessionState {
   recordingBlob: Blob | null;
   transcript: string;
   analysisResult: AnalysisResult | null;
-  setRecordingBlob: (blob: Blob) => void;
+  setRecordingBlob: (blob: Blob) => Promise<void>;
   setTranscript: (t: string) => void;
   setAnalysisResult: (r: AnalysisResult) => void;
   reset: () => void;
@@ -19,19 +19,19 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [transcript, setTranscript] = useState("");
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
 
-  function setRecordingBlob(blob: Blob) {
+  const setRecordingBlob = useCallback(async (blob: Blob) => {
     setRecordingBlobState(blob);
     // Persist to IndexedDB so it survives navigation/refresh
-    saveAudioBlob(RECORDING_KEY, blob).catch(() => {});
-  }
+    await saveAudioBlob(RECORDING_KEY, blob);
+  }, []);
 
-  function reset() {
+  const reset = useCallback(() => {
     setRecordingBlobState(null);
     setTranscript("");
     setAnalysisResult(null);
     // Clean up stored blob when session is reset
     deleteAudioBlob(RECORDING_KEY).catch(() => {});
-  }
+  }, []);
 
   return (
     <SessionContext.Provider

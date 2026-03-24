@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -108,6 +108,7 @@ function ActiveChallengeCard({
   const challengeAttempts = store.getAttemptsForChallenge(challenge.id);
   const isExhausted = challenge.status === "exhausted";
   const attemptNum = challengeAttempts.length + 1;
+  const resetInProgress = useRef(false);
 
   if (isExhausted) {
     const best = challengeAttempts.length > 0 ? Math.max(...challengeAttempts.map((a) => a.score)) : 0;
@@ -167,7 +168,12 @@ function ActiveChallengeCard({
             📋 View Prep Strategy
           </Button>
           <button
-            onClick={() => store.resetChallengeAttempts(challenge.id)}
+            onClick={() => {
+              if (resetInProgress.current) return;
+              resetInProgress.current = true;
+              store.resetChallengeAttempts(challenge.id);
+              setTimeout(() => { resetInProgress.current = false; }, 2000);
+            }}
             className="border rounded-[12px] px-4 py-2.5 text-[13px] font-bold cursor-pointer"
             style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)" }}
           >

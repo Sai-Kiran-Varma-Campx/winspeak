@@ -26,6 +26,7 @@ export default function Login() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setError("");
     setResetSuccess(false);
 
@@ -169,7 +170,8 @@ export default function Login() {
             autoFocus
             maxLength={30}
             autoComplete="username"
-            className="w-full rounded-[14px] px-4 py-3.5 text-[15px] font-semibold outline-none border transition-colors mb-3"
+            disabled={loading}
+            className="w-full rounded-[14px] px-4 py-3.5 text-[15px] font-semibold outline-none border transition-colors mb-3 disabled:opacity-60"
             style={{
               background: "var(--surface)",
               borderColor: hasError ? "#FF4D6A88" : username ? "var(--accent)" : "var(--border)",
@@ -191,7 +193,8 @@ export default function Login() {
             placeholder={mode === "reset" ? "Enter new password..." : "Enter password..."}
             maxLength={128}
             autoComplete={mode === "signup" || mode === "reset" ? "new-password" : "current-password"}
-            className="w-full rounded-[14px] px-4 py-3.5 text-[15px] font-semibold outline-none border transition-colors mb-3"
+            disabled={loading}
+            className="w-full rounded-[14px] px-4 py-3.5 text-[15px] font-semibold outline-none border transition-colors mb-3 disabled:opacity-60"
             style={{
               background: "var(--surface)",
               borderColor: hasError ? "#FF4D6A88" : password ? "var(--accent)" : "var(--border)",
@@ -214,7 +217,8 @@ export default function Login() {
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="What should we call you?"
                 maxLength={100}
-                className="w-full rounded-[14px] px-4 py-3.5 text-[15px] font-semibold outline-none border transition-colors mb-3"
+                disabled={loading}
+                className="w-full rounded-[14px] px-4 py-3.5 text-[15px] font-semibold outline-none border transition-colors mb-3 disabled:opacity-60"
                 style={{
                   background: "var(--surface)",
                   borderColor: displayName ? "var(--accent)" : "var(--border)",

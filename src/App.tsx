@@ -3,6 +3,9 @@ import Spinner from "@/components/Spinner";
 import AppSidebar from "@/components/AppSidebar";
 import { SessionProvider } from "@/context/SessionContext";
 import { UserStoreProvider } from "@/context/UserStoreContext";
+import { ToastProvider } from "@/context/ToastContext";
+import ToastContainer from "@/components/Toast";
+import OfflineBanner from "@/components/OfflineBanner";
 import { useStore } from "@/context/UserStoreContext";
 import MobileNav from "@/components/MobileNav";
 import Login from "@/screens/Login";
@@ -71,10 +74,14 @@ function AppContent() {
 
 export default function App() {
   return (
-    <UserStoreProvider>
-      <SessionProvider>
-        <AppContent />
-      </SessionProvider>
-    </UserStoreProvider>
+    <ToastProvider>
+      <UserStoreProvider>
+        <SessionProvider>
+          <OfflineBanner />
+          <AppContent />
+          <ToastContainer />
+        </SessionProvider>
+      </UserStoreProvider>
+    </ToastProvider>
   );
 }

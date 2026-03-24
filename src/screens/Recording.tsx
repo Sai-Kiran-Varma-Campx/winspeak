@@ -69,6 +69,8 @@ export default function Recording() {
   const [duration, setDuration] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const progress = duration > 0 ? currentTime / duration : 0;
@@ -116,7 +118,18 @@ export default function Recording() {
     const blob = await stopRecording();
     const recElapsed = RECORDING_DURATION_SECS - seconds;
     setElapsed(recElapsed > 0 ? recElapsed : RECORDING_DURATION_SECS);
-    session.setRecordingBlob(blob);
+
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await session.setRecordingBlob(blob);
+    } catch {
+      setSaveError("Failed to save recording. Please try again.");
+      setSaving(false);
+      return;
+    }
+    setSaving(false);
+
     const url = URL.createObjectURL(blob);
     setBlobUrl(url);
     setPhase("review");
@@ -401,8 +414,20 @@ export default function Recording() {
               : `Retry · ${retriesLeft} attempt${retriesLeft !== 1 ? "s" : ""} left`}
           </Button>
 
+          {saveError && (
+            <div
+              className="border rounded-[14px] p-3 flex items-center gap-2.5"
+              style={{ background: "#FF4D6A11", borderColor: "#FF4D6A44" }}
+            >
+              <span className="text-[16px]">⚠️</span>
+              <div className="text-[12px]" style={{ color: "#FF4D6A" }}>{saveError}</div>
+            </div>
+          )}
+
           <div className="pb-4">
-            <Button onClick={() => navigate("/analysing")}>Submit →</Button>
+            <Button disabled={saving} onClick={() => navigate("/analysing")}>
+              {saving ? "Saving..." : "Submit →"}
+            </Button>
           </div>
         </div>
       )}

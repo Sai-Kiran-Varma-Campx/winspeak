@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import OrbCanvas from "@/components/OrbCanvas";
 import { useSession } from "@/context/SessionContext";
 import { useStore } from "@/context/UserStoreContext";
 import { transcribeAudio, analyzeAnswer, preRenderSpeech } from "@/services/gemini";
 import { TIPS, ANALYSIS_STEPS, ANALYSIS_STEP_THRESHOLDS, CHALLENGES } from "@/constants";
 import { loadAudioBlob, deleteAudioBlob, RECORDING_KEY, IDEAL_RESPONSE_KEY } from "@/lib/audioStorage";
-import type { AnalysisResult, SkillMap } from "@/types";
 
 function getActiveChallenge(completedIds: string[]) {
   return (
@@ -17,30 +17,6 @@ function getActiveChallenge(completedIds: string[]) {
   );
 }
 
-// Minimal fallback used when no recording blob is available
-function buildMockResult(): AnalysisResult {
-  const skills: SkillMap = {
-    Fluency:    { score: 75, feedback: "Good flow with minimal unplanned pauses." },
-    Grammar:    { score: 80, feedback: "Generally accurate grammar throughout." },
-    Vocabulary: { score: 70, feedback: "Decent word choice with room for variety." },
-    Clarity:    { score: 85, feedback: "Clear and easy to follow overall." },
-    Structure:  { score: 65, feedback: "Good intro and body; strengthen the conclusion." },
-    Relevancy:  { score: 90, feedback: "Stayed on topic throughout the response." },
-  };
-  return {
-    overallScore: 78,
-    xpEarned: 780,
-    transcript: "No recording found — showing example result.",
-    skills,
-    pauseAnalysis: { status: "Good", count: 2, avgDuration: "1.0s", suggestion: "Pauses are natural. Try pausing slightly after key points for emphasis." },
-    grammarIssues: [],
-    fillerWords: [],
-    winSpeakAnalysis: "Good effort! Your delivery was clear and structured. Focus on varying vocabulary and adding a stronger closing statement to maximise impact.",
-    strengths: ["Clear delivery", "Good relevancy", "Natural pauses"],
-    improvements: ["Add vocabulary variety", "Stronger conclusion", "Reduce hesitations"],
-    idealResponse: "A great response addresses the question directly with a clear hook, supporting evidence, and a memorable close. Use the rule of three to organise your key points and end with a confident call to action.",
-  };
-}
 
 export default function Analysing() {
   const navigate = useNavigate();
@@ -50,6 +26,7 @@ export default function Analysing() {
   const [progress, setProgress] = useState(0);
   const [tipIndex, setTipIndex] = useState(0);
   const [tipVisible, setTipVisible] = useState(true);
+  const [error, setError] = useState<"recording_not_found" | "analysis_failed" | null>(null);
   const hasStarted = useRef(false);
 
   // Tip rotator
@@ -78,19 +55,7 @@ export default function Analysing() {
       }
 
       if (!blob) {
-        // Genuinely no recording — run mock
-        const stepDelays = [600, 600, 600, 600];
-        for (let i = 0; i < stepDelays.length; i++) {
-          await delay(stepDelays[i]);
-          setProgress(ANALYSIS_STEP_THRESHOLDS[i] + 5);
-        }
-        setProgress(100);
-        const mockResult = buildMockResult();
-        session.setAnalysisResult(mockResult);
-        // Clear stale ideal response audio before generating new one
-        deleteAudioBlob(IDEAL_RESPONSE_KEY).catch(() => {});
-        preRenderSpeech(mockResult.idealResponse, IDEAL_RESPONSE_KEY).catch(() => {});
-        setTimeout(() => navigate("/report"), 800);
+        setError("recording_not_found");
         return;
       }
 
@@ -122,17 +87,54 @@ export default function Analysing() {
         setTimeout(() => navigate("/report"), 800);
       } catch (err) {
         console.error("Analysis failed:", err);
-        setProgress(100);
-        const fallback = buildMockResult();
-        session.setAnalysisResult(fallback);
-        deleteAudioBlob(IDEAL_RESPONSE_KEY).catch(() => {});
-        preRenderSpeech(fallback.idealResponse, IDEAL_RESPONSE_KEY).catch(() => {});
-        setTimeout(() => navigate("/report"), 800);
+        setError("analysis_failed");
       }
     }
 
     run();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (error) {
+    return (
+      <div className="px-5 pt-10 pb-8 flex flex-col items-center gap-8 max-w-2xl mx-auto">
+        <div
+          className="border rounded-[22px] p-6 w-full text-center"
+          style={{
+            background: "linear-gradient(135deg, #FF4D6A08, #1A1D2E)",
+            borderColor: "#FF4D6A44",
+          }}
+        >
+          <div className="text-[40px] mb-4">
+            {error === "recording_not_found" ? "🎙️" : "⚠️"}
+          </div>
+          <div className="text-[20px] font-extrabold mb-2">
+            {error === "recording_not_found"
+              ? "No Recording Found"
+              : "Analysis Failed"}
+          </div>
+          <div className="text-[13px] mb-6" style={{ color: "var(--muted)" }}>
+            {error === "recording_not_found"
+              ? "Your recording couldn't be loaded. Please go back and record again."
+              : "Something went wrong while analysing your response. Please try again."}
+          </div>
+          <div className="flex gap-3 justify-center">
+            <Button onClick={() => {
+              session.reset();
+              navigate("/audiocheck");
+            }}>
+              Try Again
+            </Button>
+            <Button onClick={() => {
+              session.reset();
+              navigate("/");
+            }}>
+              Back to Dashboard
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-5 pt-10 pb-8 flex flex-col items-center gap-8 max-w-2xl mx-auto">
@@ -218,8 +220,4 @@ export default function Analysing() {
       </div>
     </div>
   );
-}
-
-function delay(ms: number) {
-  return new Promise((r) => setTimeout(r, ms));
 }

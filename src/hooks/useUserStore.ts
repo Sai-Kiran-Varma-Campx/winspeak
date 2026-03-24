@@ -1,5 +1,5 @@
 import type { AnalysisResult } from "@/types";
-import { api, getToken, setToken, clearToken } from "@/lib/api";
+import { api, getToken, setToken, clearToken, registerUnauthorizedHandler, unregisterUnauthorizedHandler, reportApiError } from "@/lib/api";
 
 const XP_PER_LEVEL = 500;
 
@@ -120,6 +120,14 @@ export function useUserStore(): UserStore {
   const { level, xpInLevel, xpToNext, xpProgress } = computeLevel(data.totalXp);
   const initRef = useRef(false);
 
+  // Register global 401 handler — auto-logout on expired JWT
+  useEffect(() => {
+    registerUnauthorizedHandler(() => {
+      setData({ ...defaults(), loading: false });
+    });
+    return () => unregisterUnauthorizedHandler();
+  }, []);
+
   // Load from API on mount (only if we have a token)
   useEffect(() => {
     if (initRef.current) return;
@@ -202,7 +210,7 @@ export function useUserStore(): UserStore {
           ),
         }));
       })
-      .catch(console.error);
+      .catch(() => reportApiError("Failed to save attempt"));
   }, []);
 
   const resetChallengeAttempts = useCallback((challengeId: string) => {
@@ -221,12 +229,12 @@ export function useUserStore(): UserStore {
           totalXp: me.totalXp ?? me.total_xp,
         }));
       } catch {}
-    }).catch(console.error);
+    }).catch(() => reportApiError("Failed to reset challenge"));
   }, []);
 
   const setName = useCallback((name: string) => {
     setData((prev) => ({ ...prev, name }));
-    api.updateName(name).catch(console.error);
+    api.updateName(name).catch(() => reportApiError("Failed to update name"));
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {

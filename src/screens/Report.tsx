@@ -206,11 +206,13 @@ export default function Report() {
     : session.analysisResult;
 
   const savedRef = useRef(false);
+  const actionInProgress = useRef(false);
   const [xpSaved, setXpSaved] = useState(false);
   const [ringProgress, setRingProgress] = useState(0);
 
   // Ideal response audio player state
   const idealAudioRef = useRef<HTMLAudioElement | null>(null);
+  const idealUrlRef = useRef<string | null>(null);
   const [idealReady, setIdealReady] = useState(false);
   const [idealLoading, setIdealLoading] = useState(!isHistorical);
   const [idealPlaying, setIdealPlaying] = useState(false);
@@ -281,33 +283,39 @@ export default function Report() {
     let cancelled = false;
     let attempts = 0;
 
+    function setupAudio(blob: Blob): boolean {
+      if (cancelled) return false;
+      // Revoke previous URL if any
+      if (idealUrlRef.current) URL.revokeObjectURL(idealUrlRef.current);
+      const url = URL.createObjectURL(blob);
+      idealUrlRef.current = url;
+      const audio = new Audio(url);
+      idealAudioRef.current = audio;
+
+      audio.addEventListener("loadedmetadata", () => {
+        if (!cancelled) {
+          setIdealDuration(audio.duration);
+          setIdealReady(true);
+          setIdealLoading(false);
+        }
+      });
+      audio.addEventListener("timeupdate", () => {
+        if (!cancelled) setIdealTime(audio.currentTime);
+      });
+      audio.addEventListener("ended", () => {
+        if (!cancelled) {
+          setIdealPlaying(false);
+          setIdealTime(0);
+        }
+      });
+      return true;
+    }
+
     async function tryLoad() {
       while (!cancelled && attempts < 20) {
         try {
           const blob = await loadAudioBlob(IDEAL_RESPONSE_KEY);
-          if (blob && !cancelled) {
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-            idealAudioRef.current = audio;
-
-            audio.addEventListener("loadedmetadata", () => {
-              if (!cancelled) {
-                setIdealDuration(audio.duration);
-                setIdealReady(true);
-                setIdealLoading(false);
-              }
-            });
-            audio.addEventListener("timeupdate", () => {
-              if (!cancelled) setIdealTime(audio.currentTime);
-            });
-            audio.addEventListener("ended", () => {
-              if (!cancelled) {
-                setIdealPlaying(false);
-                setIdealTime(0);
-              }
-            });
-            return;
-          }
+          if (blob && setupAudio(blob)) return;
         } catch { /* retry */ }
         attempts++;
         await new Promise((r) => setTimeout(r, 1500));
@@ -317,28 +325,7 @@ export default function Report() {
         try {
           await preRenderSpeech(result!.idealResponse, IDEAL_RESPONSE_KEY);
           const blob = await loadAudioBlob(IDEAL_RESPONSE_KEY);
-          if (blob && !cancelled) {
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-            idealAudioRef.current = audio;
-            audio.addEventListener("loadedmetadata", () => {
-              if (!cancelled) {
-                setIdealDuration(audio.duration);
-                setIdealReady(true);
-                setIdealLoading(false);
-              }
-            });
-            audio.addEventListener("timeupdate", () => {
-              if (!cancelled) setIdealTime(audio.currentTime);
-            });
-            audio.addEventListener("ended", () => {
-              if (!cancelled) {
-                setIdealPlaying(false);
-                setIdealTime(0);
-              }
-            });
-            return;
-          }
+          if (blob && setupAudio(blob)) return;
         } catch { /* give up */ }
         if (!cancelled) setIdealLoading(false);
       }
@@ -350,6 +337,11 @@ export default function Report() {
       if (idealAudioRef.current) {
         idealAudioRef.current.pause();
         idealAudioRef.current.src = "";
+        idealAudioRef.current = null;
+      }
+      if (idealUrlRef.current) {
+        URL.revokeObjectURL(idealUrlRef.current);
+        idealUrlRef.current = null;
       }
     };
   }, [result, isHistorical]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -1257,6 +1249,8 @@ export default function Report() {
                 {/* Try Again button */}
                 <Button
                   onClick={() => {
+                    if (actionInProgress.current) return;
+                    actionInProgress.current = true;
                     store.resetChallengeAttempts(activeChallenge.id);
                     session.reset();
                     navigate("/");
@@ -1272,20 +1266,38 @@ export default function Report() {
             {isHistorical ? (
               <Button onClick={() => navigate("/history")}>← Back to History</Button>
             ) : passed ? (
-              <Button onClick={() => { session.reset(); navigate("/"); }}>← Continue to Next Challenge</Button>
+              <Button onClick={() => {
+                if (actionInProgress.current) return;
+                actionInProgress.current = true;
+                session.reset();
+                navigate("/");
+              }}>← Continue to Next Challenge</Button>
             ) : !allAttemptsUsed ? (
               <div className="flex gap-3">
-                <Button onClick={() => { session.reset(); navigate("/audiocheck"); }}>
+                <Button onClick={() => {
+                  if (actionInProgress.current) return;
+                  actionInProgress.current = true;
+                  session.reset();
+                  navigate("/audiocheck");
+                }}>
                   🔄 Retry Challenge
                 </Button>
-                <Button
-                  onClick={() => { session.reset(); navigate("/"); }}
-                >
+                <Button onClick={() => {
+                  if (actionInProgress.current) return;
+                  actionInProgress.current = true;
+                  session.reset();
+                  navigate("/");
+                }}>
                   ← Back to Home
                 </Button>
               </div>
             ) : (
-              <Button onClick={() => { session.reset(); navigate("/"); }}>← Back to Home</Button>
+              <Button onClick={() => {
+                if (actionInProgress.current) return;
+                actionInProgress.current = true;
+                session.reset();
+                navigate("/");
+              }}>← Back to Home</Button>
             )}
           </div>
         </div>
