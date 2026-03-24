@@ -261,6 +261,48 @@ export async function synthesizeSpeechCached(
 }
 
 /**
+ * Prefetch coach voice audio to IndexedDB without playing it.
+ * Call from Dashboard so the Question screen plays instantly.
+ */
+export async function prefetchCoachVoice(text: string, cacheKey: string): Promise<void> {
+  // Skip if already cached
+  try {
+    const cached = await loadAudioBlob(cacheKey);
+    if (cached) return;
+  } catch { /* proceed */ }
+
+  try {
+    const result = await ai.models.generateContent({
+      model: "gemini-2.5-flash-preview-tts",
+      contents: [{ parts: [{ text }] }],
+      config: {
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: "Charon" },
+          },
+        },
+      } as Record<string, unknown>,
+    });
+
+    const parts = result.candidates?.[0]?.content?.parts ?? [];
+    const audioPart = parts.find(
+      (p: { inlineData?: { mimeType?: string; data?: string } }) => p.inlineData?.data
+    );
+    const audioData = audioPart?.inlineData?.data as string | undefined;
+
+    if (audioData) {
+      const binary = atob(audioData);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      await saveAudioBlob(cacheKey, new Blob([bytes], { type: "audio/pcm" }));
+    }
+  } catch {
+    // TTS unavailable — Question screen will generate on demand
+  }
+}
+
+/**
  * Pre-render TTS audio and save as WAV to IndexedDB (no playback).
  * Call during analysis so the audio is ready when Report loads.
  */

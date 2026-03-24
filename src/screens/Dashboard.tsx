@@ -6,6 +6,8 @@ import { useCountdown } from "@/hooks/useCountdown";
 import { CHALLENGES } from "@/constants";
 import { useStore } from "@/context/UserStoreContext";
 import { useSession } from "@/context/SessionContext";
+import { prefetchCoachVoice } from "@/services/gemini";
+import { VOICE_KEY_PREFIX } from "@/lib/audioStorage";
 import { greeting, relativeDate, type Attempt, type UserStore } from "@/hooks/useUserStore";
 import Sparkline from "@/components/Sparkline";
 import type { BadgeVariant, Challenge, ChallengeTier } from "@/types";
@@ -270,6 +272,18 @@ export default function Dashboard() {
     const t = setTimeout(() => setXpBarWidth(store.xpProgress), 300);
     return () => clearTimeout(t);
   }, [store.xpProgress]);
+
+  // Prefetch coach voices for uncompleted challenges in background
+  useEffect(() => {
+    const uncompleted = CHALLENGES.filter(
+      (c) => !store.completedChallengeIds.includes(c.id)
+    ).slice(0, 3); // prefetch up to 3
+
+    for (const c of uncompleted) {
+      const script = `${c.week}: ${c.title}. ${c.scenario} Your task: ${c.prompt} You have up to 60 seconds. Speak clearly, stay on topic. Tap Start Recording when you're ready. Good luck!`;
+      prefetchCoachVoice(script, VOICE_KEY_PREFIX + c.id).catch(() => {});
+    }
+  }, [store.completedChallengeIds]);
 
   const days = Math.floor(seconds / 86400);
   const hours = Math.floor((seconds % 86400) / 3600);
