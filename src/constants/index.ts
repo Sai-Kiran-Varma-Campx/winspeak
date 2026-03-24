@@ -36,7 +36,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 700,
     passingScore: 60,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "Explain a Concept",
     description: "Your classmate missed the lecture. Explain the topic clearly.",
     scenario:
@@ -51,7 +51,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 800,
     passingScore: 60,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "Group Project Leader",
     description: "Convince your group to adopt your plan for the final project.",
     scenario:
@@ -66,7 +66,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 900,
     passingScore: 70,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "Debate Defense",
     description: "Your opponent just made a strong point. Counter it live.",
     scenario:
@@ -81,7 +81,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 1000,
     passingScore: 70,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "Presentation Under Pressure",
     description: "Your slides crashed. Present your research from memory.",
     scenario:
@@ -96,7 +96,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 1000,
     passingScore: 70,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "Difficult Conversation",
     description: "A teammate isn't pulling their weight. Address it constructively.",
     scenario:
@@ -111,7 +111,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 1100,
     passingScore: 70,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "Tough Q&A",
     description: "The professor challenges your argument. Defend your position.",
     scenario:
@@ -126,7 +126,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 1200,
     passingScore: 75,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "Impromptu Speech",
     description: "You're called on with no preparation. Speak for 60 seconds.",
     scenario:
@@ -141,7 +141,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 1500,
     passingScore: 75,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "The Final Showcase",
     description: "Present your capstone project to a panel of judges.",
     scenario:
@@ -156,7 +156,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 500,
     passingScore: 55,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "One App to Delete",
     description: "If you had to delete one app from your phone — which and why?",
     scenario:
@@ -171,7 +171,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 500,
     passingScore: 55,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "The Ideal Weekend",
     description: "Describe your perfect weekend — make us want to live it.",
     scenario:
@@ -186,7 +186,7 @@ export const CHALLENGES: Challenge[] = [
     xp: 500,
     passingScore: 55,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "Change One Rule",
     description: "If you could change one rule in your college, what would it be?",
     scenario:
@@ -201,13 +201,28 @@ export const CHALLENGES: Challenge[] = [
     xp: 500,
     passingScore: 55,
     maxAttempts: 3,
-    status: "locked",
+    status: "active",
     title: "Recommend a Habit",
     description: "Share a productivity tool or habit you'd genuinely recommend.",
     scenario:
       "A junior student asks you: 'What's one productivity habit or tool that actually works?' They're overwhelmed with college workload and looking for real, practical advice — not generic tips from the internet.",
     prompt:
       "Recommend one productivity tool or habit that you genuinely use. Explain what it is, how you use it, and why it works for you. Be authentic — no generic advice.",
+  },
+  {
+    id: "c14",
+    week: "W14",
+    tier: "Advanced",
+    xp: 1500,
+    passingScore: 70,
+    maxAttempts: 3,
+    status: "active",
+    title: "60-Second VC Pitch",
+    description: "Pitch your startup idea to a VC in 60 seconds. Get them to say 'tell me more.'",
+    scenario:
+      "You're at a startup networking event. A well-known venture capitalist is about to leave — you catch them at the elevator. They say: 'You've got 60 seconds. What's your idea?' This is your one shot. No slides, no deck, just your words.",
+    prompt:
+      "Deliver a 60-second elevator pitch for a startup idea (real or imagined). Cover the problem, your solution, why now, your traction or vision, and end with a compelling ask. Be concise, confident, and make the investor want to hear more.",
   },
 ];
 
@@ -320,6 +335,13 @@ export const CHALLENGE_CHECKPOINTS: Record<string, string[]> = {
     "Share a concrete result or benefit you've experienced",
     "Make it practical and actionable for the listener",
     "Sound authentic — not like a product ad",
+  ],
+  c14: [
+    "Clearly state the problem you're solving and who has it",
+    "Describe the solution concisely — no jargon dumps",
+    "Explain why now — what's changed that makes this timely",
+    "Mention traction, validation, or a compelling vision",
+    "End with a clear ask that makes the investor want a follow-up",
   ],
 };
 

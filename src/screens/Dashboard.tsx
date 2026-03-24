@@ -29,7 +29,7 @@ type ChallengeStatusResult = BadgeVariant | "exhausted";
 
 function challengeStatus(
   id: string,
-  idx: number,
+  _idx: number,
   completedIds: string[],
   challengeAttempts: Attempt[],
   maxAttempts: number,
@@ -37,11 +37,7 @@ function challengeStatus(
 ): ChallengeStatusResult {
   if (completedIds.includes(id)) return "completed";
   if (isExpired(deadline)) return "locked"; // expired = locked
-  const allPrevDone = CHALLENGES.slice(0, idx).every((c) =>
-    completedIds.includes(c.id)
-  );
-  if (!allPrevDone) return "locked";
-  // All previous done — check if attempts exhausted
+  // All challenges unlocked for testing — no sequential gate
   if (challengeAttempts.length >= maxAttempts) return "exhausted";
   return "active";
 }
