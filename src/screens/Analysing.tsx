@@ -8,21 +8,16 @@ import { transcribeAudio, analyzeAnswer, preRenderSpeech } from "@/services/gemi
 import { TIPS, ANALYSIS_STEPS, ANALYSIS_STEP_THRESHOLDS, CHALLENGES } from "@/constants";
 import { loadAudioBlob, deleteAudioBlob, RECORDING_KEY, IDEAL_RESPONSE_KEY } from "@/lib/audioStorage";
 
-function getActiveChallenge(completedIds: string[]) {
-  return (
-    CHALLENGES.find((c, i) => {
-      if (completedIds.includes(c.id)) return false;
-      return CHALLENGES.slice(0, i).every((ch) => completedIds.includes(ch.id));
-    }) ?? CHALLENGES[0]
-  );
-}
 
 
 export default function Analysing() {
   const navigate = useNavigate();
   const session = useSession();
   const store = useStore();
-  const activeChallenge = getActiveChallenge(store.completedChallengeIds);
+  // Use session-selected challenge, fall back to first uncompleted
+  const activeChallenge = (session.challengeId
+    ? CHALLENGES.find((c) => c.id === session.challengeId)
+    : null) ?? CHALLENGES.find((c) => !store.completedChallengeIds.includes(c.id)) ?? CHALLENGES[0];
   const [progress, setProgress] = useState(0);
   const [tipIndex, setTipIndex] = useState(0);
   const [tipVisible, setTipVisible] = useState(true);

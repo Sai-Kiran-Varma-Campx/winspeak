@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useCountdown } from "@/hooks/useCountdown";
 import { CHALLENGES } from "@/constants";
 import { useStore } from "@/context/UserStoreContext";
+import { useSession } from "@/context/SessionContext";
 import { greeting, relativeDate, type Attempt, type UserStore } from "@/hooks/useUserStore";
 import Sparkline from "@/components/Sparkline";
 import type { BadgeVariant, Challenge, ChallengeTier } from "@/types";
@@ -79,10 +80,12 @@ function ActiveChallengeCard({
   challenge,
   store,
   navigate,
+  onStart,
 }: {
   challenge: (Omit<Challenge, "status"> & { status: ChallengeStatusResult }) | undefined;
   store: UserStore;
   navigate: NavigateFunction;
+  onStart: (id: string) => void;
 }) {
   if (!challenge) {
     return (
@@ -245,7 +248,7 @@ function ActiveChallengeCard({
           <span style={{ color: "var(--muted)" }}>· {challengeAttempts.length} {challengeAttempts.length === 1 ? "try" : "tries"}</span>
         </div>
       )}
-      <Button onClick={() => navigate("/audiocheck")}>
+      <Button onClick={() => onStart(challenge.id)}>
         {challengeAttempts.length > 0 ? "🔄 Try Again →" : "Start Challenge →"}
       </Button>
     </div>
@@ -255,6 +258,7 @@ function ActiveChallengeCard({
 export default function Dashboard() {
   const navigate = useNavigate();
   const store = useStore();
+  const session = useSession();
   const { seconds, start } = useCountdown(87600);
   const [xpBarWidth, setXpBarWidth] = useState(0);
 
@@ -284,6 +288,11 @@ export default function Dashboard() {
   }));
   const activeChallenge = challenges.find((c) => c.status === "active") ?? challenges.find((c) => c.status === "exhausted");
   const otherChallenges = challenges.filter((c) => c.id !== activeChallenge?.id);
+
+  function startChallenge(id: string) {
+    session.setChallengeId(id);
+    navigate("/audiocheck");
+  }
 
   // Skill velocity: compare latest two attempts
   const latestTwo = store.attempts.slice(0, 2);
@@ -432,6 +441,7 @@ export default function Dashboard() {
             challenge={activeChallenge}
             store={store}
             navigate={navigate}
+            onStart={startChallenge}
           />
 
           {/* Past Attempts with Sparkline */}
@@ -591,6 +601,14 @@ export default function Dashboard() {
                 >
                   🔒 LOCKED
                 </span>
+              ) : ch.status === "active" ? (
+                <button
+                  onClick={() => startChallenge(ch.id)}
+                  className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer flex-shrink-0"
+                  style={{ background: "#7C5CFC22", color: "#A78BFA" }}
+                >
+                  Start →
+                </button>
               ) : (
                 <Badge variant={ch.status as BadgeVariant}>{ch.status.toUpperCase()}</Badge>
               )}

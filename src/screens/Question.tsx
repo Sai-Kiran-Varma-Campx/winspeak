@@ -6,6 +6,7 @@ import { synthesizeSpeechCached } from "@/services/gemini";
 import { VOICE_KEY_PREFIX } from "@/lib/audioStorage";
 import { useInterval } from "@/hooks/useInterval";
 import { useStore } from "@/context/UserStoreContext";
+import { useSession } from "@/context/SessionContext";
 import { CHALLENGES } from "@/constants";
 import type { ChallengeTier } from "@/types";
 
@@ -21,19 +22,15 @@ const TIER_STYLES: Record<ChallengeTier, { bg: string; color: string; border: st
   "Advanced": { bg: "#FFB83011", color: "#FFB830", border: "#FFB83044" },
 };
 
-function getActiveChallenge(completedIds: string[]) {
-  return (
-    CHALLENGES.find((c, i) => {
-      if (completedIds.includes(c.id)) return false;
-      return CHALLENGES.slice(0, i).every((ch) => completedIds.includes(ch.id));
-    }) ?? CHALLENGES[0]
-  );
-}
-
 export default function Question() {
   const navigate = useNavigate();
   const store = useStore();
-  const challenge = getActiveChallenge(store.completedChallengeIds);
+  const session = useSession();
+
+  // Use session-selected challenge, fall back to first uncompleted
+  const challenge = (session.challengeId
+    ? CHALLENGES.find((c) => c.id === session.challengeId)
+    : null) ?? CHALLENGES.find((c) => !store.completedChallengeIds.includes(c.id)) ?? CHALLENGES[0];
 
   const coachScript = `${challenge.week}: ${challenge.title}. ${challenge.scenario} Your task: ${challenge.prompt} You have up to 60 seconds. Speak clearly, stay on topic. Tap Start Recording when you're ready. Good luck!`;
 

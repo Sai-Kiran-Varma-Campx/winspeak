@@ -3,9 +3,11 @@ import type { AnalysisResult } from "@/types";
 import { saveAudioBlob, deleteAudioBlob, RECORDING_KEY } from "@/lib/audioStorage";
 
 interface SessionState {
+  challengeId: string | null;
   recordingBlob: Blob | null;
   transcript: string;
   analysisResult: AnalysisResult | null;
+  setChallengeId: (id: string) => void;
   setRecordingBlob: (blob: Blob) => Promise<void>;
   setTranscript: (t: string) => void;
   setAnalysisResult: (r: AnalysisResult) => void;
@@ -15,6 +17,7 @@ interface SessionState {
 const SessionContext = createContext<SessionState | null>(null);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
+  const [challengeId, setChallengeId] = useState<string | null>(null);
   const [recordingBlob, setRecordingBlobState] = useState<Blob | null>(null);
   const [transcript, setTranscript] = useState("");
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
@@ -26,6 +29,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const reset = useCallback(() => {
+    setChallengeId(null);
     setRecordingBlobState(null);
     setTranscript("");
     setAnalysisResult(null);
@@ -36,9 +40,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   return (
     <SessionContext.Provider
       value={{
+        challengeId,
         recordingBlob,
         transcript,
         analysisResult,
+        setChallengeId,
         setRecordingBlob,
         setTranscript,
         setAnalysisResult,

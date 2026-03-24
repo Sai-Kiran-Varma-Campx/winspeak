@@ -220,14 +220,11 @@ export default function Report() {
   const [idealDuration, setIdealDuration] = useState(0);
   const idealProgress = idealDuration > 0 ? idealTime / idealDuration : 0;
 
-  // Resolve active challenge for live mode
+  // Resolve active challenge for live mode — use session-selected challenge
   const activeChallenge = !isHistorical
-    ? CHALLENGES.find((c, i) => {
-        if (store.completedChallengeIds.includes(c.id)) return false;
-        return CHALLENGES.slice(0, i).every((ch) =>
-          store.completedChallengeIds.includes(ch.id)
-        );
-      }) ?? CHALLENGES[0]
+    ? (session.challengeId
+        ? CHALLENGES.find((c) => c.id === session.challengeId)
+        : null) ?? CHALLENGES.find((c) => !store.completedChallengeIds.includes(c.id)) ?? CHALLENGES[0]
     : historicalAttempt
     ? CHALLENGES.find((c) => c.id === historicalAttempt.challengeId)
     : undefined;
