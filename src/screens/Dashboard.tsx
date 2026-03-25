@@ -6,7 +6,7 @@ import { useCountdown } from "@/hooks/useCountdown";
 import { CHALLENGES } from "@/constants";
 import { useStore } from "@/context/UserStoreContext";
 import { useSession } from "@/context/SessionContext";
-import { prefetchCoachVoice } from "@/services/gemini";
+import { prefetchCoachVoice, unlockAudioContext } from "@/services/gemini";
 import { VOICE_KEY_PREFIX } from "@/lib/audioStorage";
 import { greeting, relativeDate, type Attempt, type UserStore } from "@/hooks/useUserStore";
 import Sparkline from "@/components/Sparkline";
@@ -304,6 +304,7 @@ export default function Dashboard() {
   const otherChallenges = challenges.filter((c) => c.id !== activeChallenge?.id);
 
   function startChallenge(id: string) {
+    unlockAudioContext(); // Unlock for iOS on user tap
     session.setChallengeId(id);
     navigate("/audiocheck");
   }

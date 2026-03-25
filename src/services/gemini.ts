@@ -60,19 +60,42 @@ function pcm16Base64ToFloat32(base64: string): Float32Array {
   return samples;
 }
 
+// ── Shared AudioContext singleton (iOS Safari requires user-gesture unlock) ──
+
+let _sharedCtx: AudioContext | null = null;
+
+function getSharedAudioContext(sampleRate = 24000): AudioContext {
+  const AC = window.AudioContext || (window as any).webkitAudioContext;
+  if (!_sharedCtx || _sharedCtx.state === "closed") {
+    _sharedCtx = new AC({ sampleRate });
+  }
+  return _sharedCtx;
+}
+
+/**
+ * Call from any user-gesture handler (button tap) to unlock audio on iOS.
+ * Safe to call multiple times — no-ops if already running.
+ */
+export function unlockAudioContext(): void {
+  const ctx = getSharedAudioContext();
+  if (ctx.state === "suspended") {
+    ctx.resume().catch(() => {});
+  }
+}
+
 function playFloat32(samples: Float32Array, sampleRate = 24000): Promise<void> {
   return new Promise((resolve) => {
-    const AC = window.AudioContext || (window as any).webkitAudioContext;
-    const ctx = new AC({ sampleRate });
+    const ctx = getSharedAudioContext(sampleRate);
+    // Resume in case it's suspended (iOS)
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
     const buf = ctx.createBuffer(1, samples.length, sampleRate);
     buf.getChannelData(0).set(samples);
     const src = ctx.createBufferSource();
     src.buffer = buf;
     src.connect(ctx.destination);
-    src.onended = () => {
-      ctx.close();
-      resolve();
-    };
+    src.onended = () => resolve();
     src.start();
   });
 }

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import StepProgress from "@/components/StepProgress";
 import Waveform from "@/components/Waveform";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
-import { transcribeAudio } from "@/services/gemini";
+import { transcribeAudio, unlockAudioContext } from "@/services/gemini";
 
 type AudioState = "intro" | "recording" | "transcribing" | "passed" | "failed" | "error";
 
@@ -92,6 +92,7 @@ export default function AudioCheck() {
   }, []);
 
   const togglePlay = useCallback(() => {
+    unlockAudioContext(); // Unlock for iOS on user tap
     const audio = audioRef.current;
     if (!audio) return;
     if (isPlaying) {
@@ -133,6 +134,7 @@ export default function AudioCheck() {
   }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleStart() {
+    unlockAudioContext(); // Unlock for iOS on user tap
     setErrorMsg("");
     // Pause coach audio if playing
     if (isPlaying) {
@@ -482,7 +484,7 @@ export default function AudioCheck() {
               Mic is working perfectly. You're ready to go!
             </div>
           </div>
-          <Button onClick={() => navigate("/question")}>Start Challenge →</Button>
+          <Button onClick={() => { unlockAudioContext(); navigate("/question"); }}>Start Challenge →</Button>
         </div>
       )}
     </div>
