@@ -6,6 +6,7 @@ import { UserStoreProvider } from "@/context/UserStoreContext";
 import { ToastProvider } from "@/context/ToastContext";
 import ToastContainer from "@/components/Toast";
 import OfflineBanner from "@/components/OfflineBanner";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { useStore } from "@/context/UserStoreContext";
 import MobileNav from "@/components/MobileNav";
 import Login from "@/screens/Login";
@@ -74,14 +75,16 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <UserStoreProvider>
-        <SessionProvider>
-          <OfflineBanner />
-          <AppContent />
-          <ToastContainer />
-        </SessionProvider>
-      </UserStoreProvider>
-    </ToastProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <UserStoreProvider>
+          <SessionProvider>
+            <OfflineBanner />
+            <AppContent />
+            <ToastContainer />
+          </SessionProvider>
+        </UserStoreProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 }

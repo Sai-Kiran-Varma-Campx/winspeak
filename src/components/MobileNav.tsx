@@ -1,16 +1,8 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useStore } from "@/context/UserStoreContext";
+import { useSession } from "@/context/SessionContext";
 import { CHALLENGES } from "@/constants";
-
-function getActiveChallenge(completedIds: string[]) {
-  return (
-    CHALLENGES.find((c, i) => {
-      if (completedIds.includes(c.id)) return false;
-      return CHALLENGES.slice(0, i).every((ch) => completedIds.includes(ch.id));
-    }) ?? null
-  );
-}
 
 /* ── SVG Icons (stroke-based, 20x20) ── */
 
@@ -121,6 +113,7 @@ export default function MobileNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const store = useStore();
+  const session = useSession();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Close drawer on route change
@@ -140,7 +133,9 @@ export default function MobileNav() {
 
   if (HIDDEN_PATHS.some((p) => location.pathname.startsWith(p))) return null;
 
-  const activeChallenge = getActiveChallenge(store.completedChallengeIds);
+  const activeChallenge = (session.challengeId
+    ? CHALLENGES.find((c) => c.id === session.challengeId)
+    : null) ?? CHALLENGES.find((c) => !store.completedChallengeIds.includes(c.id)) ?? null;
   const completedCount = store.completedChallengeIds.length;
   const totalChallenges = CHALLENGES.length;
 

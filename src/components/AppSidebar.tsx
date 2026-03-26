@@ -1,15 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useStore } from "@/context/UserStoreContext";
+import { useSession } from "@/context/SessionContext";
 import { CHALLENGES } from "@/constants";
-
-function getActiveChallenge(completedIds: string[]) {
-  return (
-    CHALLENGES.find((c, i) => {
-      if (completedIds.includes(c.id)) return false;
-      return CHALLENGES.slice(0, i).every((ch) => completedIds.includes(ch.id));
-    }) ?? null
-  );
-}
 
 const NAV_ITEMS = [
   {
@@ -47,8 +39,11 @@ export default function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const store = useStore();
+  const session = useSession();
 
-  const activeChallenge = getActiveChallenge(store.completedChallengeIds);
+  const activeChallenge = (session.challengeId
+    ? CHALLENGES.find((c) => c.id === session.challengeId)
+    : null) ?? CHALLENGES.find((c) => !store.completedChallengeIds.includes(c.id)) ?? null;
   const completedCount = store.completedChallengeIds.length;
   const totalChallenges = CHALLENGES.length;
 
