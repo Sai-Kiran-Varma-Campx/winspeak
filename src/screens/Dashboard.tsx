@@ -30,17 +30,25 @@ function isExpired(deadline?: string): boolean {
 
 type ChallengeStatusResult = BadgeVariant | "exhausted";
 
+// Toggle this to false for production (sequential unlock for students)
+const UNLOCK_ALL = import.meta.env.VITE_UNLOCK_ALL_CHALLENGES === "true";
+
 function challengeStatus(
   id: string,
-  _idx: number,
+  idx: number,
   completedIds: string[],
   challengeAttempts: Attempt[],
   maxAttempts: number,
   deadline?: string,
 ): ChallengeStatusResult {
   if (completedIds.includes(id)) return "completed";
-  if (isExpired(deadline)) return "locked"; // expired = locked
-  // All challenges unlocked for testing — no sequential gate
+  if (isExpired(deadline)) return "locked";
+  if (!UNLOCK_ALL) {
+    const allPrevDone = CHALLENGES.slice(0, idx).every((c) =>
+      completedIds.includes(c.id)
+    );
+    if (!allPrevDone) return "locked";
+  }
   if (challengeAttempts.length >= maxAttempts) return "exhausted";
   return "active";
 }
