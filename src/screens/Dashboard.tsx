@@ -30,8 +30,9 @@ function isExpired(deadline?: string): boolean {
 
 type ChallengeStatusResult = BadgeVariant | "exhausted";
 
-// Toggle this to false for production (sequential unlock for students)
-const UNLOCK_ALL = import.meta.env.VITE_UNLOCK_ALL_CHALLENGES === "true";
+// Set to false for production (sequential unlock for students)
+// Set to true for stakeholder testing (all challenges open)
+const UNLOCK_ALL = true;
 
 function challengeStatus(
   id: string,
