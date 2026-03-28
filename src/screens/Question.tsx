@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import StepProgress from "@/components/StepProgress";
-import { playCoachVoice } from "@/services/gemini";
+import { playCoachVoice, stopAudioPlayback } from "@/services/gemini";
 import { useInterval } from "@/hooks/useInterval";
 import { useStore } from "@/context/UserStoreContext";
 import { useSession } from "@/context/SessionContext";
@@ -44,6 +44,11 @@ export default function Question() {
     () => setProgress((p) => Math.min(p + 1.5, 95)),
     isSpeaking ? 300 : null
   );
+
+  // Stop audio when leaving this page
+  useEffect(() => {
+    return () => stopAudioPlayback();
+  }, []);
 
   useEffect(() => {
     if (didSpeak.current) return;
@@ -157,7 +162,7 @@ export default function Question() {
                   Coach speaking...
                 </>
               ) : ttsError ? (
-                <span style={{ color: "#FF4D6A" }}>Voice unavailable — read the instructions below</span>
+                <span style={{ color: "#FF4D6A" }}>Coach voice failed to load. Read the instructions below and proceed.</span>
               ) : videoComplete ? (
                 "Instructions complete ✓"
               ) : (
@@ -172,7 +177,7 @@ export default function Question() {
                 className="h-full transition-all duration-300"
                 style={{
                   width: `${progress}%`,
-                  background: "linear-gradient(90deg,var(--accent),#22D37A)",
+                  background: ttsError ? "#FF4D6A" : "linear-gradient(90deg,var(--accent),#22D37A)",
                 }}
               />
             </div>

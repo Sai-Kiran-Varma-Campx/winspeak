@@ -63,6 +63,7 @@ export default function Recording() {
   const navigate = useNavigate();
   const session = useSession();
   const [phase, setPhase] = useState<Phase>("timer");
+  const [retried, setRetried] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -132,6 +133,20 @@ export default function Recording() {
     const url = URL.createObjectURL(blob);
     setBlobUrl(url);
     setPhase("review");
+  }
+
+  function handleRetry() {
+    if (retried) return; // Only one retry allowed
+    setRetried(true);
+    setPhase("timer");
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setElapsed(0);
+    setSaveError(null);
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+    setBlobUrl(null);
+    reset(RECORDING_DURATION_SECS);
   }
 
   // Auto-stop when countdown hits 0
@@ -390,6 +405,13 @@ export default function Recording() {
                 Minimum 30 seconds required to submit. Record a longer answer for better feedback.
               </div>
             </div>
+          )}
+
+          {/* Retry button */}
+          {!retried && (
+            <Button variant="danger" onClick={handleRetry}>
+              🔄 Re-record
+            </Button>
           )}
 
           {saveError && (

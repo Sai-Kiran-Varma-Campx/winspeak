@@ -513,17 +513,26 @@ export default function Dashboard() {
                 </div>
               </div>
               {ch.status === "completed" ? (
-                <button
-                  onClick={() => {
-                    const attempt = store.attempts.find((a) => a.challengeId === ch.id);
-                    if (attempt) navigate(`/report/${attempt.id}`);
-                    else navigate("/history");
-                  }}
-                  className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer flex-shrink-0"
-                  style={{ background: "#22D37A22", color: "#22D37A" }}
-                >
-                  View Results
-                </button>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <button
+                    onClick={() => startChallenge(ch.id)}
+                    className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
+                    style={{ background: "#7C5CFC22", color: "#A78BFA" }}
+                  >
+                    Retry
+                  </button>
+                  <button
+                    onClick={() => {
+                      const attempt = store.attempts.find((a) => a.challengeId === ch.id);
+                      if (attempt) navigate(`/report/${attempt.id}`);
+                      else navigate("/history");
+                    }}
+                    className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
+                    style={{ background: "#22D37A22", color: "#22D37A" }}
+                  >
+                    Results
+                  </button>
+                </div>
               ) : ch.status === "active" ? (
                 <button
                   onClick={() => startChallenge(ch.id)}

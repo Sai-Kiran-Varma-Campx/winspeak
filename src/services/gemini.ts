@@ -94,20 +94,31 @@ export function unlockAudioContext(): void {
   }
 }
 
+let _activeSource: AudioBufferSourceNode | null = null;
+
+/**
+ * Stop any currently playing audio (coach voice, etc.).
+ * Call on page navigation to prevent audio bleeding between screens.
+ */
+export function stopAudioPlayback(): void {
+  if (_activeSource) {
+    try { _activeSource.stop(); } catch { /* already stopped */ }
+    _activeSource = null;
+  }
+}
+
 function playFloat32(samples: Float32Array, sourceSampleRate = 24000): Promise<void> {
   return new Promise((resolve) => {
     const ctx = getSharedAudioContext();
     _resumeCtx();
 
-    const deviceRate = ctx.sampleRate; // e.g. 44100 or 48000
+    const deviceRate = ctx.sampleRate;
 
-    // Resample if source rate differs from device rate
     let buffer: AudioBuffer;
     if (sourceSampleRate === deviceRate) {
       buffer = ctx.createBuffer(1, samples.length, deviceRate);
       buffer.getChannelData(0).set(samples);
     } else {
-      // Linear interpolation resample: sourceSampleRate → deviceRate
       const ratio = sourceSampleRate / deviceRate;
       const newLength = Math.round(samples.length / ratio);
       buffer = ctx.createBuffer(1, newLength, deviceRate);
@@ -121,10 +132,17 @@ function playFloat32(samples: Float32Array, sourceSampleRate = 24000): Promise<v
       }
     }
 
+    // Stop any previous playback
+    stopAudioPlayback();
+
     const src = ctx.createBufferSource();
+    _activeSource = src;
     src.buffer = buffer;
     src.connect(ctx.destination);
-    src.onended = () => resolve();
+    src.onended = () => {
+      _activeSource = null;
+      resolve();
+    };
     src.start();
   });
 }
