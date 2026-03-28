@@ -190,30 +190,78 @@ export async function transcribeAudio(blob: Blob): Promise<string> {
   });
 }
 
+// ── TTS with model fallback ─────────────────────────────────────────────────
+// 1. gemini-2.5-flash-preview-tts (fast, 100/day)
+// 2. gemini-2.5-pro-preview-tts (quality, separate 100/day quota)
+// Each model has its own rate limit — gives 200 TTS calls/day total.
+
+const TTS_MODELS = [
+  "gemini-2.5-flash-preview-tts",
+];
+
 /**
- * Synthesize speech for the given text via Gemini TTS (streaming).
- * Throws on failure — caller handles the error.
+ * Generate TTS audio with model fallback. Returns raw PCM16 bytes.
+ */
+async function generateTtsBytes(text: string): Promise<Uint8Array> {
+  let lastError: unknown;
+
+  for (const model of TTS_MODELS) {
+    try {
+      const result = await ai.models.generateContent({
+        model,
+        contents: [{ parts: [{ text }] }],
+        config: {
+          responseModalities: ["AUDIO"],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: "Charon" },
+            },
+          },
+        } as Record<string, unknown>,
+      });
+
+      const parts = result.candidates?.[0]?.content?.parts ?? [];
+      const audioPart = parts.find(
+        (p: { inlineData?: { data?: string } }) => p.inlineData?.data
+      );
+      const b64 = audioPart?.inlineData?.data as string | undefined;
+      if (!b64) throw new Error("TTS returned no audio data");
+
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return bytes;
+    } catch (err) {
+      lastError = err;
+      // Continue to next model
+    }
+  }
+
+  throw lastError;
+}
+
+/**
+ * Synthesize speech. Throws on failure.
  */
 export async function synthesizeSpeech(
   text: string,
   onStart?: () => void
 ): Promise<void> {
-  const bytes = await streamTtsBytes(text);
+  const bytes = await generateTtsBytes(text);
   const samples = pcm16BytesToFloat32(bytes);
   onStart?.();
   await playFloat32(samples);
 }
 
 /**
- * Like synthesizeSpeech but caches the PCM audio to IndexedDB under `cacheKey`.
- * On subsequent calls with the same key the audio plays instantly (no API call).
+ * Synthesize speech with IndexedDB cache. Throws on generation failure.
  */
 export async function synthesizeSpeechCached(
   text: string,
   cacheKey: string,
   onStart?: () => void
 ): Promise<void> {
-  // 1. Try IndexedDB cache first
+  // 1. Try IndexedDB cache
   try {
     const cached = await loadAudioBlob(cacheKey);
     if (cached) {
@@ -223,14 +271,64 @@ export async function synthesizeSpeechCached(
       await playFloat32(samples);
       return;
     }
-  } catch {
-    // Cache read failed — fall through to generate
+  } catch { /* fall through */ }
+
+  // 2. Generate via Gemini with model fallback
+  const bytes = await generateTtsBytes(text);
+
+  // Cache for next time
+  saveAudioBlob(cacheKey, new Blob([bytes.buffer as ArrayBuffer], { type: "audio/pcm" })).catch(() => {});
+
+  const samples = pcm16BytesToFloat32(bytes);
+  onStart?.();
+  await playFloat32(samples);
+}
+
+// ── Server-cached coach voice ────────────────────────────────────────────────
+
+/**
+ * Fetch coach voice from server (DB-cached, shared across all users).
+ * Falls back to client-side Gemini TTS if server fails.
+ * Plays via Web Audio API.
+ */
+export async function playCoachVoice(
+  challengeId: string,
+  coachScript: string,
+  onStart?: () => void
+): Promise<void> {
+  // 1. Try local IndexedDB cache first (instant)
+  const cacheKey = `coach_voice_${challengeId}`;
+  try {
+    const cached = await loadAudioBlob(cacheKey);
+    if (cached) {
+      const arrayBuffer = await cached.arrayBuffer();
+      const samples = pcm16BytesToFloat32(new Uint8Array(arrayBuffer));
+      onStart?.();
+      await playFloat32(samples);
+      return;
+    }
+  } catch { /* fall through */ }
+
+  // 2. Fetch static pre-generated file (shared across all users, zero API cost)
+  let bytes: Uint8Array | null = null;
+  try {
+    const res = await fetch(`/voices/${challengeId}.pcm`);
+    if (res.ok) {
+      const buf = await res.arrayBuffer();
+      if (buf.byteLength > 0) bytes = new Uint8Array(buf);
+    }
+  } catch { /* fall through to client-side */ }
+
+  // 3. Fallback: generate client-side with model fallback
+  if (!bytes) {
+    bytes = await generateTtsBytes(coachScript);
   }
 
-  // 2. Generate via Gemini TTS using STREAMING to prevent iOS Safari timeout
-  const bytes = await streamTtsBytes(text);
+  if (!bytes || bytes.length === 0) {
+    throw new Error("No audio bytes received");
+  }
 
-  // Persist to IndexedDB (fire-and-forget, don't block playback)
+  // Cache locally for instant replay
   saveAudioBlob(cacheKey, new Blob([bytes.buffer as ArrayBuffer], { type: "audio/pcm" })).catch(() => {});
 
   const samples = pcm16BytesToFloat32(bytes);
@@ -239,69 +337,7 @@ export async function synthesizeSpeechCached(
 }
 
 /**
- * Stream TTS audio from Gemini and return raw PCM bytes.
- * Uses generateContentStream to prevent iOS Safari from killing long requests.
- */
-async function streamTtsBytes(text: string): Promise<Uint8Array> {
-  const stream = await ai.models.generateContentStream({
-    model: "gemini-2.5-flash-preview-tts",
-    contents: [{ parts: [{ text }] }],
-    config: {
-      responseModalities: ["AUDIO"],
-      speechConfig: {
-        voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: "Charon" },
-        },
-      },
-    } as Record<string, unknown>,
-  });
-
-  const chunks: Uint8Array[] = [];
-  for await (const chunk of stream) {
-    const parts = chunk.candidates?.[0]?.content?.parts ?? [];
-    for (const part of parts) {
-      const data = (part as any).inlineData?.data as string | undefined;
-      if (data) {
-        const binary = atob(data);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        chunks.push(bytes);
-      }
-    }
-  }
-
-  if (chunks.length === 0) throw new Error("TTS stream returned no audio data");
-
-  const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
-  const merged = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const c of chunks) {
-    merged.set(c, offset);
-    offset += c.length;
-  }
-  return merged;
-}
-
-/**
- * Prefetch coach voice audio to IndexedDB without playing it.
- */
-export async function prefetchCoachVoice(text: string, cacheKey: string): Promise<void> {
-  try {
-    const cached = await loadAudioBlob(cacheKey);
-    if (cached) return;
-  } catch { /* proceed */ }
-
-  try {
-    const bytes = await streamTtsBytes(text);
-    await saveAudioBlob(cacheKey, new Blob([bytes.buffer as ArrayBuffer], { type: "audio/pcm" }));
-  } catch {
-    // TTS unavailable — Question screen will generate on demand
-  }
-}
-
-/**
- * Pre-render TTS audio and save as WAV to IndexedDB (no playback).
- * Call during analysis so the audio is ready when Report loads.
+ * Pre-render TTS as WAV to IndexedDB (no playback). For ideal response audio.
  */
 export async function preRenderSpeech(text: string, cacheKey: string): Promise<void> {
   try {
@@ -310,7 +346,7 @@ export async function preRenderSpeech(text: string, cacheKey: string): Promise<v
   } catch { /* proceed */ }
 
   try {
-    const bytes = await streamTtsBytes(text);
+    const bytes = await generateTtsBytes(text);
     const wavBlob = pcm16ToWav(bytes);
     await saveAudioBlob(cacheKey, wavBlob);
   } catch {

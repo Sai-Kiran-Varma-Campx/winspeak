@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import StepProgress from "@/components/StepProgress";
-import { synthesizeSpeechCached } from "@/services/gemini";
-import { VOICE_KEY_PREFIX } from "@/lib/audioStorage";
+import { playCoachVoice } from "@/services/gemini";
 import { useInterval } from "@/hooks/useInterval";
 import { useStore } from "@/context/UserStoreContext";
 import { useSession } from "@/context/SessionContext";
@@ -58,7 +57,7 @@ export default function Question() {
     setTtsError(false);
 
     try {
-      await synthesizeSpeechCached(coachScript, VOICE_KEY_PREFIX + challenge.id, () => {
+      await playCoachVoice(challenge.id, coachScript, () => {
         setLoadingTTS(false);
         setIsSpeaking(true);
       });
