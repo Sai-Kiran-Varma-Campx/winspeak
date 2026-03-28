@@ -7,7 +7,7 @@ import Waveform from "@/components/Waveform";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useSession } from "@/context/SessionContext";
-import { MAX_RETRIES, RECORDING_DURATION_SECS } from "@/constants";
+import { RECORDING_DURATION_SECS } from "@/constants";
 
 type Phase = "timer" | "review";
 
@@ -63,7 +63,6 @@ export default function Recording() {
   const navigate = useNavigate();
   const session = useSession();
   const [phase, setPhase] = useState<Phase>("timer");
-  const [retriesLeft, setRetriesLeft] = useState(MAX_RETRIES);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -142,18 +141,6 @@ export default function Recording() {
     }
   }, [seconds, isRecording]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function handleRetry() {
-    if (retriesLeft <= 0) return;
-    setRetriesLeft((r) => r - 1);
-    setPhase("timer");
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-    if (blobUrl) URL.revokeObjectURL(blobUrl);
-    setBlobUrl(null);
-    reset(RECORDING_DURATION_SECS);
-  }
-
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -221,7 +208,9 @@ export default function Recording() {
           {!isRecording ? (
             <Button onClick={handleStartRecording}>Start Recording</Button>
           ) : (
-            <Button variant="danger" onClick={handleStop}>Stop Recording</Button>
+            <Button variant="danger" disabled={seconds > RECORDING_DURATION_SECS - 30} onClick={handleStop}>
+              {seconds > RECORDING_DURATION_SECS - 30 ? `Record at least 30s (${RECORDING_DURATION_SECS - seconds}s)` : "Stop Recording"}
+            </Button>
           )}
         </>
       )}
@@ -402,17 +391,6 @@ export default function Recording() {
               </div>
             </div>
           )}
-
-          {/* Action buttons */}
-          <Button
-            variant="danger"
-            disabled={retriesLeft === 0}
-            onClick={handleRetry}
-          >
-            {retriesLeft === 0
-              ? "No retries remaining"
-              : `Retry · ${retriesLeft} attempt${retriesLeft !== 1 ? "s" : ""} left`}
-          </Button>
 
           {saveError && (
             <div
