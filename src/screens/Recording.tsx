@@ -7,6 +7,7 @@ import Waveform from "@/components/Waveform";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useSession } from "@/context/SessionContext";
+import { unlockAudioContext } from "@/services/gemini";
 import { RECORDING_DURATION_SECS } from "@/constants";
 
 type Phase = "timer" | "review";
@@ -66,49 +67,29 @@ export default function Recording() {
   const [retried, setRetried] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [, setDuration] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const recordingBlobRef = useRef<Blob | null>(null);
+  const webAudioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const animFrameRef = useRef(0);
 
-  // Use elapsed as fallback when duration is unknown (blob URLs)
-  const displayDuration = (duration && isFinite(duration)) ? duration : elapsed;
+  const displayDuration = elapsed;
   const progress = displayDuration > 0 ? currentTime / displayDuration : 0;
 
   const { seconds, start, reset } = useCountdown(RECORDING_DURATION_SECS);
   const { startRecording, stopRecording, isRecording } = useAudioRecorder();
 
-  // Clean up blob URL on unmount
+  // Clean up on unmount
   useEffect(() => {
     return () => {
       if (blobUrl) URL.revokeObjectURL(blobUrl);
-    };
-  }, [blobUrl]);
-
-  // Set up audio element when blobUrl changes
-  useEffect(() => {
-    if (!blobUrl) return;
-    const audio = new Audio(blobUrl);
-    audioRef.current = audio;
-
-    function updateDuration() {
-      const d = audio.duration;
-      if (d && isFinite(d) && !isNaN(d)) setDuration(d);
-    }
-
-    audio.addEventListener("loadedmetadata", updateDuration);
-    audio.addEventListener("durationchange", updateDuration);
-    audio.addEventListener("timeupdate", () => setCurrentTime(audio.currentTime));
-    audio.addEventListener("ended", () => {
-      setIsPlaying(false);
-      setCurrentTime(0);
-    });
-
-    return () => {
-      audio.pause();
-      audio.src = "";
+      if (webAudioSourceRef.current) {
+        try { webAudioSourceRef.current.stop(); } catch {}
+      }
+      cancelAnimationFrame(animFrameRef.current);
     };
   }, [blobUrl]);
 
@@ -138,6 +119,7 @@ export default function Recording() {
     }
     setSaving(false);
 
+    recordingBlobRef.current = blob;
     const url = URL.createObjectURL(blob);
     setBlobUrl(url);
     setPhase("review");
@@ -164,31 +146,64 @@ export default function Recording() {
     }
   }, [seconds, isRecording]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const togglePlay = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio || !blobUrl) return;
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
-      // Ensure audio src is set (may have been cleared)
-      if (!audio.src || audio.src === "") {
-        audio.src = blobUrl;
-      }
-      audio.play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
-    }
-  }, [isPlaying, blobUrl]);
+  const togglePlay = useCallback(async () => {
+    const blob = recordingBlobRef.current;
+    if (!blob) return;
 
-  const seekTo = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const audio = audioRef.current;
-    if (!audio || !displayDuration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    audio.currentTime = pct * displayDuration;
-    setCurrentTime(audio.currentTime);
-  }, [duration]);
+    if (isPlaying) {
+      if (webAudioSourceRef.current) {
+        try { webAudioSourceRef.current.stop(); } catch {}
+        webAudioSourceRef.current = null;
+      }
+      cancelAnimationFrame(animFrameRef.current);
+      setIsPlaying(false);
+      return;
+    }
+
+    // Use Web Audio API decodeAudioData — works on iOS Safari (blob URLs don't)
+    try {
+      unlockAudioContext();
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AC();
+      const arrayBuffer = await blob.arrayBuffer();
+      const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+      setDuration(audioBuffer.duration);
+
+      const source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(ctx.destination);
+      webAudioSourceRef.current = source;
+
+      const startTime = ctx.currentTime;
+      setIsPlaying(true);
+      setCurrentTime(0);
+
+      function tick() {
+        const t = ctx.currentTime - startTime;
+        setCurrentTime(Math.min(t, audioBuffer.duration));
+        if (t < audioBuffer.duration) {
+          animFrameRef.current = requestAnimationFrame(tick);
+        }
+      }
+      animFrameRef.current = requestAnimationFrame(tick);
+
+      source.onended = () => {
+        cancelAnimationFrame(animFrameRef.current);
+        setIsPlaying(false);
+        setCurrentTime(0);
+        webAudioSourceRef.current = null;
+      };
+
+      source.start();
+    } catch {
+      setIsPlaying(false);
+    }
+  }, [isPlaying]);
+
+  const seekTo = useCallback((_e: React.MouseEvent<HTMLDivElement>) => {
+    // Seek not supported with Web Audio BufferSource
+  }, []);
 
   return (
     <div className="p-4 sm:p-5 pb-8 flex flex-col gap-4 sm:gap-5 max-w-2xl mx-auto">
