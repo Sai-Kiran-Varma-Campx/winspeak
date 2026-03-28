@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import StepProgress from "@/components/StepProgress";
-import { playCoachVoice, stopAudioPlayback } from "@/services/gemini";
-import { useInterval } from "@/hooks/useInterval";
-import { useStore } from "@/context/UserStoreContext";
-import { useSession } from "@/context/SessionContext";
+import { Button } from "@/components/ui/button";
 import { CHALLENGES } from "@/constants";
+import { useSession } from "@/context/SessionContext";
+import { useStore } from "@/context/UserStoreContext";
+import { useInterval } from "@/hooks/useInterval";
+import { playCoachVoice, stopAudioPlayback } from "@/services/gemini";
 import type { ChallengeTier } from "@/types";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const STEPS = [
   { label: "Audio Check", status: "completed" as const },
@@ -15,10 +15,13 @@ const STEPS = [
   { label: "Record", status: "pending" as const },
 ];
 
-const TIER_STYLES: Record<ChallengeTier, { bg: string; color: string; border: string }> = {
-  "Beginner": { bg: "#22D37A11", color: "#22D37A", border: "#22D37A44" },
-  "Intermediate": { bg: "#7C5CFC11", color: "#7C5CFC", border: "#7C5CFC44" },
-  "Advanced": { bg: "#FFB83011", color: "#FFB830", border: "#FFB83044" },
+const TIER_STYLES: Record<
+  ChallengeTier,
+  { bg: string; color: string; border: string }
+> = {
+  Beginner: { bg: "#22D37A11", color: "#22D37A", border: "#22D37A44" },
+  Intermediate: { bg: "#7C5CFC11", color: "#7C5CFC", border: "#7C5CFC44" },
+  Advanced: { bg: "#FFB83011", color: "#FFB830", border: "#FFB83044" },
 };
 
 export default function Question() {
@@ -27,9 +30,12 @@ export default function Question() {
   const session = useSession();
 
   // Use session-selected challenge, fall back to first uncompleted
-  const challenge = (session.challengeId
-    ? CHALLENGES.find((c) => c.id === session.challengeId)
-    : null) ?? CHALLENGES.find((c) => !store.completedChallengeIds.includes(c.id)) ?? CHALLENGES[0];
+  const challenge =
+    (session.challengeId
+      ? CHALLENGES.find((c) => c.id === session.challengeId)
+      : null) ??
+    CHALLENGES.find((c) => !store.completedChallengeIds.includes(c.id)) ??
+    CHALLENGES[0];
 
   const coachScript = `${challenge.week}: ${challenge.title}. ${challenge.scenario} Your task: ${challenge.prompt} You have up to 60 seconds. Speak clearly, stay on topic. Tap Start Recording when you're ready. Good luck!`;
 
@@ -42,7 +48,7 @@ export default function Question() {
 
   useInterval(
     () => setProgress((p) => Math.min(p + 1.5, 95)),
-    isSpeaking ? 300 : null
+    isSpeaking ? 300 : null,
   );
 
   // Stop audio when leaving this page
@@ -101,7 +107,10 @@ export default function Question() {
           ←
         </button>
         <div>
-          <div className="text-[11px] font-semibold tracking-[1px]" style={{ color: "var(--muted)" }}>
+          <div
+            className="text-[11px] font-semibold tracking-[1px]"
+            style={{ color: "var(--muted)" }}
+          >
             STEP 2 OF 3
           </div>
           <div className="text-[18px] font-extrabold">Rules & Question</div>
@@ -126,7 +135,8 @@ export default function Question() {
             <div
               className="absolute inset-0"
               style={{
-                background: "radial-gradient(ellipse at 40% 50%, #22D37A22, transparent 60%)",
+                background:
+                  "radial-gradient(ellipse at 40% 50%, #22D37A22, transparent 60%)",
               }}
             />
             <div
@@ -140,7 +150,10 @@ export default function Question() {
                 <>
                   <span
                     className="w-4 h-4 rounded-full border-2 border-t-transparent inline-block flex-shrink-0"
-                    style={{ borderColor: "#22D37A", animation: "spin 0.8s linear infinite" }}
+                    style={{
+                      borderColor: "#22D37A",
+                      animation: "spin 0.8s linear infinite",
+                    }}
                   />
                   Fetching voice...
                 </>
@@ -162,7 +175,10 @@ export default function Question() {
                   Coach speaking...
                 </>
               ) : ttsError ? (
-                <span style={{ color: "#FF4D6A" }}>Coach voice failed to load. Read the instructions below and proceed.</span>
+                <span style={{ color: "#FF4D6A" }}>
+                  Issue fetching audio. Please read the instructions to
+                  continue.
+                </span>
               ) : videoComplete ? (
                 "Instructions complete ✓"
               ) : (
@@ -177,7 +193,9 @@ export default function Question() {
                 className="h-full transition-all duration-300"
                 style={{
                   width: `${progress}%`,
-                  background: ttsError ? "#FF4D6A" : "linear-gradient(90deg,var(--accent),#22D37A)",
+                  background: ttsError
+                    ? "#FF4D6A"
+                    : "linear-gradient(90deg,var(--accent),#22D37A)",
                 }}
               />
             </div>
@@ -205,7 +223,15 @@ export default function Question() {
           >
             <div
               className="absolute"
-              style={{ top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: "var(--accent-glow)", filter: "blur(30px)" }}
+              style={{
+                top: -20,
+                right: -20,
+                width: 80,
+                height: 80,
+                borderRadius: "50%",
+                background: "var(--accent-glow)",
+                filter: "blur(30px)",
+              }}
             />
 
             {/* Header */}
@@ -237,12 +263,21 @@ export default function Question() {
             {/* Scenario */}
             <div
               className="rounded-[12px] p-3.5 mb-3"
-              style={{ background: "var(--surface)", borderLeft: "3px solid #FFB830" }}
+              style={{
+                background: "var(--surface)",
+                borderLeft: "3px solid #FFB830",
+              }}
             >
-              <div className="text-[10px] font-bold tracking-[1px] mb-1.5" style={{ color: "#FFB830" }}>
+              <div
+                className="text-[10px] font-bold tracking-[1px] mb-1.5"
+                style={{ color: "#FFB830" }}
+              >
                 THE SITUATION
               </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: "#C8CCEC" }}>
+              <p
+                className="text-[12px] leading-relaxed"
+                style={{ color: "#C8CCEC" }}
+              >
                 {challenge.scenario}
               </p>
             </div>
@@ -250,7 +285,10 @@ export default function Question() {
             {/* Prompt */}
             <div
               className="rounded-[12px] p-3.5 mb-4"
-              style={{ background: "var(--surface)", borderLeft: "3px solid var(--accent)" }}
+              style={{
+                background: "var(--surface)",
+                borderLeft: "3px solid var(--accent)",
+              }}
             >
               <div
                 className="text-[10px] font-bold tracking-[1px] mb-1.5"
@@ -268,7 +306,11 @@ export default function Question() {
               {[
                 { value: "60s", label: "Max Time", color: "var(--accent)" },
                 { value: "2", label: "Retries", color: "#22D37A" },
-                { value: `${challenge.xp}`, label: "XP Reward", color: "#FFB830" },
+                {
+                  value: `${challenge.xp}`,
+                  label: "XP Reward",
+                  color: "#FFB830",
+                },
               ].map(({ value, label, color }) => (
                 <div
                   key={label}
@@ -278,7 +320,10 @@ export default function Question() {
                   <div className="text-[18px] font-extrabold" style={{ color }}>
                     {value}
                   </div>
-                  <div className="text-[10px]" style={{ color: "var(--muted)" }}>
+                  <div
+                    className="text-[10px]"
+                    style={{ color: "var(--muted)" }}
+                  >
                     {label}
                   </div>
                 </div>
@@ -293,8 +338,8 @@ export default function Question() {
             {videoComplete
               ? "🎙 Start Recording →"
               : loadingTTS
-              ? "Loading coach voice..."
-              : "Listen to instructions first..."}
+                ? "Loading coach voice..."
+                : "Listen to instructions first..."}
           </Button>
         </div>
       </div>

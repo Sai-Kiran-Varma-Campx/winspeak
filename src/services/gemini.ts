@@ -248,6 +248,10 @@ async function generateTtsBytes(text: string): Promise<Uint8Array> {
       const binary = atob(b64);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+      // Reject if audio is too short (< 1 second at 24kHz PCM16 = 48000 bytes)
+      if (bytes.length < 48000) throw new Error("TTS returned audio too short");
+
       return bytes;
     } catch (err) {
       lastError = err;
@@ -302,54 +306,30 @@ export async function synthesizeSpeechCached(
   await playFloat32(samples);
 }
 
-// ── Server-cached coach voice ────────────────────────────────────────────────
+// ── Static coach voice playback ──────────────────────────────────────────────
+// Coach voice files are pre-generated and stored in public/voices/{challengeId}.pcm
+// No Gemini API calls needed — purely static file serving.
 
 /**
- * Fetch coach voice from server (DB-cached, shared across all users).
- * Falls back to client-side Gemini TTS if server fails.
- * Plays via Web Audio API.
+ * Play coach voice from static file. Throws if file not found.
+ * Files are stored at /voices/{challengeId}.pcm (PCM16 24kHz mono).
  */
 export async function playCoachVoice(
   challengeId: string,
-  coachScript: string,
+  _coachScript: string,
   onStart?: () => void
 ): Promise<void> {
-  // 1. Try local IndexedDB cache first (instant)
-  const cacheKey = `coach_voice_${challengeId}`;
-  try {
-    const cached = await loadAudioBlob(cacheKey);
-    if (cached) {
-      const arrayBuffer = await cached.arrayBuffer();
-      const samples = pcm16BytesToFloat32(new Uint8Array(arrayBuffer));
-      onStart?.();
-      await playFloat32(samples);
-      return;
-    }
-  } catch { /* fall through */ }
-
-  // 2. Fetch static pre-generated file (shared across all users, zero API cost)
-  let bytes: Uint8Array | null = null;
-  try {
-    const res = await fetch(`/voices/${challengeId}.pcm`);
-    if (res.ok) {
-      const buf = await res.arrayBuffer();
-      if (buf.byteLength > 0) bytes = new Uint8Array(buf);
-    }
-  } catch { /* fall through to client-side */ }
-
-  // 3. Fallback: generate client-side with model fallback
-  if (!bytes) {
-    bytes = await generateTtsBytes(coachScript);
+  const res = await fetch(`/voices/${challengeId}.pcm`);
+  if (!res.ok) {
+    throw new Error("Coach voice file not found");
   }
 
-  if (!bytes || bytes.length === 0) {
-    throw new Error("No audio bytes received");
+  const buf = await res.arrayBuffer();
+  if (buf.byteLength < 48000) {
+    throw new Error("Coach voice file too short");
   }
 
-  // Cache locally for instant replay
-  saveAudioBlob(cacheKey, new Blob([bytes.buffer as ArrayBuffer], { type: "audio/pcm" })).catch(() => {});
-
-  const samples = pcm16BytesToFloat32(bytes);
+  const samples = pcm16BytesToFloat32(new Uint8Array(buf));
   onStart?.();
   await playFloat32(samples);
 }

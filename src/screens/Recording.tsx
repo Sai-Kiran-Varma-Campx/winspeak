@@ -73,7 +73,9 @@ export default function Recording() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const progress = duration > 0 ? currentTime / duration : 0;
+  // Use elapsed as fallback when duration is unknown (blob URLs)
+  const displayDuration = (duration && isFinite(duration)) ? duration : elapsed;
+  const progress = displayDuration > 0 ? currentTime / displayDuration : 0;
 
   const { seconds, start, reset } = useCountdown(RECORDING_DURATION_SECS);
   const { startRecording, stopRecording, isRecording } = useAudioRecorder();
@@ -91,7 +93,13 @@ export default function Recording() {
     const audio = new Audio(blobUrl);
     audioRef.current = audio;
 
-    audio.addEventListener("loadedmetadata", () => setDuration(audio.duration));
+    function updateDuration() {
+      const d = audio.duration;
+      if (d && isFinite(d) && !isNaN(d)) setDuration(d);
+    }
+
+    audio.addEventListener("loadedmetadata", updateDuration);
+    audio.addEventListener("durationchange", updateDuration);
     audio.addEventListener("timeupdate", () => setCurrentTime(audio.currentTime));
     audio.addEventListener("ended", () => {
       setIsPlaying(false);
@@ -345,7 +353,7 @@ export default function Recording() {
                   {isPlaying ? "Playing your response..." : "Tap to review your answer"}
                 </div>
                 <div className="text-[11px] mt-0.5" style={{ color: "var(--muted)" }}>
-                  {formatTime(currentTime)} / {formatTime(duration || elapsed)}
+                  {formatTime(currentTime)} / {formatTime(displayDuration)}
                 </div>
               </div>
             </div>
@@ -386,7 +394,7 @@ export default function Recording() {
                 {formatTime(currentTime)}
               </span>
               <span className="text-[10px] font-mono tabular-nums" style={{ color: "var(--muted)" }}>
-                {formatTime(duration || elapsed)}
+                {formatTime(displayDuration)}
               </span>
             </div>
           </div>
