@@ -40,7 +40,6 @@ export default function Question() {
   const [loadingTTS, setLoadingTTS] = useState(false);
   const [ttsError, setTtsError] = useState(false);
   const didSpeak = useRef(false);
-  const ttsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useInterval(
     () => setProgress((p) => Math.min(p + 1.5, 95)),
@@ -58,15 +57,6 @@ export default function Question() {
     setIsSpeaking(false);
     setTtsError(false);
 
-    // Safety timeout — if TTS hangs for 20s, force unlock
-    ttsTimeoutRef.current = setTimeout(() => {
-      setIsSpeaking(false);
-      setLoadingTTS(false);
-      setProgress(100);
-      setVideoComplete(true);
-      setTtsError(true);
-    }, 20000);
-
     try {
       await synthesizeSpeechCached(coachScript, VOICE_KEY_PREFIX + challenge.id, () => {
         setLoadingTTS(false);
@@ -75,7 +65,6 @@ export default function Question() {
     } catch {
       setTtsError(true);
     } finally {
-      if (ttsTimeoutRef.current) clearTimeout(ttsTimeoutRef.current);
       setIsSpeaking(false);
       setProgress(100);
       setVideoComplete(true);
@@ -87,7 +76,6 @@ export default function Question() {
     if (isSpeaking || loadingTTS) return;
     setProgress(0);
     setVideoComplete(false);
-    didSpeak.current = false;
     await speak();
   }
 

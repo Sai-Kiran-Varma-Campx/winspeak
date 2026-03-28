@@ -275,53 +275,41 @@ export async function synthesizeSpeechCached(
   }
 
   // 2. Generate via Gemini TTS and save to cache
-  try {
-    const result = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text }] }],
-      config: {
-        responseModalities: ["AUDIO"],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: "Charon" },
-          },
+  const result = await ai.models.generateContent({
+    model: "gemini-2.5-flash-preview-tts",
+    contents: [{ parts: [{ text }] }],
+    config: {
+      responseModalities: ["AUDIO"],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: { voiceName: "Charon" },
         },
-      } as Record<string, unknown>,
-    });
+      },
+    } as Record<string, unknown>,
+  });
 
-    const parts = result.candidates?.[0]?.content?.parts ?? [];
-    const audioPart = parts.find(
-      (p: { inlineData?: { mimeType?: string; data?: string } }) =>
-        p.inlineData?.data
-    );
-    const audioData = audioPart?.inlineData?.data as string | undefined;
+  const parts = result.candidates?.[0]?.content?.parts ?? [];
+  const audioPart = parts.find(
+    (p: { inlineData?: { mimeType?: string; data?: string } }) =>
+      p.inlineData?.data
+  );
+  const audioData = audioPart?.inlineData?.data as string | undefined;
 
-    if (audioData) {
-      // Decode base64 → Uint8Array
-      const binary = atob(audioData);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-
-      // Persist to IndexedDB (fire-and-forget, don't block playback)
-      saveAudioBlob(cacheKey, new Blob([bytes], { type: "audio/pcm" })).catch(() => {});
-
-      const samples = pcm16BytesToFloat32(bytes);
-      onStart?.();
-      await playFloat32(samples);
-      return;
-    }
-  } catch {
-    // TTS model unavailable — fall through to browser fallback
+  if (!audioData) {
+    throw new Error("TTS returned no audio data");
   }
 
-  // 3. Browser speechSynthesis fallback
+  // Decode base64 → Uint8Array
+  const binary = atob(audioData);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+  // Persist to IndexedDB (fire-and-forget, don't block playback)
+  saveAudioBlob(cacheKey, new Blob([bytes], { type: "audio/pcm" })).catch(() => {});
+
+  const samples = pcm16BytesToFloat32(bytes);
   onStart?.();
-  await new Promise<void>((resolve) => {
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.onend = () => resolve();
-    utt.onerror = () => resolve();
-    window.speechSynthesis.speak(utt);
-  });
+  await playFloat32(samples);
 }
 
 /**
