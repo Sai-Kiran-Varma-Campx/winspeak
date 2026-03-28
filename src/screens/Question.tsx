@@ -81,7 +81,7 @@ export default function Question() {
       {/* Back + title */}
       <div className="flex items-center gap-3 mb-5">
         <button
-          onClick={() => navigate("/audiocheck")}
+          onClick={() => navigate("/")}
           className="rounded-[10px] px-3.5 py-2 text-[18px] cursor-pointer border"
           style={{
             background: "var(--surface)",

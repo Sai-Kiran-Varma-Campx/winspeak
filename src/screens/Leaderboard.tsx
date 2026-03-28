@@ -8,6 +8,7 @@ interface Leader {
   name: string;
   xp: number;
   streak: number;
+  totalAttempts: number;
   badge: string | null;
   isMe?: boolean;
 }
@@ -42,6 +43,7 @@ export default function Leaderboard() {
           name: r.name,
           xp: r.totalXp ?? r.total_xp,
           streak: r.streak,
+          totalAttempts: r.totalAttempts ?? r.total_attempts ?? 0,
           badge:
             r.rank === 1 ? "\u{1F947}" : r.rank === 2 ? "\u{1F948}" : r.rank === 3 ? "\u{1F949}" : null,
           isMe: r.name === store.name,
@@ -97,10 +99,11 @@ export default function Leaderboard() {
               {topThree[1].name}{isUser(topThree[1]) ? " (You)" : ""}
             </div>
             <div
-              className="rounded-t-[12px] w-full flex items-center justify-center py-3 text-[12px] font-bold"
+              className="rounded-t-[12px] w-full flex flex-col items-center justify-center py-3 text-[12px] font-bold"
               style={{ background: "var(--card)", borderColor: "var(--border)", minHeight: 64 }}
             >
-              {"\u26A1"} {topThree[1].xp.toLocaleString()}
+              <div>{"\u26A1"} {topThree[1].xp.toLocaleString()}</div>
+              <div className="text-[9px] font-medium" style={{ color: "var(--muted)" }}>{topThree[1].totalAttempts} attempts</div>
             </div>
           </div>
 
@@ -128,7 +131,7 @@ export default function Leaderboard() {
               {topThree[0].name}{isUser(topThree[0]) ? " (You)" : ""}
             </div>
             <div
-              className="rounded-t-[12px] w-full flex items-center justify-center py-4 text-[13px] font-bold"
+              className="rounded-t-[12px] w-full flex flex-col items-center justify-center py-4 text-[13px] font-bold"
               style={{
                 background: "linear-gradient(135deg,#FFB83022,#1A1D2E)",
                 borderTop: "2px solid #FFB83044",
@@ -136,7 +139,8 @@ export default function Leaderboard() {
                 color: "#FFB830",
               }}
             >
-              {"\u26A1"} {topThree[0].xp.toLocaleString()}
+              <div>{"\u26A1"} {topThree[0].xp.toLocaleString()}</div>
+              <div className="text-[9px] font-medium" style={{ color: "var(--muted)" }}>{topThree[0].totalAttempts} attempts</div>
             </div>
           </div>
 
@@ -157,10 +161,11 @@ export default function Leaderboard() {
               {topThree[2].name}{isUser(topThree[2]) ? " (You)" : ""}
             </div>
             <div
-              className="rounded-t-[12px] w-full flex items-center justify-center py-2 text-[12px] font-bold"
+              className="rounded-t-[12px] w-full flex flex-col items-center justify-center py-2 text-[12px] font-bold"
               style={{ background: "var(--card)", minHeight: 48 }}
             >
-              {"\u26A1"} {topThree[2].xp.toLocaleString()}
+              <div>{"\u26A1"} {topThree[2].xp.toLocaleString()}</div>
+              <div className="text-[9px] font-medium" style={{ color: "var(--muted)" }}>{topThree[2].totalAttempts} attempts</div>
             </div>
           </div>
         </div>
@@ -216,12 +221,17 @@ export default function Leaderboard() {
                 )}
               </div>
 
-              {/* XP */}
-              <div
-                className="text-[13px] font-extrabold flex-shrink-0"
-                style={{ color: isMe ? "var(--accent)" : "#FFB830" }}
-              >
-                {"\u26A1"} {leader.xp.toLocaleString()}
+              {/* XP + Attempts */}
+              <div className="flex flex-col items-end flex-shrink-0">
+                <div
+                  className="text-[13px] font-extrabold"
+                  style={{ color: isMe ? "var(--accent)" : "#FFB830" }}
+                >
+                  {"\u26A1"} {leader.xp.toLocaleString()}
+                </div>
+                <div className="text-[10px]" style={{ color: "var(--muted)" }}>
+                  {leader.totalAttempts} {leader.totalAttempts === 1 ? "attempt" : "attempts"}
+                </div>
               </div>
             </div>
           );

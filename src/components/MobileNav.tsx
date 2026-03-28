@@ -102,7 +102,7 @@ function DrawerIconLeaderboard() {
 
 const DRAWER_NAV_ITEMS: { path: string; label: string; icon: ReactNode }[] = [
   { path: "/", label: "Home", icon: <DrawerIconHome /> },
-  { path: "/audiocheck", label: "Practice", icon: <DrawerIconMic /> },
+  { path: "/question", label: "Practice", icon: <DrawerIconMic /> },
   { path: "/history", label: "History", icon: <DrawerIconClock /> },
   { path: "/leaderboard", label: "Leaderboard", icon: <DrawerIconLeaderboard /> },
 ];
@@ -141,7 +141,7 @@ export default function MobileNav() {
 
   const tabs: { path: string; label: string; icon: (active: boolean) => ReactNode }[] = [
     { path: "/", label: "Home", icon: (a) => <IconHome active={a} /> },
-    { path: "/audiocheck", label: "Practice", icon: (a) => <IconMic active={a} /> },
+    { path: "/question", label: "Practice", icon: (a) => <IconMic active={a} /> },
     { path: "/history", label: "History", icon: (a) => <IconClock active={a} /> },
     { path: "/leaderboard", label: "Rank", icon: (a) => <IconTrophy active={a} /> },
   ];
@@ -298,7 +298,7 @@ export default function MobileNav() {
         {/* Practice Now CTA */}
         <div className="px-4 mt-4">
           <button
-            onClick={() => { navigate("/audiocheck"); setDrawerOpen(false); }}
+            onClick={() => { navigate("/question"); setDrawerOpen(false); }}
             className="w-full rounded-[12px] py-3 text-[14px] font-bold border-none cursor-pointer flex items-center justify-center gap-2"
             style={{
               background: "linear-gradient(135deg,#7C5CFC,#9B7BFF)",
@@ -348,7 +348,7 @@ export default function MobileNav() {
 
           {activeChallenge && (
             <button
-              onClick={() => { navigate("/audiocheck"); setDrawerOpen(false); }}
+              onClick={() => { navigate("/question"); setDrawerOpen(false); }}
               className="rounded-[10px] px-3 py-2.5 flex items-center gap-2.5 w-full border-none cursor-pointer text-left"
               style={{ background: "var(--surface)" }}
             >

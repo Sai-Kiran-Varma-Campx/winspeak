@@ -441,7 +441,7 @@ export default function AudioCheck() {
           <div>
             <div className="font-bold text-[14px]">Analysing audio...</div>
             <div className="text-[12px]" style={{ color: "var(--muted)" }}>
-              Gemini is transcribing your speech
+              WinSpeak is transcribing your speech
             </div>
           </div>
         </div>

@@ -61,39 +61,80 @@ function pcm16Base64ToFloat32(base64: string): Float32Array {
 }
 
 // ── Shared AudioContext singleton (iOS Safari requires user-gesture unlock) ──
+// iOS Safari does NOT support sampleRate < 44100, so we use the device default
+// and resample 24kHz PCM → device rate when creating buffers.
 
 let _sharedCtx: AudioContext | null = null;
 
-function getSharedAudioContext(sampleRate = 24000): AudioContext {
+function getSharedAudioContext(): AudioContext {
   const AC = window.AudioContext || (window as any).webkitAudioContext;
   if (!_sharedCtx || _sharedCtx.state === "closed") {
-    _sharedCtx = new AC({ sampleRate });
+    _sharedCtx = new AC(); // Use device default sample rate (44100 or 48000)
   }
   return _sharedCtx;
 }
 
 /**
- * Call from any user-gesture handler (button tap) to unlock audio on iOS.
- * Safe to call multiple times — no-ops if already running.
+ * Unlock AudioContext on iOS Safari. Call early and often.
+ * Also installs document-level touch listeners so ANY user tap unlocks audio.
  */
-export function unlockAudioContext(): void {
-  const ctx = getSharedAudioContext();
-  if (ctx.state === "suspended") {
-    ctx.resume().catch(() => {});
+let _listenersInstalled = false;
+
+function _resumeCtx() {
+  if (!_sharedCtx) return;
+  if (_sharedCtx.state === "suspended" || (_sharedCtx.state as string) === "interrupted") {
+    _sharedCtx.resume().catch(() => {});
   }
 }
 
-function playFloat32(samples: Float32Array, sampleRate = 24000): Promise<void> {
-  return new Promise((resolve) => {
-    const ctx = getSharedAudioContext(sampleRate);
-    // Resume in case it's suspended (iOS)
-    if (ctx.state === "suspended") {
-      ctx.resume().catch(() => {});
+export function unlockAudioContext(): void {
+  getSharedAudioContext(); // Ensure it exists
+  _resumeCtx();
+
+  // Install global listeners once — any future touch/click will also unlock
+  if (!_listenersInstalled) {
+    _listenersInstalled = true;
+    const events = ["touchstart", "touchend", "mousedown", "keydown"];
+    function handler() {
+      _resumeCtx();
+      // Once running, remove listeners
+      if (_sharedCtx?.state === "running") {
+        events.forEach((e) => document.removeEventListener(e, handler));
+      }
     }
-    const buf = ctx.createBuffer(1, samples.length, sampleRate);
-    buf.getChannelData(0).set(samples);
+    events.forEach((e) => document.addEventListener(e, handler, { passive: true }));
+  }
+}
+
+function playFloat32(samples: Float32Array, sourceSampleRate = 24000): Promise<void> {
+  return new Promise((resolve) => {
+    const ctx = getSharedAudioContext();
+    _resumeCtx();
+
+    const deviceRate = ctx.sampleRate; // e.g. 44100 or 48000
+
+    // Resample if source rate differs from device rate
+    let buffer: AudioBuffer;
+    if (sourceSampleRate === deviceRate) {
+      buffer = ctx.createBuffer(1, samples.length, deviceRate);
+      buffer.getChannelData(0).set(samples);
+    } else {
+      // Linear interpolation resample: sourceSampleRate → deviceRate
+      const ratio = sourceSampleRate / deviceRate;
+      const newLength = Math.round(samples.length / ratio);
+      buffer = ctx.createBuffer(1, newLength, deviceRate);
+      const output = buffer.getChannelData(0);
+      for (let i = 0; i < newLength; i++) {
+        const srcIdx = i * ratio;
+        const lo = Math.floor(srcIdx);
+        const hi = Math.min(lo + 1, samples.length - 1);
+        const frac = srcIdx - lo;
+        output[i] = samples[lo] * (1 - frac) + samples[hi] * frac;
+      }
+    }
+
     const src = ctx.createBufferSource();
-    src.buffer = buf;
+    src.buffer = buffer;
     src.connect(ctx.destination);
     src.onended = () => resolve();
     src.start();
@@ -488,7 +529,7 @@ ${regressionContext}
 3. Calculate xpEarned: floor(overallScore / 100 * ${challenge.xp})
    - If overallScore < ${challenge.passingScore}: xpEarned = floor(xpEarned * 0.4) (partial XP for failing)
 4. In feedback, be SPECIFIC — reference exact phrases from the transcript. Don't say "good job" without citing evidence.
-5. The idealResponse should be a ${tier === "Advanced" ? "polished, stage-ready" : tier === "Intermediate" ? "well-reasoned, precise" : "clear, enthusiastic"} model answer (130-150 words).
+5. The idealResponse should be a GRADUAL ENHANCEMENT of the speaker's original transcript — keep their ideas, structure, and personality but fix grammar, remove filler words, improve vocabulary, and strengthen weak sections. Do NOT write a completely different answer. It should sound like a better version of what THEY said, not a generic model answer. Aim for 130-150 words.
 
 Return ONLY valid JSON with this exact structure:
 {

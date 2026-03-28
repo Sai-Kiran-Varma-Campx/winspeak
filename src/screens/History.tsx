@@ -39,7 +39,7 @@ export default function History() {
           <div className="text-[13px] mb-6" style={{ color: "var(--muted)" }}>
             Complete a challenge to see your analysis history here.
           </div>
-          <Button onClick={() => navigate("/audiocheck")}>Start a Challenge</Button>
+          <Button onClick={() => navigate("/question")}>Start a Challenge</Button>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">

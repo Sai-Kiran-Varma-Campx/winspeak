@@ -391,14 +391,14 @@ export default function Recording() {
           {elapsed > 0 && elapsed < 30 && (
             <div
               className="border rounded-[14px] p-3 flex items-center gap-2.5"
-              style={{ background: "#FFB83011", borderColor: "#FFB83044" }}
+              style={{ background: "#FF4D6A11", borderColor: "#FF4D6A44" }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFB830" strokeWidth="2" strokeLinecap="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4D6A" strokeWidth="2" strokeLinecap="round">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                 <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
-              <div className="text-[12px]" style={{ color: "#FFB830" }}>
-                Recording is under 30 seconds. Longer answers get better scores.
+              <div className="text-[12px]" style={{ color: "#FF4D6A" }}>
+                Minimum 30 seconds required to submit. Record a longer answer for better feedback.
               </div>
             </div>
           )}
@@ -425,8 +425,8 @@ export default function Recording() {
           )}
 
           <div className="pb-4">
-            <Button disabled={saving} onClick={() => navigate("/analysing")}>
-              {saving ? "Saving..." : "Submit →"}
+            <Button disabled={saving || elapsed < 30} onClick={() => navigate("/analysing")}>
+              {saving ? "Saving..." : elapsed < 30 ? `Record at least 30s (${elapsed}s recorded)` : "Submit →"}
             </Button>
           </div>
         </div>

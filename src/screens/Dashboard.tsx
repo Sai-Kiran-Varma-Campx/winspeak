@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import { VOICE_KEY_PREFIX } from "@/lib/audioStorage";
 import { greeting, relativeDate, type Attempt, type UserStore } from "@/hooks/useUserStore";
 import Sparkline from "@/components/Sparkline";
 import type { BadgeVariant, Challenge, ChallengeTier } from "@/types";
-import type { NavigateFunction } from "react-router-dom";
 
 function scoreColor(score: number) {
   if (score >= 80) return "#22D37A";
@@ -28,7 +27,7 @@ function isExpired(deadline?: string): boolean {
   }
 }
 
-type ChallengeStatusResult = BadgeVariant | "exhausted";
+type ChallengeStatusResult = BadgeVariant;
 
 // Set to false for production (sequential unlock for students)
 // Set to true for stakeholder testing (all challenges open)
@@ -38,8 +37,8 @@ function challengeStatus(
   id: string,
   idx: number,
   completedIds: string[],
-  challengeAttempts: Attempt[],
-  maxAttempts: number,
+  _challengeAttempts: Attempt[],
+  _maxAttempts: number,
   deadline?: string,
 ): ChallengeStatusResult {
   if (completedIds.includes(id)) return "completed";
@@ -50,7 +49,6 @@ function challengeStatus(
     );
     if (!allPrevDone) return "locked";
   }
-  if (challengeAttempts.length >= maxAttempts) return "exhausted";
   return "active";
 }
 
@@ -90,12 +88,10 @@ function StreakBadge({ streak }: { streak: number }) {
 function ActiveChallengeCard({
   challenge,
   store,
-  navigate,
   onStart,
 }: {
   challenge: (Omit<Challenge, "status"> & { status: ChallengeStatusResult }) | undefined;
   store: UserStore;
-  navigate: NavigateFunction;
   onStart: (id: string) => void;
 }) {
   if (!challenge) {
@@ -116,83 +112,7 @@ function ActiveChallengeCard({
   }
 
   const challengeAttempts = store.getAttemptsForChallenge(challenge.id);
-  const isExhausted = challenge.status === "exhausted";
   const attemptNum = challengeAttempts.length + 1;
-  const resetInProgress = useRef(false);
-
-  if (isExhausted) {
-    const best = challengeAttempts.length > 0 ? Math.max(...challengeAttempts.map((a) => a.score)) : 0;
-    return (
-      <div
-        className="border rounded-[22px] p-5 mb-4 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg,#1A1D2E,#13151C)", borderColor: "#FF4D6A44" }}
-      >
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex items-center gap-2">
-            <span
-              className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold"
-              style={{ background: "#FF4D6A22", borderColor: "#FF4D6A44", color: "#FF4D6A" }}
-            >
-              🔒 LOCKED
-            </span>
-            {challenge.tier && (
-              <span
-                className="border rounded-[6px] px-2 py-0.5 text-[10px] font-bold"
-                style={{
-                  background: TIER_STYLES[challenge.tier].bg,
-                  color: TIER_STYLES[challenge.tier].color,
-                  borderColor: TIER_STYLES[challenge.tier].border,
-                }}
-              >
-                {challenge.tier}
-              </span>
-            )}
-          </div>
-          <span
-            className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold"
-            style={{ background: "#FF4D6A11", borderColor: "#FF4D6A33", color: "#FF4D6A" }}
-          >
-            {challengeAttempts.length}/{challenge.maxAttempts} Attempts Used
-          </span>
-        </div>
-        <div className="text-[20px] font-extrabold mb-1.5">{challenge.title}</div>
-        <div className="text-[13px] leading-relaxed mb-3" style={{ color: "var(--muted-soft)" }}>
-          All attempts used. Review your preparation strategy, then try again.
-        </div>
-        <div
-          className="border rounded-[10px] px-3 py-2 mb-3.5 flex items-center gap-2 text-[12px]"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-        >
-          <span>📊</span>
-          <span style={{ color: "var(--muted)" }}>Best score:</span>
-          <span className="font-bold" style={{ color: scoreColor(best) }}>{best}/100</span>
-          <span style={{ color: "var(--muted)" }}>· Need {challenge.passingScore} to pass</span>
-        </div>
-        <div className="flex gap-2.5">
-          <Button
-            onClick={() => {
-              const lastAttempt = challengeAttempts[0];
-              if (lastAttempt) navigate(`/report/${lastAttempt.id}`);
-            }}
-          >
-            📋 View Prep Strategy
-          </Button>
-          <button
-            onClick={() => {
-              if (resetInProgress.current) return;
-              resetInProgress.current = true;
-              store.resetChallengeAttempts(challenge.id);
-              setTimeout(() => { resetInProgress.current = false; }, 2000);
-            }}
-            className="border rounded-[12px] px-4 py-2.5 text-[13px] font-bold cursor-pointer"
-            style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)" }}
-          >
-            🔄 Reset Attempts
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   const best = challengeAttempts.length > 0 ? Math.max(...challengeAttempts.map((a) => a.score)) : null;
 
@@ -225,7 +145,7 @@ function ActiveChallengeCard({
               className="border rounded-[6px] px-2 py-0.5 text-[10px] font-bold"
               style={{ background: "#FFB83011", borderColor: "#FFB83033", color: "#FFB830" }}
             >
-              Attempt {attemptNum}/{challenge.maxAttempts}
+              Attempt {attemptNum}
             </span>
           )}
         </div>
@@ -309,13 +229,13 @@ export default function Dashboard() {
       c.deadline,
     ),
   }));
-  const activeChallenge = challenges.find((c) => c.status === "active") ?? challenges.find((c) => c.status === "exhausted");
+  const activeChallenge = challenges.find((c) => c.status === "active");
   const otherChallenges = challenges.filter((c) => c.id !== activeChallenge?.id);
 
   function startChallenge(id: string) {
     unlockAudioContext(); // Unlock for iOS on user tap
     session.setChallengeId(id);
-    navigate("/audiocheck");
+    navigate("/question");
   }
 
   // Skill velocity: compare latest two attempts
@@ -455,7 +375,7 @@ export default function Dashboard() {
                 WEEKLY CHALLENGE
               </div>
               <div className="text-[16px] font-extrabold">
-                Week {(challenges.findIndex((c) => c.status === "active" || c.status === "exhausted") + 1) || "—"}
+                Week {(challenges.findIndex((c) => c.status === "active") + 1) || "—"}
               </div>
             </div>
             <div className="lg:hidden">{countdownEl}</div>
@@ -464,7 +384,6 @@ export default function Dashboard() {
           <ActiveChallengeCard
             challenge={activeChallenge}
             store={store}
-            navigate={navigate}
             onStart={startChallenge}
           />
 
@@ -568,7 +487,7 @@ export default function Dashboard() {
               style={{
                 background: "var(--card)",
                 borderColor: ch.status === "completed" ? "#22D37A33" : "var(--border)",
-                opacity: ch.status === "locked" ? 0.5 : ch.status === "exhausted" ? 0.7 : 1,
+                opacity: ch.status === "locked" ? 0.5 : 1,
               }}
             >
               <div
@@ -618,13 +537,6 @@ export default function Dashboard() {
                 >
                   View Results
                 </button>
-              ) : ch.status === "exhausted" ? (
-                <span
-                  className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold flex-shrink-0"
-                  style={{ background: "#FF4D6A22", borderColor: "#FF4D6A44", color: "#FF4D6A" }}
-                >
-                  🔒 LOCKED
-                </span>
               ) : ch.status === "active" ? (
                 <button
                   onClick={() => startChallenge(ch.id)}

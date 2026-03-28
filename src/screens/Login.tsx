@@ -4,7 +4,7 @@ import Spinner from "@/components/Spinner";
 
 const FEATURES = [
   { icon: "🎯", text: "Complete weekly speaking challenges" },
-  { icon: "🤖", text: "Get real-time AI feedback from Gemini" },
+  { icon: "🤖", text: "Get real-time AI feedback from WinSpeak" },
   { icon: "📈", text: "Track XP, levels & streak" },
 ];
 

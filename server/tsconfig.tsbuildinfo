@@ -1,0 +1,1 @@
+{"root":["./src/app.ts","./src/index.ts","./src/db/index.ts","./src/db/schema.ts","./src/lib/xp.ts","./src/middleware/auth.ts","./src/routes/attempts.ts","./src/routes/leaderboard.ts","./src/routes/users.ts"],"version":"5.9.3"}

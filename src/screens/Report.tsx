@@ -236,13 +236,7 @@ export default function Report() {
   const challengeAttempts = activeChallenge
     ? store.getAttemptsForChallenge(activeChallenge.id)
     : [];
-  // +1 for the current attempt (before save completes)
-  const attemptCount = isHistorical
-    ? challengeAttempts.length
-    : challengeAttempts.length + (savedRef.current ? 0 : 1);
-  const maxAttempts = activeChallenge?.maxAttempts ?? 3;
-  const attemptsRemaining = Math.max(0, maxAttempts - attemptCount);
-  const allAttemptsUsed = attemptsRemaining === 0 && !passed;
+  const allAttemptsUsed = false; // Unlimited retries
 
   // Save attempt once (live mode only)
   useEffect(() => {
@@ -577,21 +571,6 @@ export default function Report() {
               </div>
             </div>
           </div>
-        ) : allAttemptsUsed ? (
-          <div
-            className="border rounded-[16px] p-4 mb-5 flex items-center gap-3"
-            style={{ background: "#FF4D6A11", borderColor: "#FF4D6A44" }}
-          >
-            <span className="text-[24px]">🔒</span>
-            <div className="flex-1">
-              <div className="text-[14px] font-extrabold" style={{ color: "#FF4D6A" }}>
-                Challenge Locked — All {maxAttempts} Attempts Used
-              </div>
-              <div className="text-[12px]" style={{ color: "#FF4D6Acc" }}>
-                Review your preparation strategy below to improve before trying again.
-              </div>
-            </div>
-          </div>
         ) : (
           <div
             className="border rounded-[16px] p-4 mb-5 flex items-center gap-3"
@@ -600,10 +579,10 @@ export default function Report() {
             <span className="text-[24px]">⚠️</span>
             <div className="flex-1">
               <div className="text-[14px] font-extrabold" style={{ color: "#FFB830" }}>
-                Not Yet — {attemptsRemaining} {attemptsRemaining === 1 ? "attempt" : "attempts"} remaining
+                Not Yet — Keep practising!
               </div>
               <div className="text-[12px]" style={{ color: "#FFB830cc" }}>
-                You need {activeChallenge.passingScore} to pass. You scored {overallScore}.
+                You need {activeChallenge.passingScore} to pass. You scored {overallScore}. Try again anytime.
               </div>
             </div>
           </div>
@@ -677,13 +656,6 @@ export default function Report() {
 
             <div className="text-[15px] font-bold" style={{ color: "#FFB830" }}>
               +{xpEarned} XP Earned!
-            </div>
-            <div className="flex justify-center gap-1.5 mt-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <span key={i} className="text-[18px]" style={{ opacity: i <= Math.round(overallScore / 20) ? 1 : 0.2 }}>
-                  ★
-                </span>
-              ))}
             </div>
           </div>
 
@@ -840,7 +812,7 @@ export default function Report() {
               {[
                 { value: pauseAnalysis.status, label: "Status" },
                 { value: String(pauseAnalysis.count), label: "Count" },
-                { value: pauseAnalysis.avgDuration, label: "Avg Duration" },
+                { value: /^\d/.test(pauseAnalysis.avgDuration) ? pauseAnalysis.avgDuration : "-", label: "Avg Duration" },
               ].map(({ value, label }) => (
                 <div key={label} className="flex-1 rounded-[12px] p-2.5 sm:p-3 text-center" style={{ background: "var(--surface)" }}>
                   <div className="text-[14px] sm:text-[16px] font-extrabold" style={{ color: "var(--accent)" }}>{value}</div>
@@ -923,7 +895,7 @@ export default function Report() {
 
         {/* FULL-WIDTH BOTTOM: Ideal Response + Back */}
         <div className="lg:col-span-2">
-          <div
+          {overallScore >= 40 && <div
             className="border rounded-[20px] p-4 sm:p-5 mb-5"
             style={{
               background: "linear-gradient(135deg,#FFB83008,#1A1D2E)",
@@ -1029,7 +1001,7 @@ export default function Report() {
                       <div className="text-[11px] mt-0.5" style={{ color: "var(--muted)" }}>
                         {idealReady
                           ? `${formatTime(idealTime)} / ${formatTime(idealDuration)}`
-                          : "Powered by Gemini TTS"}
+                          : "Powered by WinSpeak AI"}
                       </div>
                     </div>
                   </div>
@@ -1085,7 +1057,7 @@ export default function Report() {
                 {idealResponse}
               </p>
             </div>
-          </div>
+          </div>}
 
           {/* Preparation Strategy (shown when all attempts used and not passed) */}
           {!isHistorical && allAttemptsUsed && activeChallenge && (() => {
@@ -1275,7 +1247,7 @@ export default function Report() {
                   if (actionInProgress.current) return;
                   actionInProgress.current = true;
                   session.reset();
-                  navigate("/audiocheck");
+                  navigate("/question");
                 }}>
                   🔄 Retry Challenge
                 </Button>

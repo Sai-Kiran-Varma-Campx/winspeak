@@ -115,7 +115,7 @@ export default function Analysing() {
           <div className="flex gap-3 justify-center">
             <Button onClick={() => {
               session.reset();
-              navigate("/audiocheck");
+              navigate("/question");
             }}>
               Try Again
             </Button>
@@ -143,7 +143,7 @@ export default function Analysing() {
         </div>
         <div className="text-[24px] font-extrabold">Analysing your answer...</div>
         <div className="text-[13px] mt-1.5" style={{ color: "var(--muted)" }}>
-          {session.recordingBlob ? "Gemini AI is evaluating your response" : "This will take ~30 seconds"}
+          {session.recordingBlob ? "WinSpeak AI is evaluating your response" : "This will take ~30 seconds"}
         </div>
       </div>
 

@@ -109,7 +109,7 @@ export default function AppSidebar() {
         {/* Practice Now CTA */}
         <div className="px-4 mt-5">
           <button
-            onClick={() => navigate("/audiocheck")}
+            onClick={() => navigate("/question")}
             className="w-full rounded-[12px] py-2.5 text-[13px] font-bold border-none cursor-pointer flex items-center justify-center gap-2"
             style={{
               background: "linear-gradient(135deg,#7C5CFC,#9B7BFF)",
