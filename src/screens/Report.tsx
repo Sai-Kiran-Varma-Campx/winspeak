@@ -911,11 +911,21 @@ export default function Report() {
               </div>
             </div>
 
-            {/* Audio player (live mode only) */}
-            {!isHistorical && (
+            {/* Ideal response text — ALWAYS shown */}
+            <div className="rounded-[14px] p-3.5 my-4" style={{ background: "var(--surface)", borderLeft: "3px solid #FFB830" }}>
+              <div className="text-[10px] font-bold tracking-[1px] mb-2.5" style={{ color: "var(--muted)" }}>
+                IMPROVED VERSION OF YOUR RESPONSE
+              </div>
+              <p className="text-[12px] leading-[1.8] whitespace-pre-line" style={{ color: "var(--text)" }}>
+                {idealResponse}
+              </p>
+            </div>
+
+            {/* Audio player (live mode only, only when audio is ready or loading) */}
+            {!isHistorical && (idealReady || idealLoading) && (
               <>
                 <div className="text-[11px] mb-4" style={{ color: "var(--muted-soft)" }}>
-                  {idealReady ? "Tap play to hear the ideal spoken response" : idealLoading ? "Preparing audio..." : "Audio unavailable"}
+                  {idealReady ? "Tap play to hear the ideal spoken response" : "Preparing audio..."}
                 </div>
 
                 <div
@@ -1048,15 +1058,6 @@ export default function Report() {
               </>
             )}
 
-            {/* Transcript (always shown) */}
-            <div className="rounded-[14px] p-3.5" style={{ background: "var(--surface)", borderLeft: "3px solid #FFB830" }}>
-              <div className="text-[10px] font-bold tracking-[1px] mb-2.5" style={{ color: "var(--muted)" }}>
-                TRANSCRIPT
-              </div>
-              <p className="text-[12px] leading-[1.8] whitespace-pre-line" style={{ color: "var(--text)" }}>
-                {idealResponse}
-              </p>
-            </div>
           </div>}
 
           {/* Preparation Strategy (shown when all attempts used and not passed) */}
