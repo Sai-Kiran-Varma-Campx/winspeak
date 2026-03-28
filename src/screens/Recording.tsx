@@ -67,16 +67,15 @@ export default function Recording() {
   const [retried, setRetried] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [, setDuration] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const recordingBlobRef = useRef<Blob | null>(null);
-  const webAudioSourceRef = useRef<AudioBufferSourceNode | null>(null);
-  const animFrameRef = useRef(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioDataUrl, setAudioDataUrl] = useState<string | null>(null);
 
-  const displayDuration = elapsed;
+  const displayDuration = (duration && isFinite(duration) && !isNaN(duration)) ? duration : elapsed;
   const progress = displayDuration > 0 ? currentTime / displayDuration : 0;
 
   const { seconds, start, reset } = useCountdown(RECORDING_DURATION_SECS);
@@ -86,12 +85,33 @@ export default function Recording() {
   useEffect(() => {
     return () => {
       if (blobUrl) URL.revokeObjectURL(blobUrl);
-      if (webAudioSourceRef.current) {
-        try { webAudioSourceRef.current.stop(); } catch {}
-      }
-      cancelAnimationFrame(animFrameRef.current);
     };
   }, [blobUrl]);
+
+  // Set up audio element with data URL (works on iOS Safari unlike blob URLs)
+  useEffect(() => {
+    if (!audioDataUrl) return;
+    const audio = new Audio(audioDataUrl);
+    audioRef.current = audio;
+
+    audio.addEventListener("loadedmetadata", () => {
+      if (audio.duration && isFinite(audio.duration)) setDuration(audio.duration);
+    });
+    audio.addEventListener("durationchange", () => {
+      if (audio.duration && isFinite(audio.duration)) setDuration(audio.duration);
+    });
+    audio.addEventListener("timeupdate", () => setCurrentTime(audio.currentTime));
+    audio.addEventListener("ended", () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    });
+
+    return () => {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    };
+  }, [audioDataUrl]);
 
   async function handleStartRecording() {
     reset(RECORDING_DURATION_SECS);
@@ -119,9 +139,17 @@ export default function Recording() {
     }
     setSaving(false);
 
-    recordingBlobRef.current = blob;
+    // Create blob URL for waveform visual + data URL for iOS-safe playback
     const url = URL.createObjectURL(blob);
     setBlobUrl(url);
+
+    // Convert to data URL — iOS Safari can't play blob URLs reliably
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") setAudioDataUrl(reader.result);
+    };
+    reader.readAsDataURL(blob);
+
     setPhase("review");
   }
 
@@ -136,6 +164,7 @@ export default function Recording() {
     setSaveError(null);
     if (blobUrl) URL.revokeObjectURL(blobUrl);
     setBlobUrl(null);
+    setAudioDataUrl(null);
     reset(RECORDING_DURATION_SECS);
   }
 
@@ -146,64 +175,28 @@ export default function Recording() {
     }
   }, [seconds, isRecording]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const togglePlay = useCallback(async () => {
-    const blob = recordingBlobRef.current;
-    if (!blob) return;
-
+  const togglePlay = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    unlockAudioContext();
     if (isPlaying) {
-      if (webAudioSourceRef.current) {
-        try { webAudioSourceRef.current.stop(); } catch {}
-        webAudioSourceRef.current = null;
-      }
-      cancelAnimationFrame(animFrameRef.current);
+      audio.pause();
       setIsPlaying(false);
-      return;
-    }
-
-    // Use Web Audio API decodeAudioData — works on iOS Safari (blob URLs don't)
-    try {
-      unlockAudioContext();
-      const AC = window.AudioContext || (window as any).webkitAudioContext;
-      const ctx = new AC();
-      const arrayBuffer = await blob.arrayBuffer();
-      const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-
-      setDuration(audioBuffer.duration);
-
-      const source = ctx.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(ctx.destination);
-      webAudioSourceRef.current = source;
-
-      const startTime = ctx.currentTime;
-      setIsPlaying(true);
-      setCurrentTime(0);
-
-      function tick() {
-        const t = ctx.currentTime - startTime;
-        setCurrentTime(Math.min(t, audioBuffer.duration));
-        if (t < audioBuffer.duration) {
-          animFrameRef.current = requestAnimationFrame(tick);
-        }
-      }
-      animFrameRef.current = requestAnimationFrame(tick);
-
-      source.onended = () => {
-        cancelAnimationFrame(animFrameRef.current);
-        setIsPlaying(false);
-        setCurrentTime(0);
-        webAudioSourceRef.current = null;
-      };
-
-      source.start();
-    } catch {
-      setIsPlaying(false);
+    } else {
+      audio.play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false));
     }
   }, [isPlaying]);
 
-  const seekTo = useCallback((_e: React.MouseEvent<HTMLDivElement>) => {
-    // Seek not supported with Web Audio BufferSource
-  }, []);
+  const seekTo = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const audio = audioRef.current;
+    if (!audio || !displayDuration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    audio.currentTime = pct * displayDuration;
+    setCurrentTime(audio.currentTime);
+  }, [displayDuration]);
 
   return (
     <div className="p-4 sm:p-5 pb-8 flex flex-col gap-4 sm:gap-5 max-w-2xl mx-auto">
