@@ -166,22 +166,27 @@ export default function Recording() {
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !blobUrl) return;
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play().catch(() => setIsPlaying(false));
-      setIsPlaying(true);
+      // Ensure audio src is set (may have been cleared)
+      if (!audio.src || audio.src === "") {
+        audio.src = blobUrl;
+      }
+      audio.play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false));
     }
-  }, [isPlaying]);
+  }, [isPlaying, blobUrl]);
 
   const seekTo = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const audio = audioRef.current;
-    if (!audio || !duration) return;
+    if (!audio || !displayDuration) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    audio.currentTime = pct * duration;
+    audio.currentTime = pct * displayDuration;
     setCurrentTime(audio.currentTime);
   }, [duration]);
 
