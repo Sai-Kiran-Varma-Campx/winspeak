@@ -306,22 +306,27 @@ export async function synthesizeSpeechCached(
   await playFloat32(samples);
 }
 
-// ── Static coach voice playback ──────────────────────────────────────────────
-// Coach voice files are pre-generated and stored in public/voices/{challengeId}.pcm
-// No Gemini API calls needed — purely static file serving.
+// ── Coach voice playback from Vercel Blob CDN ───────────────────────────────
+
+import { VOICE_URLS } from "@/constants/voiceUrls";
 
 /**
- * Play coach voice from static file. Throws if file not found.
- * Files are stored at /voices/{challengeId}.pcm (PCM16 24kHz mono).
+ * Play coach voice from Vercel Blob CDN. Throws if not available.
+ * Voice files are pre-generated PCM16 24kHz mono, hosted on Vercel Blob.
  */
 export async function playCoachVoice(
   challengeId: string,
   _coachScript: string,
   onStart?: () => void
 ): Promise<void> {
-  const res = await fetch(`/voices/${challengeId}.pcm`);
+  const blobUrl = VOICE_URLS[challengeId];
+  if (!blobUrl) {
+    throw new Error("Coach voice not available for this challenge");
+  }
+
+  const res = await fetch(blobUrl);
   if (!res.ok) {
-    throw new Error("Coach voice file not found");
+    throw new Error("Failed to fetch coach voice");
   }
 
   const buf = await res.arrayBuffer();

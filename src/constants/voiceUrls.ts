@@ -1,0 +1,16 @@
+export const VOICE_URLS: Record<string, string> = {
+  "c1": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c1.pcm",
+  "c2": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c2.pcm",
+  "c3": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c3.pcm",
+  "c4": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c4.pcm",
+  "c5": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c5.pcm",
+  "c6": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c6.pcm",
+  "c7": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c7.pcm",
+  "c8": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c8.pcm",
+  "c9": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c9.pcm",
+  "c10": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c10.pcm",
+  "c11": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c11.pcm",
+  "c12": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c12.pcm",
+  "c13": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c13.pcm",
+  "c14": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/c14.pcm",
+};

@@ -26,3 +26,5 @@ server/drizzle
 *.sln
 *.sw?
 .vercel
+.env*.local
+public/voices/*.pcm
