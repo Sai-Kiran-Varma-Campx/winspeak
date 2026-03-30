@@ -49,9 +49,11 @@ winspeak/
 - Env vars on Vercel: `DATABASE_URL`, `JWT_SECRET`, `VITE_GEMINI_API_KEY`
 
 ### Coach Voice Audio
-- Pre-generated as static PCM files in `public/voices/{challengeId}.pcm`
-- Generated once via `node scripts/generate-voices.mjs` (Gemini TTS)
-- Frontend fetches `/voices/c1.pcm` etc. — zero API calls, instant playback
+- Pre-generated PCM files stored on **Vercel Blob CDN** (not in git repo)
+- Generated via `node scripts/generate-voices.mjs` (Gemini TTS)
+- Uploaded via `BLOB_READ_WRITE_TOKEN=<token> node scripts/upload-voices-to-blob.mjs`
+- URLs mapped in `src/constants/voiceUrls.ts`
+- Frontend fetches from Blob CDN → plays via Web Audio API
 - If file missing → shows "Issue fetching audio" message, user can still proceed
 
 ### iOS Safari Compatibility
