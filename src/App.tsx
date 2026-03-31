@@ -18,6 +18,7 @@ import Analysing from "@/screens/Analysing";
 import Report from "@/screens/Report";
 import History from "@/screens/History";
 import Leaderboard from "@/screens/Leaderboard";
+import InterviewPrep from "@/screens/InterviewPrep";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -25,6 +26,7 @@ function AnimatedRoutes() {
     <div key={location.pathname} className="page-enter">
       <Routes location={location}>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/interview-prep" element={<InterviewPrep />} />
         <Route path="/audiocheck" element={<AudioCheck />} />
         <Route path="/question" element={<Question />} />
         <Route path="/recording" element={<Recording />} />
