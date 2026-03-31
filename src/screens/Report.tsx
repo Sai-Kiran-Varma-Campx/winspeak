@@ -13,14 +13,9 @@ import { useStore } from "@/context/UserStoreContext";
 import { preRenderSpeech } from "@/services/gemini";
 import { loadAudioBlob, IDEAL_RESPONSE_KEY } from "@/lib/audioStorage";
 import { CHALLENGES } from "@/constants";
+import { scoreColor, getChallengeBackPath } from "@/lib/challengeUtils";
 import RadarChart from "@/components/RadarChart";
 import type { AnalysisResult } from "@/types";
-
-function scoreColor(score: number) {
-  if (score >= 80) return "#22D37A";
-  if (score >= 60) return "#FFB830";
-  return "#FF4D6A";
-}
 
 function scoreLabel(score: number) {
   if (score >= 80) return "Good";
@@ -1223,7 +1218,7 @@ export default function Report() {
                     actionInProgress.current = true;
                     store.resetChallengeAttempts(activeChallenge.id);
                     session.reset();
-                    navigate("/");
+                    navigate(getChallengeBackPath(activeChallenge.category));
                   }}
                 >
                   🔄 Reset & Try Again
@@ -1240,7 +1235,7 @@ export default function Report() {
                 if (actionInProgress.current) return;
                 actionInProgress.current = true;
                 session.reset();
-                navigate("/");
+                navigate(activeChallenge ? getChallengeBackPath(activeChallenge.category) : "/");
               }}>← Continue to Next Challenge</Button>
             ) : !allAttemptsUsed ? (
               <div className="flex gap-3">
@@ -1256,9 +1251,9 @@ export default function Report() {
                   if (actionInProgress.current) return;
                   actionInProgress.current = true;
                   session.reset();
-                  navigate("/");
+                  navigate(activeChallenge ? getChallengeBackPath(activeChallenge.category) : "/");
                 }}>
-                  ← Back to Home
+                  ← Back to Challenges
                 </Button>
               </div>
             ) : (
@@ -1266,8 +1261,8 @@ export default function Report() {
                 if (actionInProgress.current) return;
                 actionInProgress.current = true;
                 session.reset();
-                navigate("/");
-              }}>← Back to Home</Button>
+                navigate(activeChallenge ? getChallengeBackPath(activeChallenge.category) : "/");
+              }}>← Back to Challenges</Button>
             )}
           </div>
         </div>

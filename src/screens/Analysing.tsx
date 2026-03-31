@@ -6,6 +6,7 @@ import { useSession } from "@/context/SessionContext";
 import { useStore } from "@/context/UserStoreContext";
 import { transcribeAudio, analyzeAnswer, preRenderSpeech } from "@/services/gemini";
 import { TIPS, ANALYSIS_STEPS, ANALYSIS_STEP_THRESHOLDS, CHALLENGES } from "@/constants";
+import { getChallengeBackPath } from "@/lib/challengeUtils";
 import { loadAudioBlob, deleteAudioBlob, RECORDING_KEY, IDEAL_RESPONSE_KEY } from "@/lib/audioStorage";
 
 
@@ -121,9 +122,9 @@ export default function Analysing() {
             </Button>
             <Button onClick={() => {
               session.reset();
-              navigate("/");
+              navigate(getChallengeBackPath(activeChallenge.category));
             }}>
-              Back to Dashboard
+              Back to Challenges
             </Button>
           </div>
         </div>

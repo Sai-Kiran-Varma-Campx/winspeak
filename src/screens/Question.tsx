@@ -5,6 +5,7 @@ import { useSession } from "@/context/SessionContext";
 import { useStore } from "@/context/UserStoreContext";
 import { useInterval } from "@/hooks/useInterval";
 import { playCoachVoice, stopAudioPlayback } from "@/services/gemini";
+import { getChallengeBackPath } from "@/lib/challengeUtils";
 import type { ChallengeTier } from "@/types";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -96,7 +97,7 @@ export default function Question() {
       {/* Back + title */}
       <div className="flex items-center gap-3 mb-5">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate(getChallengeBackPath(challenge.category))}
           className="rounded-[10px] px-3.5 py-2 text-[18px] cursor-pointer border"
           style={{
             background: "var(--surface)",
