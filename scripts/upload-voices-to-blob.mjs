@@ -16,6 +16,13 @@ const VOICES_DIR = path.join(__dirname, "..", "public", "voices");
 const CHALLENGE_IDS = [
   "c1", "c2", "c3", "c4", "c5", "c6", "c7",
   "c8", "c9", "c10", "c11", "c12", "c13", "c14",
+  "hr1", "hr2", "hr3", "hr4", "hr5", "hr6", "hr7", "hr8", "hr9", "hr10",
+  "hr11", "hr12", "hr13", "hr14", "hr15", "hr16", "hr17", "hr18", "hr19", "hr20",
+  "hr21", "hr22", "hr23", "hr24", "hr25", "hr26", "hr27", "hr28", "hr29", "hr30",
+  "hr31", "hr32", "hr33", "hr34", "hr35", "hr36", "hr37", "hr38", "hr39", "hr40",
+  "hr41", "hr42", "hr43", "hr44", "hr45", "hr46", "hr47", "hr48", "hr49", "hr50",
+  "abap1", "abap2", "abap3", "abap4", "abap5", "abap6",
+  "abap7", "abap8", "abap9", "abap10", "abap11", "abap12",
 ];
 
 async function main() {
