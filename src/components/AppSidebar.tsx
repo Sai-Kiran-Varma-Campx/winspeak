@@ -54,8 +54,9 @@ export default function AppSidebar() {
   const activeChallenge = (session.challengeId
     ? CHALLENGES.find((c) => c.id === session.challengeId)
     : null) ?? CHALLENGES.find((c) => !store.completedChallengeIds.includes(c.id)) ?? null;
-  const completedCount = store.completedChallengeIds.length;
-  const totalChallenges = CHALLENGES.length;
+  const speakingChallenges = CHALLENGES.filter((c) => c.category === "speaking");
+  const completedCount = speakingChallenges.filter((c) => store.completedChallengeIds.includes(c.id)).length;
+  const totalChallenges = speakingChallenges.length;
 
   return (
     <aside className="app-sidebar" style={{ justifyContent: "space-between" }}>
@@ -157,7 +158,7 @@ export default function AppSidebar() {
 
           {/* Segmented progress bar */}
           <div className="flex gap-[3px] mb-2.5">
-            {CHALLENGES.map((c) => {
+            {speakingChallenges.map((c) => {
               const done = store.completedChallengeIds.includes(c.id);
               const isNext = c.id === activeChallenge?.id;
               return (
