@@ -2,12 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/context/UserStoreContext";
 import { relativeDate } from "@/hooks/useUserStore";
-
-function scoreColor(score: number) {
-  if (score >= 80) return "#22D37A";
-  if (score >= 60) return "#FFB830";
-  return "#FF4D6A";
-}
+import { scoreColor } from "@/lib/challengeUtils";
 
 export default function History() {
   const navigate = useNavigate();
