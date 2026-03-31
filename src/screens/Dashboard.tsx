@@ -9,13 +9,8 @@ import { useSession } from "@/context/SessionContext";
 import { unlockAudioContext } from "@/services/gemini";
 import { greeting, relativeDate, type Attempt, type UserStore } from "@/hooks/useUserStore";
 import Sparkline from "@/components/Sparkline";
+import { scoreColor } from "@/lib/challengeUtils";
 import type { BadgeVariant, Challenge, ChallengeTier } from "@/types";
-
-function scoreColor(score: number) {
-  if (score >= 80) return "#22D37A";
-  if (score >= 60) return "#FFB830";
-  return "#FF4D6A";
-}
 
 function isExpired(deadline?: string): boolean {
   if (!deadline) return false;
@@ -373,6 +368,36 @@ export default function Dashboard() {
             store={store}
             onStart={startChallenge}
           />
+
+          {/* Interview Prep Card */}
+          <div
+            className="border rounded-[22px] p-5 mb-4 cursor-pointer transition-all"
+            style={{
+              background: "linear-gradient(135deg,#1A1D2E,#13151C)",
+              borderColor: "#7C5CFC33",
+            }}
+            onClick={() => navigate("/interview-prep")}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = "#7C5CFC66"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = "#7C5CFC33"; }}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-12 h-12 rounded-[14px] flex items-center justify-center text-[22px] flex-shrink-0"
+                style={{ background: "#7C5CFC22" }}
+              >
+                🎯
+              </div>
+              <div className="flex-1">
+                <div className="text-[16px] font-extrabold">Interview Prep</div>
+                <div className="text-[12px] mt-0.5" style={{ color: "var(--muted-soft)" }}>
+                  Practice HR & Technical Questions
+                </div>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </div>
+          </div>
 
           {/* Past Attempts with Sparkline */}
           {store.attempts.length > 0 && (
