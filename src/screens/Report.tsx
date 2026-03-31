@@ -902,17 +902,19 @@ export default function Report() {
             <div className="flex justify-between items-center mb-1">
               <div className="text-[15px] font-extrabold">Ideal Response</div>
               <div className="border rounded-[8px] px-2.5 py-1 text-[10px] font-bold" style={{ background: "#FFB83022", borderColor: "#FFB83044", color: "#FFB830" }}>
-                AI Generated
+                {activeChallenge?.category === "abap" ? "Reference Answer" : "AI Generated"}
               </div>
             </div>
 
             {/* Ideal response text — ALWAYS shown */}
             <div className="rounded-[14px] p-3.5 my-4" style={{ background: "var(--surface)", borderLeft: "3px solid #FFB830" }}>
               <div className="text-[10px] font-bold tracking-[1px] mb-2.5" style={{ color: "var(--muted)" }}>
-                IMPROVED VERSION OF YOUR RESPONSE
+                {activeChallenge?.category === "abap" ? "REFERENCE ANSWER" : "IMPROVED VERSION OF YOUR RESPONSE"}
               </div>
               <p className="text-[12px] leading-[1.8] whitespace-pre-line" style={{ color: "var(--text)" }}>
-                {idealResponse}
+                {activeChallenge?.category === "abap" && activeChallenge.referenceAnswer
+                  ? activeChallenge.referenceAnswer
+                  : idealResponse}
               </p>
             </div>
 
