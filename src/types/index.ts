@@ -25,6 +25,8 @@ export type SkillMap = Record<SkillName, SkillData>;
 
 export type ChallengeTier = "Beginner" | "Intermediate" | "Advanced";
 
+export type ChallengeCategory = "speaking" | "hr" | "abap";
+
 export interface Challenge {
   id: string;
   title: string;
@@ -38,6 +40,9 @@ export interface Challenge {
   tier?: ChallengeTier;
   passingScore: number;
   maxAttempts: number;
+  category: ChallengeCategory;
+  referenceAnswer?: string;
+  evaluationCriteria?: string;
 }
 
 export interface GrammarIssue {
