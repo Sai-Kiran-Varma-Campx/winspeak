@@ -200,7 +200,8 @@ export default function Dashboard() {
   const hours = Math.floor((seconds % 86400) / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
 
-  const challenges = CHALLENGES.map((c, i) => ({
+  const speakingChallenges = CHALLENGES.filter((c) => c.category === "speaking");
+  const challenges = speakingChallenges.map((c, i) => ({
     ...c,
     status: challengeStatus(
       c.id,
