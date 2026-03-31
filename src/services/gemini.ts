@@ -443,6 +443,18 @@ export async function analyzeAnswer(
     ? checkpoints.map((cp, i) => `  ${i + 1}. ${cp}`).join("\n")
     : "  (No specific checkpoints for this challenge)";
 
+  const evaluationCriteriaBlock = challenge.evaluationCriteria
+    ? `\n═══ EVALUATION CRITERIA ═══\nListen for: ${challenge.evaluationCriteria}\n\nThe response should demonstrate these qualities. Score Relevancy based on whether the candidate shows the qualities described above, not just whether they answer the question.\n`
+    : "";
+
+  const referenceAnswerBlock = challenge.referenceAnswer
+    ? `\n═══ REFERENCE ANSWER ═══\n${challenge.referenceAnswer}\n\n═══ TECHNICAL ACCURACY INSTRUCTIONS ═══\n- Compare the student's spoken response against the reference answer above\n- Check if key technical concepts, distinctions, and facts are mentioned correctly\n- Score Relevancy primarily on technical accuracy and completeness\n- The student is speaking, not writing code — evaluate their verbal explanation\n- Missing critical technical distinctions = cap Relevancy at 50\n- Factual errors (wrong complexity, wrong syntax description) = cap Relevancy at 40\n- Mentioning concepts not in the reference but still correct = bonus, do not penalize\n`
+    : "";
+
+  const idealResponseInstruction = challenge.referenceAnswer
+    ? `5. For idealResponse, use this reference answer cleaned up for spoken delivery (remove code syntax, keep explanation): "${challenge.referenceAnswer.replace(/\`\`\`[\s\S]*?\`\`\`/g, '[code example]').slice(0, 500)}"`
+    : `5. The idealResponse should be a GRADUAL ENHANCEMENT of the speaker's original transcript — keep their ideas, structure, and personality but fix grammar, remove filler words, improve vocabulary, and strengthen weak sections. Do NOT write a completely different answer. It should sound like a better version of what THEY said, not a generic model answer. Aim for 130-150 words.`;
+
   const prompt = `You are WinSpeak, a ruthlessly honest AI speaking coach for students. You evaluate spoken responses in academic and real-world speaking scenarios. Your job is to score accurately so students ACTUALLY improve — not to be nice.
 
 ═══ EVALUATION TIER: ${tier} ═══
@@ -465,7 +477,7 @@ CHECKPOINT ENFORCEMENT:
 - Missing checkpoints → cap Relevancy at 60, Structure at 65.
 - Missing MORE THAN HALF → cap Relevancy at 45, Structure at 50.
 - All checkpoints addressed (even briefly) → no cap applied.
-${regressionContext}
+${evaluationCriteriaBlock}${referenceAnswerBlock}${regressionContext}
 
 ═══ TRANSCRIPT TO EVALUATE ═══
 "${transcript}"
@@ -477,7 +489,7 @@ ${regressionContext}
 3. Calculate xpEarned: floor(overallScore / 100 * ${challenge.xp})
    - If overallScore < ${challenge.passingScore}: xpEarned = floor(xpEarned * 0.4) (partial XP for failing)
 4. In feedback, be SPECIFIC — reference exact phrases from the transcript. Don't say "good job" without citing evidence.
-5. The idealResponse should be a GRADUAL ENHANCEMENT of the speaker's original transcript — keep their ideas, structure, and personality but fix grammar, remove filler words, improve vocabulary, and strengthen weak sections. Do NOT write a completely different answer. It should sound like a better version of what THEY said, not a generic model answer. Aim for 130-150 words.
+${idealResponseInstruction}
 
 Return ONLY valid JSON with this exact structure:
 {
