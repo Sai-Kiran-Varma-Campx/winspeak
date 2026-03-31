@@ -1,9 +1,11 @@
 import type { AnalysisStep } from "@/types";
 import { SPEAKING_CHALLENGES, SPEAKING_CHECKPOINTS } from "./challenges-speaking";
+import { HR_CHALLENGES } from "./challenges-hr";
+import { HR_CHECKPOINTS } from "./checkpoints-hr";
 
-export const CHALLENGES = [...SPEAKING_CHALLENGES];
+export const CHALLENGES = [...SPEAKING_CHALLENGES, ...HR_CHALLENGES];
 
-export const CHALLENGE_CHECKPOINTS = { ...SPEAKING_CHECKPOINTS };
+export const CHALLENGE_CHECKPOINTS = { ...SPEAKING_CHECKPOINTS, ...HR_CHECKPOINTS };
 
 export const TIPS: string[] = [
   "💡 Tip: Pausing for 1–2 seconds between points makes you sound more confident.",
