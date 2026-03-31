@@ -19,6 +19,7 @@ export const VOICE_URLS: Record<string, string> = {
   "hr5": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/hr5.pcm",
   "hr6": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/hr6.pcm",
   "hr7": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/hr7.pcm",
+  "hr8": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/hr8.pcm",
   "hr9": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/hr9.pcm",
   "hr10": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/hr10.pcm",
   "hr12": "https://iq1grzgo2lwh6nqd.public.blob.vercel-storage.com/voices/hr12.pcm",
