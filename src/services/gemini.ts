@@ -215,6 +215,7 @@ export async function transcribeAudio(blob: Blob): Promise<string> {
 
 const TTS_MODELS = [
   "gemini-2.5-flash-preview-tts",
+  "gemini-2.5-pro-preview-tts",
 ];
 
 /**
@@ -254,11 +255,13 @@ async function generateTtsBytes(text: string): Promise<Uint8Array> {
 
       return bytes;
     } catch (err) {
+      console.error(`[TTS] Model ${model} failed:`, err);
       lastError = err;
       // Continue to next model
     }
   }
 
+  console.error("[TTS] All models failed. Last error:", lastError);
   throw lastError;
 }
 
@@ -352,8 +355,9 @@ export async function preRenderSpeech(text: string, cacheKey: string): Promise<v
     const bytes = await generateTtsBytes(text);
     const wavBlob = pcm16ToWav(bytes);
     await saveAudioBlob(cacheKey, wavBlob);
-  } catch {
-    // TTS unavailable — Report will handle gracefully
+    console.log("[TTS] Ideal response audio saved successfully");
+  } catch (err) {
+    console.error("[TTS] preRenderSpeech failed:", err);
   }
 }
 

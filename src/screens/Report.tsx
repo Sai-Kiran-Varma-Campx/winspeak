@@ -202,6 +202,7 @@ export default function Report() {
 
   const savedRef = useRef(false);
   const actionInProgress = useRef(false);
+  const leavingRef = useRef(false);
   const [xpSaved, setXpSaved] = useState(false);
   const [ringProgress, setRingProgress] = useState(0);
 
@@ -209,7 +210,7 @@ export default function Report() {
   const idealAudioRef = useRef<HTMLAudioElement | null>(null);
   const idealUrlRef = useRef<string | null>(null);
   const [idealReady, setIdealReady] = useState(false);
-  const [idealLoading, setIdealLoading] = useState(!isHistorical);
+  const [idealLoading, setIdealLoading] = useState(true);
   const [idealPlaying, setIdealPlaying] = useState(false);
   const [idealTime, setIdealTime] = useState(0);
   const [idealDuration, setIdealDuration] = useState(0);
@@ -263,11 +264,10 @@ export default function Report() {
     return () => clearTimeout(t);
   }, [result]);
 
-  // Load pre-rendered ideal response audio (live mode only)
+  // Load or generate ideal response audio (live + historical)
   useEffect(() => {
-    if (isHistorical || !result) return;
+    if (!result) return;
     let cancelled = false;
-    let attempts = 0;
 
     function setupAudio(blob: Blob): boolean {
       if (cancelled) return false;
@@ -298,15 +298,19 @@ export default function Report() {
     }
 
     async function tryLoad() {
-      while (!cancelled && attempts < 20) {
-        try {
-          const blob = await loadAudioBlob(IDEAL_RESPONSE_KEY);
-          if (blob && setupAudio(blob)) return;
-        } catch { /* retry */ }
-        attempts++;
-        await new Promise((r) => setTimeout(r, 1500));
+      // For live mode, poll for pre-rendered audio from Analysing screen
+      if (!isHistorical) {
+        let attempts = 0;
+        while (!cancelled && attempts < 20) {
+          try {
+            const blob = await loadAudioBlob(IDEAL_RESPONSE_KEY);
+            if (blob && setupAudio(blob)) return;
+          } catch { /* retry */ }
+          attempts++;
+          await new Promise((r) => setTimeout(r, 1500));
+        }
       }
-      // If still not ready after retries, try generating now
+      // Generate on-the-fly (live fallback or historical)
       if (!cancelled) {
         try {
           await preRenderSpeech(result!.idealResponse, IDEAL_RESPONSE_KEY);
@@ -332,10 +336,15 @@ export default function Report() {
     };
   }, [result, isHistorical]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Redirect if no result (live mode only)
+  // Redirect if no result (live mode only) — skip if user already navigated away
   useEffect(() => {
+    if (leavingRef.current) return;
     if (!isHistorical && !result) navigate("/", { replace: true });
   }, [isHistorical, result, navigate]);
+
+  // Must be called before any early returns to satisfy React hooks rules
+  const xpTarget = result ? result.xpEarned : 0;
+  const displayXp = useCountUp(isHistorical ? 0 : xpTarget, 700);
 
   const toggleIdealPlay = useCallback(() => {
     const audio = idealAudioRef.current;
@@ -455,7 +464,6 @@ export default function Report() {
   )));
 
   const skillScores = Object.fromEntries(Object.entries(skills).map(([k, v]) => [k, v.score]));
-  const displayXp = useCountUp(isHistorical ? 0 : xpEarned, 700);
 
   // Skill velocity vs previous attempt (live mode only)
   const velocity: { skill: string; delta: number }[] = [];
@@ -918,8 +926,8 @@ export default function Report() {
               </p>
             </div>
 
-            {/* Audio player (live mode only, only when audio is ready or loading) */}
-            {!isHistorical && (idealReady || idealLoading) && (
+            {/* Audio player (when audio is ready or loading) */}
+            {(idealReady || idealLoading) && (
               <>
                 <div className="text-[11px] mb-4" style={{ color: "var(--muted-soft)" }}>
                   {idealReady ? "Tap play to hear the ideal spoken response" : "Preparing audio..."}
@@ -1218,9 +1226,11 @@ export default function Report() {
                   onClick={() => {
                     if (actionInProgress.current) return;
                     actionInProgress.current = true;
+                    leavingRef.current = true;
                     store.resetChallengeAttempts(activeChallenge.id);
+                    const dest = getChallengeBackPath(activeChallenge.category);
+                    navigate(dest);
                     session.reset();
-                    navigate(getChallengeBackPath(activeChallenge.category));
                   }}
                 >
                   🔄 Reset & Try Again
@@ -1236,14 +1246,17 @@ export default function Report() {
               <Button onClick={() => {
                 if (actionInProgress.current) return;
                 actionInProgress.current = true;
+                leavingRef.current = true;
+                const dest = activeChallenge ? getChallengeBackPath(activeChallenge.category) : "/";
+                navigate(dest);
                 session.reset();
-                navigate(activeChallenge ? getChallengeBackPath(activeChallenge.category) : "/");
-              }}>← Continue to Next Challenge</Button>
+              }}>Continue to Next Challenge →</Button>
             ) : !allAttemptsUsed ? (
               <div className="flex gap-3">
                 <Button onClick={() => {
                   if (actionInProgress.current) return;
                   actionInProgress.current = true;
+                  leavingRef.current = true;
                   session.reset();
                   navigate("/question");
                 }}>
@@ -1252,8 +1265,10 @@ export default function Report() {
                 <Button onClick={() => {
                   if (actionInProgress.current) return;
                   actionInProgress.current = true;
+                  leavingRef.current = true;
+                  const dest = activeChallenge ? getChallengeBackPath(activeChallenge.category) : "/";
+                  navigate(dest);
                   session.reset();
-                  navigate(activeChallenge ? getChallengeBackPath(activeChallenge.category) : "/");
                 }}>
                   ← Back to Challenges
                 </Button>
@@ -1262,8 +1277,10 @@ export default function Report() {
               <Button onClick={() => {
                 if (actionInProgress.current) return;
                 actionInProgress.current = true;
+                leavingRef.current = true;
+                const dest = activeChallenge ? getChallengeBackPath(activeChallenge.category) : "/";
+                navigate(dest);
                 session.reset();
-                navigate(activeChallenge ? getChallengeBackPath(activeChallenge.category) : "/");
               }}>← Back to Challenges</Button>
             )}
           </div>

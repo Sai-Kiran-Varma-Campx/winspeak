@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { CHALLENGES } from "@/constants";
 import { useStore } from "@/context/UserStoreContext";
 import { useSession } from "@/context/SessionContext";
@@ -19,7 +19,9 @@ export default function InterviewPrep() {
   const navigate = useNavigate();
   const store = useStore();
   const session = useSession();
-  const [activeTab, setActiveTab] = useState<Tab>("hr");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") === "abap" ? "abap" : "hr";
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
   const hrChallenges = CHALLENGES.filter((c) => c.category === "hr");
   const abapChallenges = CHALLENGES.filter((c) => c.category === "abap");

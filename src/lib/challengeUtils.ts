@@ -9,6 +9,7 @@ export function scoreColor(score: number): string {
 
 /** Returns the route to navigate back to based on challenge category. */
 export function getChallengeBackPath(category: ChallengeCategory): string {
-  if (category === "hr" || category === "abap") return "/interview-prep";
+  if (category === "hr") return "/interview-prep?tab=hr";
+  if (category === "abap") return "/interview-prep?tab=abap";
   return "/";
 }
