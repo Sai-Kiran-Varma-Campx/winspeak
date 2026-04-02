@@ -1,0 +1,32 @@
+name: Alias dev deployment
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  alias:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Vercel deployment
+        run: sleep 60
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Get latest preview URL and alias it
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # Get latest preview deployment URL
+          DEPLOY_URL=$(vercel ls winspeak --token "$VERCEL_TOKEN" --scope saikiran-5686s-projects 2>&1 | grep Preview | head -1 | awk '{print $3}')
+          echo "Latest preview: $DEPLOY_URL"
+
+          if [ -z "$DEPLOY_URL" ]; then
+            echo "No preview deployment found"
+            exit 1
+          fi
+
+          # Alias it to winspeak-dev.vercel.app
+          vercel alias "$DEPLOY_URL" winspeak-dev.vercel.app --token "$VERCEL_TOKEN" --scope saikiran-5686s-projects
+          echo "Aliased to https://winspeak-dev.vercel.app"
