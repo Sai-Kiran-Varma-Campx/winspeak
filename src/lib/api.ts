@@ -154,6 +154,6 @@ export const api = {
 
   // Leaderboard
   getLeaderboard() {
-    return request<any[]>(`/leaderboard`);
+    return request<{ stats: any; leaderboard: any[] }>(`/leaderboard`);
   },
 };

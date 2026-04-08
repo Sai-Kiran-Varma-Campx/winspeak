@@ -29,16 +29,24 @@ const AVATAR_COLORS = [
   "linear-gradient(135deg,#FF4D6A,#22D37A)",
 ];
 
+interface Stats {
+  totalRegistered: number;
+  totalWithAttempts: number;
+  totalAttempts: number;
+  totalXp: number;
+}
+
 export default function Leaderboard() {
   const store = useStore();
   const [leaders, setLeaders] = useState<Leader[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api
       .getLeaderboard()
-      .then((rows) => {
-        const mapped: Leader[] = rows.map((r: any) => ({
+      .then((data) => {
+        const mapped: Leader[] = data.leaderboard.map((r: any) => ({
           rank: r.rank,
           name: r.name,
           xp: r.totalXp ?? r.total_xp,
@@ -49,6 +57,7 @@ export default function Leaderboard() {
           isMe: r.name === store.name,
         }));
         setLeaders(mapped);
+        setStats(data.stats);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -78,6 +87,32 @@ export default function Leaderboard() {
           Top speakers by total XP
         </div>
       </div>
+
+      {/* Stats */}
+      {stats && (
+        <div className="grid grid-cols-2 gap-2.5 mb-6">
+          {[
+            { label: "Registered", value: stats.totalRegistered, icon: "\u{1F465}" },
+            { label: "Active Speakers", value: stats.totalWithAttempts, icon: "\u{1F399}\uFE0F" },
+            { label: "Total Attempts", value: stats.totalAttempts, icon: "\u{1F3AF}" },
+            { label: "Total XP Earned", value: stats.totalXp.toLocaleString(), icon: "\u26A1" },
+          ].map((s) => (
+            <div
+              key={s.label}
+              className="border rounded-[14px] p-3 flex flex-col gap-1"
+              style={{ background: "var(--card)", borderColor: "var(--border)" }}
+            >
+              <div className="text-[18px]">{s.icon}</div>
+              <div className="text-[18px] font-extrabold" style={{ color: "var(--text)" }}>
+                {s.value}
+              </div>
+              <div className="text-[11px] font-medium" style={{ color: "var(--muted)" }}>
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Top 3 podium */}
       {topThree.length >= 3 && (
