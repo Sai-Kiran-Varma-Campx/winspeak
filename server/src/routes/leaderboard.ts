@@ -30,9 +30,6 @@ app.get("/", async (c) => {
         avgScore: avg(attempts.score),
         totalPassed: sum(sql<number>`case when ${attempts.passed} then 1 else 0 end`),
         bestStreak: max(users.streak),
-        challengesConquered: countDistinct(
-          sql`case when ${attempts.passed} then ${attempts.challengeId} end`
-        ),
       })
       .from(users)
       .leftJoin(attempts, eq(users.id, attempts.userId)),
@@ -52,7 +49,6 @@ app.get("/", async (c) => {
       avgScore: Math.round(Number(s.avgScore) || 0),
       passRate: totalAttempts > 0 ? Math.round((totalPassed / totalAttempts) * 100) : 0,
       bestStreak: Number(s.bestStreak) || 0,
-      challengesConquered: Number(s.challengesConquered) || 0,
     },
     leaderboard: ranked,
   });

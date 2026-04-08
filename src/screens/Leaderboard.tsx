@@ -37,7 +37,6 @@ interface Stats {
   avgScore: number;
   passRate: number;
   bestStreak: number;
-  challengesConquered: number;
 }
 
 export default function Leaderboard() {
@@ -103,7 +102,6 @@ export default function Leaderboard() {
             { label: "Avg Score", value: stats.avgScore, icon: "\u{1F4CA}" },
             { label: "Pass Rate", value: `${stats.passRate}%`, icon: "\u2705" },
             { label: "Best Streak", value: `${stats.bestStreak} days`, icon: "\u{1F525}" },
-            { label: "Challenges Conquered", value: `${stats.challengesConquered}/14`, icon: "\u{1F3C6}" },
           ].map((s) => (
             <div
               key={s.label}
