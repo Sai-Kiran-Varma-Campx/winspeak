@@ -5,9 +5,8 @@ import { users, attempts } from "../db/schema.js";
 
 const app = new Hono();
 
-// GET /api/leaderboard?limit=20
+// GET /api/leaderboard
 app.get("/", async (c) => {
-  const limit = Math.min(parseInt(c.req.query("limit") || "20"), 100);
 
   const rows = await db
     .select({
@@ -21,8 +20,7 @@ app.get("/", async (c) => {
     .leftJoin(attempts, eq(users.id, attempts.userId))
     .where(gt(users.totalXp, 0))
     .groupBy(users.id, users.name, users.totalXp, users.streak)
-    .orderBy(desc(users.totalXp))
-    .limit(limit);
+    .orderBy(desc(users.totalXp));
 
   const ranked = rows.map((u, i) => ({ ...u, rank: i + 1 }));
 

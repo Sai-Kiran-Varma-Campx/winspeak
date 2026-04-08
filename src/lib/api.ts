@@ -153,7 +153,7 @@ export const api = {
   },
 
   // Leaderboard
-  getLeaderboard(limit = 20) {
-    return request<any[]>(`/leaderboard?limit=${limit}`);
+  getLeaderboard() {
+    return request<any[]>(`/leaderboard`);
   },
 };

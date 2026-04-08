@@ -36,7 +36,7 @@ export default function Leaderboard() {
 
   useEffect(() => {
     api
-      .getLeaderboard(20)
+      .getLeaderboard()
       .then((rows) => {
         const mapped: Leader[] = rows.map((r: any) => ({
           rank: r.rank,
