@@ -4,6 +4,7 @@ import { logger } from "hono/logger";
 import userRoutes from "./routes/users.js";
 import attemptRoutes from "./routes/attempts.js";
 import leaderboardRoutes from "./routes/leaderboard.js";
+import schoolRoutes from "./routes/school.js";
 
 const app = new Hono();
 
@@ -19,6 +20,7 @@ app.use(
 app.route("/api/users", userRoutes);
 app.route("/api/users/me/attempts", attemptRoutes);
 app.route("/api/leaderboard", leaderboardRoutes);
+app.route("/api/school", schoolRoutes);
 
 app.get("/api/health", (c) => c.json({ ok: true }));
 

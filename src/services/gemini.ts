@@ -432,12 +432,27 @@ export async function analyzeAnswer(
   transcript: string,
   question: string,
   challenge: Challenge,
-  previousAttempts?: Attempt[]
+  previousAttempts?: Attempt[],
+  /** Optional school-mode context: grade level for grade-aware calibration */
+  schoolContext?: { grade: 1 | 2 | 3 | 4; ageHint?: string }
 ): Promise<AnalysisResult> {
   const tier = challenge.tier ?? "Beginner";
   const rubric = TIER_RUBRICS[tier] ?? TIER_RUBRICS["Beginner"];
   const checkpoints = CHALLENGE_CHECKPOINTS[challenge.id] ?? [];
   const regressionContext = buildRegressionContext(previousAttempts ?? []);
+
+  // ── School POC: grade-aware calibration ────────────────────────────────
+  // Per the WinSpeak School POC brief: "AI must assess the student against
+  // the expected baseline for their specific grade."
+  const gradeBaselines: Record<number, string> = {
+    1: "Grade 1 (~6 years old): Expect short sentences, simple vocabulary, lots of imagination, frequent restarts. Reward courage and effort. A confident, on-topic 4-sentence answer is excellent for this grade. Do NOT penalise grammar gaps that are normal for emerging readers.",
+    2: "Grade 2 (~7 years old): Expect 4-6 sentence answers, some descriptive words, clear topic. Reward storytelling. Some grammar slips are normal.",
+    3: "Grade 3 (~8 years old): Expect linked sentences, clear opening and ending, basic structure. Reward specific examples and varied vocabulary.",
+    4: "Grade 4 (~9 years old): Expect a coherent mini-speech with clear structure, specific vocabulary, and confident delivery. Hold to a higher bar but stay age-appropriate.",
+  };
+  const gradeBlock = schoolContext
+    ? `\n═══ GRADE-AWARE CALIBRATION ═══\nThis student is in ${gradeBaselines[schoolContext.grade] ?? gradeBaselines[1]}\nScore against the expected baseline FOR THIS GRADE — not against an adult standard.\nFeedback must use age-appropriate, encouraging language a young child can understand.\n`
+    : "";
 
   const skillRubricBlock = Object.entries(rubric.skillGuidelines)
     .map(([skill, guideline]) => `  - ${skill}: ${guideline}`)
@@ -459,11 +474,17 @@ export async function analyzeAnswer(
     ? `5. For idealResponse, use this reference answer cleaned up for spoken delivery (remove code syntax, keep explanation): "${challenge.referenceAnswer.replace(/\`\`\`[\s\S]*?\`\`\`/g, '[code example]').slice(0, 500)}"`
     : `5. The idealResponse should be a GRADUAL ENHANCEMENT of the speaker's original transcript — keep their ideas, structure, and personality but fix grammar, remove filler words, improve vocabulary, and strengthen weak sections. Do NOT write a completely different answer. It should sound like a better version of what THEY said, not a generic model answer. Aim for 130-150 words.`;
 
-  const prompt = `You are WinSpeak, a ruthlessly honest AI speaking coach for students. You evaluate spoken responses in academic and real-world speaking scenarios. Your job is to score accurately so students ACTUALLY improve — not to be nice.
+  const coachPersona = schoolContext
+    ? `You are WinSpeak, a kind, encouraging AI speaking coach for school children. You evaluate young students fairly and supportively. Be honest about what to work on, but always celebrate effort and use simple, warm, age-appropriate words a child can understand.`
+    : `You are WinSpeak, a ruthlessly honest AI speaking coach for students. You evaluate spoken responses in academic and real-world speaking scenarios. Your job is to score accurately so students ACTUALLY improve — not to be nice.`;
+
+  const clarityExpansion = `\n═══ EXPANDED CLARITY ASSESSMENT ═══\nThe Clarity skill must consider FOUR dimensions and produce a single combined score:\n  1. Pronunciation — how clearly individual words are spoken.\n  2. Word clarity — whether the listener can understand what is being said.\n  3. Voice modulation — variation in pitch and tone to convey meaning and maintain engagement (inferred from transcript phrasing/punctuation cues if you cannot hear audio).\n  4. Voice throw — projection and volume appropriate to the speaking context.\nAll four dimensions feed into the SINGLE Clarity score. Note in the Clarity feedback which dimension(s) drove the score.\n`;
+
+  const prompt = `${coachPersona}
 
 ═══ EVALUATION TIER: ${tier} ═══
 ${rubric.calibration}
-
+${gradeBlock}${clarityExpansion}
 ═══ SCORING RUBRIC (per-skill guidelines) ═══
 ${skillRubricBlock}
 
@@ -520,11 +541,13 @@ Return ONLY valid JSON with this exact structure:
   "fillerWords": [
     { "word": "<filler>", "count": <integer> }
   ],
-  "winSpeakAnalysis": "<3-4 sentence coaching summary — be direct, cite specifics, note checkpoint coverage>",
-  "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
-  "improvements": ["<improvement 1>", "<improvement 2>", "<improvement 3>"],
-  "idealResponse": "<130-150 word model answer for this specific scenario>"
-}`;
+  "winSpeakAnalysis": "${schoolContext ? "<2-3 VERY short sentences, simple age-appropriate words for a young child>" : "<3-4 sentence coaching summary — be direct, cite specifics, note checkpoint coverage>"}",
+  "strengths": [${schoolContext ? `"<celebratory simple sentence — max 2 items only>"` : `"<strength 1>", "<strength 2>", "<strength 3>"`}],
+  "improvements": [${schoolContext ? `"<ONE simple, encouraging next-step instruction — max 1 item only, e.g. 'Next time, try to use more describing words.'>"` : `"<improvement 1>", "<improvement 2>", "<improvement 3>"`}],
+  "idealResponse": "<${schoolContext ? "60-90 word model answer in simple language for this specific scenario" : "130-150 word model answer for this specific scenario"}>"${schoolContext ? `,
+  "confidenceScore": <0-100 estimate of how brave/confident the student sounded — based on hesitation, restarts, sentence completeness, and overall flow>,
+  "whatYouGotRight": ["<one specific grammar/structure thing they did correctly>", "<another, optional>"]` : ""}
+}${schoolContext ? `\n\nSCHOOL OUTPUT RULES (STRICT):\n- strengths: MAX 2 items, written like a parent praising the child. e.g. "You spoke in full sentences! 👏"\n- improvements: MAX 1 item, an actionable instruction, NEVER a criticism. e.g. "Next time, try to use more describing words."\n- winSpeakAnalysis: MAX 3 short sentences, simple words a 7-year-old understands.\n- All grammar/filler tips must be encouraging, not corrective.\n- Estimate a confidence value 0-100 (called confidenceScore in the response below).\n` : ""}`;
 
   return withRetry(async () => {
     const result = await ai.models.generateContent({

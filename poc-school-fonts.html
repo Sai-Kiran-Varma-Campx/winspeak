@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WinSpeak — Pick Your Font Combo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Nunito:wght@500;700;800;900&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Quicksand:wght@500;700&family=Lilita+One&family=Baloo+2:wght@500;700;800&family=Fredoka:wght@400;600;700&family=Gabarito:wght@500;700;900&family=Outfit:wght@500;700;800&family=Poppins:wght@500;700;800;900&family=DM+Serif+Display&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF6EC;--ink:#2A1F1A;--ink-soft:#6B5C53;--ink-line:rgba(42,31,26,0.12);
+    --peach:#FFB694;--peach-bg:#FFE9DC;--peach-bd:#F4B89A;--peach-deep:#E8794A;
+    --butter:#FFE08A;--butter-bg:#FFF4C9;--butter-bd:#F2CE65;
+    --sky:#B6DDF0;--sky-bg:#E1F1FA;--sky-bd:#8BC8E2;
+    --mint-bg:#DDF1E5;--mint-bd:#85CFA0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Nunito',system-ui,sans-serif;
+    color:var(--ink);background:var(--paper);
+    -webkit-font-smoothing:antialiased;
+    padding:32px 20px 80px;
+  }
+
+  .page-title{
+    text-align:center;margin-bottom:8px;
+    font-family:'Fraunces',serif;font-weight:900;
+    font-size:32px;letter-spacing:-0.03em;
+  }
+  .page-sub{
+    text-align:center;color:var(--ink-soft);
+    font-size:15px;margin-bottom:40px;font-weight:600;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));
+    gap:28px;
+    max-width:1200px;margin:0 auto;
+  }
+
+  .card{
+    background:#fff;
+    border:2px solid var(--ink-line);
+    border-radius:28px;
+    padding:28px 24px;
+    box-shadow:0 2px 0 rgba(42,31,26,0.08), 0 18px 32px -22px rgba(42,31,26,0.25);
+    transition:transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, border-color .2s;
+    cursor:pointer;
+    position:relative;
+  }
+  .card:hover{
+    transform:translateY(-4px) scale(1.01);
+    box-shadow:0 3px 0 rgba(42,31,26,0.12), 0 26px 44px -24px rgba(42,31,26,0.35);
+    border-color:var(--peach-deep);
+  }
+  .card.selected{
+    border-color:var(--peach-deep);
+    box-shadow:0 0 0 3px var(--peach-bg), 0 18px 32px -22px rgba(42,31,26,0.3);
+  }
+  .card.selected::after{
+    content:"✓ SELECTED";
+    position:absolute;top:14px;right:16px;
+    font-size:11px;font-weight:900;letter-spacing:0.1em;
+    color:#fff;background:var(--peach-deep);
+    padding:4px 10px;border-radius:999px;
+  }
+
+  .combo-num{
+    font-size:11px;font-weight:900;letter-spacing:0.15em;
+    color:var(--peach-deep);text-transform:uppercase;
+    margin-bottom:14px;
+    background:var(--peach-bg);border:1.5px solid var(--peach-bd);
+    display:inline-block;padding:4px 10px;border-radius:999px;
+  }
+  .combo-fonts{
+    font-size:12px;color:var(--ink-soft);font-weight:700;
+    margin-bottom:16px;
+    background:var(--butter-bg);border:1px solid var(--butter-bd);
+    padding:6px 10px;border-radius:12px;
+  }
+
+  /* Mini preview inside each card */
+  .preview{
+    background:var(--paper);
+    border:1.5px solid var(--ink-line);
+    border-radius:20px;padding:20px 18px;
+    margin-bottom:0;
+  }
+  .prev-eyebrow{
+    font-size:10px;font-weight:900;letter-spacing:0.15em;
+    color:var(--peach-deep);text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .prev-greeting{
+    font-weight:900;
+    font-size:36px;line-height:0.95;letter-spacing:-0.03em;
+    margin-bottom:10px;
+  }
+  .prev-greeting em{
+    font-style:italic;font-weight:500;
+    color:var(--peach-deep);position:relative;display:inline-block;
+  }
+  .prev-greeting em::after{
+    content:"";position:absolute;
+    left:-2%;right:-2%;bottom:6%;height:10px;
+    background:var(--butter);z-index:-1;
+    border-radius:6px;transform:rotate(-1deg);opacity:0.85;
+  }
+  .prev-sub{font-size:13px;color:var(--ink-soft);margin-bottom:16px;line-height:1.4}
+
+  .prev-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .prev-action{
+    border-radius:18px;padding:14px 12px;
+    border:1.5px solid;text-align:left;
+  }
+  .prev-action.p{background:var(--peach-bg);border-color:var(--peach-bd);transform:rotate(-0.5deg)}
+  .prev-action.s{background:var(--sky-bg);border-color:var(--sky-bd);transform:rotate(0.5deg)}
+  .prev-action .emoji{font-size:20px;margin-bottom:6px}
+  .prev-action h4{font-weight:900;font-size:15px;letter-spacing:-0.01em;margin-bottom:3px}
+  .prev-action span{font-size:11px;color:var(--ink-soft);font-weight:600}
+
+  .prev-student{
+    display:flex;align-items:center;gap:10px;
+    background:#fff;border:1.5px solid var(--ink-line);
+    border-radius:14px;padding:10px 12px;
+  }
+  .prev-student .av{
+    width:36px;height:36px;border-radius:12px;
+    background:var(--sky-bg);border:1.5px solid var(--sky-bd);
+    display:grid;place-items:center;font-weight:900;font-size:15px;
+    color:#2c7ea3;flex-shrink:0;
+  }
+  .prev-student .nm{font-weight:700;font-size:14px;letter-spacing:-0.01em}
+  .prev-student .mt{font-size:11px;color:var(--ink-soft);font-weight:600}
+
+  .click-hint{
+    text-align:center;color:var(--ink-soft);
+    font-size:13px;font-weight:700;margin-top:40px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">Pick a Font Combo</div>
+<p class="page-sub">Click the one you like best. Each card shows the same UI with different fonts.</p>
+
+<div class="grid">
+
+  <!-- 1. Fraunces + Nunito -->
+  <div class="card" onclick="select(this)">
+    <div class="combo-num">Combo 1</div>
+    <div class="combo-fonts">Display: <b>Fraunces</b> (serif) &nbsp;·&nbsp; Body: <b>Nunito</b> (rounded sans)</div>
+    <div class="preview">
+      <div class="prev-eyebrow" style="font-family:'Nunito'">★ Tuesday morning</div>
+      <div class="prev-greeting" style="font-family:'Fraunces',serif">Hi,<br><em>Ms. Rao</em></div>
+      <div class="prev-sub" style="font-family:'Nunito'">Your class of 24 little voices is ready.</div>
+      <div class="prev-cards">
+        <div class="prev-action p">
+          <div class="emoji">👧</div>
+          <h4 style="font-family:'Fraunces',serif">Add a kiddo</h4>
+          <span style="font-family:'Nunito'">Add to your roster</span>
+        </div>
+        <div class="prev-action s">
+          <div class="emoji">🎤</div>
+          <h4 style="font-family:'Fraunces',serif">Run challenge</h4>
+          <span style="font-family:'Nunito'">Student by student</span>
+        </div>
+      </div>
+      <div class="prev-student">
+        <div class="av" style="font-family:'Fraunces',serif">A</div>
+        <div>
+          <div class="nm" style="font-family:'Fraunces',serif">Aanya Sharma</div>
+          <div class="mt" style="font-family:'Nunito'">Grade 4 · Section A</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Gabarito + Quicksand -->
+  <div class="card" onclick="select(this)">
+    <div class="combo-num">Combo 2</div>
+    <div class="combo-fonts">Display: <b>Gabarito</b> (geometric) &nbsp;·&nbsp; Body: <b>Quicksand</b> (rounded)</div>
+    <div class="preview">
+      <div class="prev-eyebrow" style="font-family:'Quicksand'">★ Tuesday morning</div>
+      <div class="prev-greeting" style="font-family:'Gabarito',sans-serif">Hi,<br><em>Ms. Rao</em></div>
+      <div class="prev-sub" style="font-family:'Quicksand'">Your class of 24 little voices is ready.</div>
+      <div class="prev-cards">
+        <div class="prev-action p">
+          <div class="emoji">👧</div>
+          <h4 style="font-family:'Gabarito',sans-serif">Add a kiddo</h4>
+          <span style="font-family:'Quicksand'">Add to your roster</span>
+        </div>
+        <div class="prev-action s">
+          <div class="emoji">🎤</div>
+          <h4 style="font-family:'Gabarito',sans-serif">Run challenge</h4>
+          <span style="font-family:'Quicksand'">Student by student</span>
+        </div>
+      </div>
+      <div class="prev-student">
+        <div class="av" style="font-family:'Gabarito',sans-serif">A</div>
+        <div>
+          <div class="nm" style="font-family:'Gabarito',sans-serif">Aanya Sharma</div>
+          <div class="mt" style="font-family:'Quicksand'">Grade 4 · Section A</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Lilita One + Nunito -->
+  <div class="card" onclick="select(this)">
+    <div class="combo-num">Combo 3</div>
+    <div class="combo-fonts">Display: <b>Lilita One</b> (chunky fun) &nbsp;·&nbsp; Body: <b>Nunito</b> (rounded sans)</div>
+    <div class="preview">
+      <div class="prev-eyebrow" style="font-family:'Nunito'">★ Tuesday morning</div>
+      <div class="prev-greeting" style="font-family:'Lilita One',cursive;font-weight:400">Hi,<br><em style="font-family:'Lilita One';font-weight:400">Ms. Rao</em></div>
+      <div class="prev-sub" style="font-family:'Nunito'">Your class of 24 little voices is ready.</div>
+      <div class="prev-cards">
+        <div class="prev-action p">
+          <div class="emoji">👧</div>
+          <h4 style="font-family:'Lilita One',cursive;font-weight:400">Add a kiddo</h4>
+          <span style="font-family:'Nunito'">Add to your roster</span>
+        </div>
+        <div class="prev-action s">
+          <div class="emoji">🎤</div>
+          <h4 style="font-family:'Lilita One',cursive;font-weight:400">Run challenge</h4>
+          <span style="font-family:'Nunito'">Student by student</span>
+        </div>
+      </div>
+      <div class="prev-student">
+        <div class="av" style="font-family:'Lilita One',cursive;font-weight:400">A</div>
+        <div>
+          <div class="nm" style="font-family:'Lilita One',cursive;font-weight:400">Aanya Sharma</div>
+          <div class="mt" style="font-family:'Nunito'">Grade 4 · Section A</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Baloo 2 + Outfit -->
+  <div class="card" onclick="select(this)">
+    <div class="combo-num">Combo 4</div>
+    <div class="combo-fonts">Display: <b>Baloo 2</b> (bubbly Indian) &nbsp;·&nbsp; Body: <b>Outfit</b> (clean geometric)</div>
+    <div class="preview">
+      <div class="prev-eyebrow" style="font-family:'Outfit'">★ Tuesday morning</div>
+      <div class="prev-greeting" style="font-family:'Baloo 2',cursive">Hi,<br><em>Ms. Rao</em></div>
+      <div class="prev-sub" style="font-family:'Outfit'">Your class of 24 little voices is ready.</div>
+      <div class="prev-cards">
+        <div class="prev-action p">
+          <div class="emoji">👧</div>
+          <h4 style="font-family:'Baloo 2',cursive">Add a kiddo</h4>
+          <span style="font-family:'Outfit'">Add to your roster</span>
+        </div>
+        <div class="prev-action s">
+          <div class="emoji">🎤</div>
+          <h4 style="font-family:'Baloo 2',cursive">Run challenge</h4>
+          <span style="font-family:'Outfit'">Student by student</span>
+        </div>
+      </div>
+      <div class="prev-student">
+        <div class="av" style="font-family:'Baloo 2',cursive">A</div>
+        <div>
+          <div class="nm" style="font-family:'Baloo 2',cursive">Aanya Sharma</div>
+          <div class="mt" style="font-family:'Outfit'">Grade 4 · Section A</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Fredoka + Poppins -->
+  <div class="card" onclick="select(this)">
+    <div class="combo-num">Combo 5</div>
+    <div class="combo-fonts">Display: <b>Fredoka</b> (soft rounded) &nbsp;·&nbsp; Body: <b>Poppins</b> (geometric clean)</div>
+    <div class="preview">
+      <div class="prev-eyebrow" style="font-family:'Poppins'">★ Tuesday morning</div>
+      <div class="prev-greeting" style="font-family:'Fredoka',sans-serif">Hi,<br><em>Ms. Rao</em></div>
+      <div class="prev-sub" style="font-family:'Poppins'">Your class of 24 little voices is ready.</div>
+      <div class="prev-cards">
+        <div class="prev-action p">
+          <div class="emoji">👧</div>
+          <h4 style="font-family:'Fredoka',sans-serif">Add a kiddo</h4>
+          <span style="font-family:'Poppins'">Add to your roster</span>
+        </div>
+        <div class="prev-action s">
+          <div class="emoji">🎤</div>
+          <h4 style="font-family:'Fredoka',sans-serif">Run challenge</h4>
+          <span style="font-family:'Poppins'">Student by student</span>
+        </div>
+      </div>
+      <div class="prev-student">
+        <div class="av" style="font-family:'Fredoka',sans-serif">A</div>
+        <div>
+          <div class="nm" style="font-family:'Fredoka',sans-serif">Aanya Sharma</div>
+          <div class="mt" style="font-family:'Poppins'">Grade 4 · Section A</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Playfair Display + Outfit -->
+  <div class="card" onclick="select(this)">
+    <div class="combo-num">Combo 6</div>
+    <div class="combo-fonts">Display: <b>Playfair Display</b> (elegant serif) &nbsp;·&nbsp; Body: <b>Outfit</b> (clean geometric)</div>
+    <div class="preview">
+      <div class="prev-eyebrow" style="font-family:'Outfit'">★ Tuesday morning</div>
+      <div class="prev-greeting" style="font-family:'Playfair Display',serif">Hi,<br><em>Ms. Rao</em></div>
+      <div class="prev-sub" style="font-family:'Outfit'">Your class of 24 little voices is ready.</div>
+      <div class="prev-cards">
+        <div class="prev-action p">
+          <div class="emoji">👧</div>
+          <h4 style="font-family:'Playfair Display',serif">Add a kiddo</h4>
+          <span style="font-family:'Outfit'">Add to your roster</span>
+        </div>
+        <div class="prev-action s">
+          <div class="emoji">🎤</div>
+          <h4 style="font-family:'Playfair Display',serif">Run challenge</h4>
+          <span style="font-family:'Outfit'">Student by student</span>
+        </div>
+      </div>
+      <div class="prev-student">
+        <div class="av" style="font-family:'Playfair Display',serif">A</div>
+        <div>
+          <div class="nm" style="font-family:'Playfair Display',serif">Aanya Sharma</div>
+          <div class="mt" style="font-family:'Outfit'">Grade 4 · Section A</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="click-hint">Click a card to mark it as your pick, then tell me which combo number you like!</p>
+
+<script>
+function select(el){
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

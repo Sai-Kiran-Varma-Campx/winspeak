@@ -89,10 +89,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const api = {
   // Auth
-  signup(username: string, password: string, name?: string) {
-    return request<{ token: string; user: { id: string; name: string } }>("/users/signup", {
+  signup(username: string, password: string, name?: string, grades?: number[]) {
+    return request<{ token: string; user: { id: string; name: string; grades: number[] } }>("/users/signup", {
       method: "POST",
-      body: JSON.stringify({ username, password, name }),
+      body: JSON.stringify({ username, password, name, grades }),
     });
   },
 
@@ -155,5 +155,52 @@ export const api = {
   // Leaderboard
   getLeaderboard(limit = 20) {
     return request<any[]>(`/leaderboard?limit=${limit}`);
+  },
+
+  // ── School POC ──
+  listStudents(grade?: number) {
+    const qs = grade ? `?grade=${grade}` : "";
+    return request<any[]>(`/school/students${qs}`);
+  },
+  createStudent(data: {
+    fullName: string;
+    studentExternalId?: string | null;
+    grade: number;
+    section?: string | null;
+    parentEmail?: string | null;
+  }) {
+    return request<any>("/school/students", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  deleteStudent(id: string) {
+    return request<{ ok: boolean }>(`/school/students/${id}`, { method: "DELETE" });
+  },
+  createSchoolAttempt(data: {
+    studentId: string;
+    categoryId: string;
+    questionId: string;
+    questionTitle: string;
+    grade: number;
+    score: number;
+    skills?: Record<string, number>;
+    confidenceScore?: number;
+    analysisResult?: any;
+  }) {
+    return request<any>("/school/attempts", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  listSchoolAttempts(params?: { studentId?: string; limit?: number }) {
+    const qs = new URLSearchParams();
+    if (params?.studentId) qs.set("studentId", params.studentId);
+    if (params?.limit) qs.set("limit", String(params.limit));
+    const query = qs.toString();
+    return request<any[]>(`/school/attempts${query ? `?${query}` : ""}`);
+  },
+  getSchoolAttempt(id: string) {
+    return request<any>(`/school/attempts/${id}`);
   },
 };

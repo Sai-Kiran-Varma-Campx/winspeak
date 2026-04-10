@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Sora:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -287,5 +287,1120 @@ body.has-dev-nav .app-main {
   button:active:not(:disabled) {
     transform: scale(0.97);
     transition: transform 0.1s ease;
+  }
+}
+
+/* ─────────────────────────────────────────
+   SCHOOL MODE — light, soft pastel theme
+   Per WinSpeak School POC brief
+───────────────────────────────────────── */
+html.mode-school {
+  /* Violet + Orange Palette (matching reference) */
+  --ink:#2D2654;
+  --ink-soft:#5B5280;
+  --ink-line:rgba(107,93,173,0.15);
+  --orange:#F59E0B;
+  --orange-light:#FEF3C7;
+  --orange-bd:#FCD34D;
+  --orange-deep:#D97706;
+  --violet:#7B6FBF;
+  --violet-light:#EDE9F6;
+  --violet-bd:#B8B0DA;
+  --violet-deep:#6B5DAD;
+  --pink:#DB2777;
+  --pink-light:#FCE7F3;
+  --pink-bd:#F9A8D4;
+  --s-yellow:#F59E0B;
+  --yellow-light:#FEF3C7;
+  --yellow-bd:#FCD34D;
+  --teal:#0D9488;
+  --teal-light:#CCFBF1;
+  --teal-bd:#5EEAD4;
+  --card-radius:26px;
+  --card-shadow:0 2px 0 rgba(107,93,173,0.08), 0 16px 32px -20px rgba(107,93,173,0.18);
+  --card-shadow-hover:0 3px 0 rgba(107,93,173,0.10), 0 24px 44px -22px rgba(107,93,173,0.25);
+
+  --bg: #F8F6FF;
+  --card: #FFFFFF;
+  --surface: #EEEAFF;
+  --border: var(--ink-line);
+  --accent: var(--violet);
+  --accent-glow: rgba(123,111,191,0.2);
+  --text: var(--ink);
+  --text-bright: #000;
+  --text-secondary: var(--ink-soft);
+  --muted: var(--ink-soft);
+  --muted-soft: #8078A8;
+  --green: var(--teal);
+  --red: #F43F5E;
+  --yellow: var(--s-yellow);
+
+  /* school pastel palette */
+  --school-sky:    var(--violet-light);
+  --school-mint:   var(--teal-light);
+  --school-yellow: var(--yellow-light);
+  --school-pink:   var(--pink-light);
+  --school-lilac:  var(--violet-light);
+  --school-peach:  var(--orange-light);
+
+  --font-display: 'Sora', 'Poppins', sans-serif;
+  --font-body: 'Poppins', system-ui, sans-serif;
+}
+
+html.mode-school body {
+  background: url("/school-bg.png") center center / cover no-repeat fixed;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 500;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ── Background overlay removed — using school-bg.png ── */
+html.mode-school body::before {
+  display: none;
+}
+
+/* ── School layout (no sidebar, top navbar) ── */
+.school-layout {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.school-content {
+  position: relative;
+  z-index: 5;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── School Navbar ── */
+.school-navbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 40px;
+  background: linear-gradient(135deg, #4a1a7a 0%, #6b2fa0 50%, #5a2590 100%);
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.school-navbar-logo {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.school-navbar-logo-img {
+  height: 45px;
+  width: auto;
+}
+
+.school-navbar-links {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.school-navbar-link {
+  color: white;
+  font-family: 'Nunito', 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 8px 20px;
+  border-radius: 25px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.school-navbar-link:hover,
+.school-navbar-link.active {
+  background: rgba(255, 255, 255, 0.2);
+  transform: none !important;
+  filter: none !important;
+}
+
+.school-navbar-link.active {
+  background: rgba(255, 215, 0, 0.25);
+  color: #ffd700;
+}
+
+.school-navbar-avatar:hover {
+  transform: none !important;
+  filter: none !important;
+}
+
+.school-navbar-logo:hover {
+  transform: none !important;
+  filter: none !important;
+}
+
+.school-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.school-navbar-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FED7AA, #FEF3C7);
+  border: 2.5px solid rgba(255,255,255,0.4);
+  display: grid;
+  place-items: center;
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: #7C5C3E;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Glassmorphism utility classes */
+.school-glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.school-glass-card {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.school-glass-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* Page container for inner school pages */
+.school-page-container {
+  min-height: calc(100vh - 70px);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.school-page-header {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px 50px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.school-page-header h1 {
+  font-family: 'Fredoka', 'Sora', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #2d1b69;
+  margin-bottom: 8px;
+}
+
+.school-page-header p {
+  color: #5a3e8a;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.school-page-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 900px;
+}
+
+@media (max-width: 768px) {
+  .school-navbar {
+    padding: 10px 20px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .school-navbar-links {
+    gap: 4px;
+  }
+  .school-navbar-link {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+  .school-page-container {
+    padding: 20px;
+  }
+  .school-page-header {
+    padding: 20px 24px;
+  }
+}
+
+/* Keep old sidebar/mobile-nav hidden in new layout */
+html.mode-school .app-root {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+html.mode-school .app-main {
+  background: transparent;
+}
+
+html.mode-school .school-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease;
+  overflow: hidden;
+}
+
+html.mode-school .school-card:not(button):not(a) {
+  /* remove hover from non-interactive cards */
+  transition: none;
+}
+
+html.mode-school button.school-card:hover,
+html.mode-school a.school-card:hover {
+  transform: translateY(-4px) rotate(0deg) scale(1.01);
+  box-shadow: var(--card-shadow-hover);
+}
+
+html.mode-school .school-pastel-sky    { background: var(--teal-light); border-color: var(--teal-bd); }
+html.mode-school .school-pastel-mint   { background: var(--teal-light); border-color: var(--teal-bd); }
+html.mode-school .school-pastel-yellow { background: var(--yellow-light); border-color: var(--yellow-bd); }
+html.mode-school .school-pastel-pink   { background: var(--pink-light); border-color: var(--pink-bd); }
+html.mode-school .school-pastel-lilac  { background: var(--pink-light); border-color: var(--pink-bd); }
+html.mode-school .school-pastel-peach  { background: var(--orange-light); border-color: var(--orange-bd); }
+
+/* Sunset Pop action card variants */
+html.mode-school .school-card-orange {
+  background: var(--orange-light);
+  border-color: var(--orange-bd);
+  transform: rotate(-0.5deg);
+}
+html.mode-school .school-card-pink {
+  background: var(--pink-light);
+  border-color: var(--pink-bd);
+  transform: rotate(0.6deg);
+}
+
+
+/* ─────────────────────────────────────────
+   SCHOOL SIDEBAR — Sunset Pop theme
+───────────────────────────────────────── */
+.school-sidebar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .school-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    flex-shrink: 0;
+    background: #fff;
+    border-right: 1.5px solid rgba(107,93,173,0.1);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    z-index: 10;
+  }
+}
+
+.school-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 24px 22px 20px;
+}
+
+.school-sidebar-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7B6FBF, #6B5DAD);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 10px rgba(107,93,173,0.3);
+  flex-shrink: 0;
+}
+.school-sidebar-logo svg {
+  width: 18px;
+  height: 18px;
+}
+
+.school-sidebar-title {
+  font-family: 'Sora', 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+  color: #2D2654;
+}
+
+.school-sidebar-divider {
+  height: 1.5px;
+  background: rgba(107,93,173,0.1);
+  margin: 0 18px;
+}
+
+.school-sidebar-nav {
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.school-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5B5280;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+
+.school-sidebar-item:hover {
+  background: rgba(123,111,191,0.08);
+  color: #2D2654;
+}
+
+.school-sidebar-item.active {
+  background: linear-gradient(135deg, rgba(123,111,191,0.12), rgba(107,93,173,0.1));
+  color: #7B6FBF;
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 #7B6FBF;
+}
+
+.school-sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  opacity: 0.8;
+}
+
+.school-sidebar-item.active .school-sidebar-icon {
+  opacity: 1;
+}
+
+.school-sidebar-footer {
+  margin-top: auto;
+  padding-bottom: 16px;
+}
+
+.school-sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+}
+
+.school-sidebar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #EDE9F6, #FEF3C7);
+  border: 2px solid #B8B0DA;
+  display: grid;
+  place-items: center;
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: #6B5DAD;
+  flex-shrink: 0;
+}
+
+.school-sidebar-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.school-sidebar-user-name {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #2D2654;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.school-sidebar-user-role {
+  font-size: 11px;
+  color: #5B5280;
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+.school-sidebar-logout {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #5B5280;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+
+.school-sidebar-logout:hover {
+  background: rgba(244,63,94,0.1);
+  color: #F43F5E;
+}
+
+/* School mobile bottom nav */
+.school-mobile-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: #fff;
+  border-top: 1.5px solid rgba(107,93,173,0.1);
+  z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (min-width: 1024px) {
+  .school-mobile-nav {
+    display: none;
+  }
+}
+
+.school-mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #5B5280;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.school-mobile-nav-item.active {
+  color: #7B6FBF;
+}
+
+.school-mobile-nav-item svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ─────────────────────────────────────────
+   SCHOOL WIZARD — Kid-Friendly Bottom Bar
+───────────────────────────────────────── */
+.school-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.school-bottom-bar-inner {
+  width: 100%;
+  max-width: 644px;
+  padding: 0 22px calc(22px + env(safe-area-inset-bottom, 0px));
+  padding-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(to top,
+    rgba(255,248,243,1) 0%,
+    rgba(255,248,243,1) 50%,
+    rgba(255,248,243,0.92) 75%,
+    rgba(255,248,243,0) 100%
+  );
+  pointer-events: auto;
+}
+
+@media (min-width: 1024px) {
+  .school-bottom-bar {
+    left: 0;
+  }
+}
+
+/* Step dots — progress indicator */
+.school-step-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.school-step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(124,45,18,0.12);
+  transition: all 0.35s cubic-bezier(.34,1.56,.64,1);
+}
+.school-step-dot.active {
+  width: 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #EA580C, #DB2777);
+  box-shadow: 0 2px 8px rgba(234,88,12,0.35);
+}
+.school-step-dot.done {
+  background: #0D9488;
+  box-shadow: 0 1px 4px rgba(13,148,136,0.3);
+}
+
+/* Back button — chunky circle */
+.school-btn-back {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  border: 2.5px solid rgba(124,45,18,0.1);
+  background: #fff;
+  color: #7C2D12;
+  font-size: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 4px 0 rgba(124,45,18,0.08),
+    0 8px 24px -10px rgba(124,45,18,0.18);
+  transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+  overflow: hidden;
+}
+
+.school-btn-back::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent);
+  border-radius: 18px 18px 0 0;
+  pointer-events: none;
+}
+
+.school-btn-back svg {
+  width: 22px;
+  height: 22px;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.25s ease;
+}
+
+.school-btn-back:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 6px 0 rgba(124,45,18,0.08),
+    0 14px 32px -10px rgba(124,45,18,0.22);
+  border-color: rgba(124,45,18,0.16);
+}
+.school-btn-back:hover svg {
+  transform: translateX(-2px);
+}
+
+.school-btn-back:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(124,45,18,0.06);
+}
+
+/* Next button — big, chunky, fun gradient */
+.school-btn-next {
+  flex: 1;
+  height: 58px;
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(135deg, #7B6FBF 0%, #6B5DAD 50%, #5B4D9E 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease infinite;
+  color: #fff;
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow:
+    0 5px 0 #4A3D8F,
+    0 10px 30px -6px rgba(107,93,173,0.45);
+  transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.school-btn-next::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+  border-radius: 20px 20px 0 0;
+  pointer-events: none;
+}
+
+/* Sparkle shimmer across the button */
+.school-btn-next::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255,255,255,0.25) 50%,
+    transparent 70%
+  );
+  transform: rotate(25deg);
+  animation: shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { left: -60%; }
+  40%, 100% { left: 120%; }
+}
+
+.school-btn-next:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow:
+    0 7px 0 #4A3D8F,
+    0 16px 40px -6px rgba(107,93,173,0.5);
+}
+
+.school-btn-next:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #4A3D8F;
+}
+
+.school-btn-next:disabled {
+  background: rgba(124,45,18,0.08);
+  color: rgba(124,45,18,0.25);
+  box-shadow: 0 3px 0 rgba(124,45,18,0.04);
+  cursor: not-allowed;
+  animation: none;
+}
+.school-btn-next:disabled::after {
+  animation: none;
+  display: none;
+}
+
+.school-btn-next .btn-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.2);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+  z-index: 1;
+}
+
+.school-btn-next:hover:not(:disabled) .btn-icon {
+  transform: translateX(4px) scale(1.1);
+}
+
+/* Step progress bar (colored line above bottom bar) */
+.school-progress-track {
+  height: 4px;
+  background: rgba(124,45,18,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  width: 100%;
+}
+.school-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #EA580C, #DB2777);
+  transition: width 0.5s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 0 10px rgba(234,88,12,0.4);
+}
+
+/* ── Step 1 category card hover ── */
+.school-cat-card {
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease !important;
+}
+.school-cat-card:hover {
+  transform: translateY(-6px) scale(1.02) !important;
+  box-shadow: 0 8px 0 rgba(107,93,173,0.08), 0 18px 32px -10px rgba(107,93,173,0.25) !important;
+}
+.school-cat-card:active {
+  transform: translateY(-2px) scale(1.01) !important;
+}
+
+/* ── Global hover effects for school mode ── */
+html.mode-school button:not(:disabled),
+html.mode-school [role="button"],
+html.mode-school .school-card {
+  transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+html.mode-school button:not(:disabled):hover,
+html.mode-school [role="button"]:hover,
+html.mode-school .school-card:hover {
+  transform: translateY(-3px);
+  filter: drop-shadow(0 6px 14px rgba(107, 93, 173, 0.15));
+}
+
+html.mode-school button:not(:disabled):active,
+html.mode-school [role="button"]:active,
+html.mode-school .school-card:active {
+  transform: translateY(1px);
+  filter: drop-shadow(0 2px 4px rgba(107, 93, 173, 0.1));
+}
+
+/* Float animation for decorative elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-30deg); }
+  50% { transform: translateY(-12px) rotate(-25deg); }
+}
+
+/* Sunflower wiggle animation */
+@keyframes sunflowerWiggle {
+  0%, 100% { transform: rotate(-5deg); }
+  25% { transform: rotate(5deg); }
+  50% { transform: rotate(-3deg); }
+  75% { transform: rotate(4deg); }
+}
+
+/* School page entrance animation */
+@keyframes schoolReveal {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.school-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: schoolReveal .7s cubic-bezier(.2,.8,.2,1) forwards;
+}
+.school-reveal-1 { animation-delay: .04s; }
+.school-reveal-2 { animation-delay: .10s; }
+.school-reveal-3 { animation-delay: .18s; }
+.school-reveal-4 { animation-delay: .26s; }
+.school-reveal-5 { animation-delay: .34s; }
+.school-reveal-6 { animation-delay: .42s; }
+
+/* ─────────────────────────────────────────
+   SCHOOL SCORE ANIMATIONS (SchoolReport)
+───────────────────────────────────────── */
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.6); }
+  60%  { transform: scale(1.08); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes barFill {
+  from { width: 0%; }
+  to   { width: var(--bar-width, 100%); }
+}
+
+@keyframes schoolScoreIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.school-score-animate {
+  opacity: 0;
+  animation: schoolScoreIn 0.5s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+
+.school-score-delay-1 { animation-delay: 0.06s; }
+.school-score-delay-2 { animation-delay: 0.14s; }
+.school-score-delay-3 { animation-delay: 0.22s; }
+.school-score-delay-4 { animation-delay: 0.30s; }
+.school-score-delay-5 { animation-delay: 0.38s; }
+.school-score-delay-6 { animation-delay: 0.46s; }
+
+/* ─────────────────────────────────────────
+   SCHOOL PAGE TRANSITIONS (wizard steps)
+───────────────────────────────────────── */
+@keyframes schoolSlideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+html.mode-school .page-enter {
+  animation: schoolSlideIn 0.3s cubic-bezier(.2,.8,.2,1);
+}
+
+/* ─────────────────────────────────────────
+   SCHOOL BOUNCING DOTS LOADER
+───────────────────────────────────────── */
+@keyframes schoolBounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-12px); }
+}
+
+/* ───── Print-only / no-print utility classes ───── */
+.print-only {
+  display: none !important;
+}
+
+/* ───── Print stylesheet for school report PDF download ───── */
+@media print {
+  /* ── Force color printing ── */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* ── Page setup ── */
+  @page {
+    size: A4;
+    margin: 18mm 16mm 18mm 16mm;
+  }
+
+  /* ── Base reset for print ── */
+  html, body {
+    background: #fff !important;
+    color: #7C2D12 !important;
+    font-family: 'Poppins', 'Inter', system-ui, sans-serif !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+    -webkit-font-smoothing: auto !important;
+    width: 100% !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  html.mode-school body {
+    background: #fff !important;
+    background-image: none !important;
+  }
+
+  /* ── Show print-only elements ── */
+  .print-only {
+    display: block !important;
+  }
+
+  /* ── Hide everything not needed ── */
+  .no-print,
+  .app-sidebar,
+  .school-sidebar,
+  .school-mobile-nav,
+  .school-bottom-bar,
+  .screen-nav,
+  nav,
+  .mobile-nav,
+  button,
+  [role="navigation"] {
+    display: none !important;
+  }
+
+  /* ── Print header branding ── */
+  .print-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16pt;
+    margin-bottom: 16pt;
+    border-bottom: 2.5pt solid #EA580C;
+  }
+
+  .print-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 10pt;
+  }
+
+  .print-header-logo {
+    width: 36pt;
+    height: 36pt;
+    border-radius: 8pt;
+    background: linear-gradient(135deg, #EA580C, #DB2777) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: 'Sora', 'Poppins', sans-serif;
+    font-weight: 900;
+    font-size: 16pt;
+    letter-spacing: -0.03em;
+  }
+
+  .print-header-title {
+    font-family: 'Sora', 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 18pt;
+    color: #7C2D12;
+    letter-spacing: -0.02em;
+  }
+
+  .print-header-subtitle {
+    font-size: 9pt;
+    color: #A8603C;
+    font-weight: 600;
+    margin-top: 1pt;
+  }
+
+  .print-header-date {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #A8603C;
+    text-align: right;
+  }
+
+  /* ── Report content area ── */
+  .print-area {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ── Cards: clean, bordered, no shadows ── */
+  .school-card,
+  [class*="rounded-[24px]"],
+  [class*="rounded-[20px]"] {
+    box-shadow: none !important;
+    border: 1pt solid #E8D5C4 !important;
+    border-radius: 10pt !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* ── Skill cards grid stays 2-col ── */
+  .grid.grid-cols-2 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8pt !important;
+  }
+
+  /* ── Section spacing ── */
+  .mb-8 { margin-bottom: 14pt !important; }
+  .mb-6 { margin-bottom: 12pt !important; }
+  .p-6  { padding: 12pt !important; }
+  .p-4  { padding: 8pt !important; }
+
+  /* ── Typography adjustments ── */
+  h1 {
+    font-size: 22pt !important;
+    line-height: 1.15 !important;
+    color: #7C2D12 !important;
+  }
+  h2 {
+    font-size: 16pt !important;
+    color: #7C2D12 !important;
+  }
+
+  /* ── Brave Meter: simplify for print ── */
+  .bg-\[\#FEF3C7\] {
+    background: #FEF3C7 !important;
+    border: 1pt solid #FCD34D !important;
+  }
+
+  /* ── Strengths section ── */
+  .bg-\[\#CCFBF1\] {
+    background: #CCFBF1 !important;
+    border: 1pt solid #5EEAD4 !important;
+  }
+
+  /* ── WinSpeak Says section ── */
+  .bg-\[\#FCE7F3\] {
+    background: #FCE7F3 !important;
+    border: 1pt solid #F9A8D4 !important;
+  }
+
+  /* ── Improvement section ── */
+  .bg-\[\#FEF2E8\] {
+    background: #FEF2E8 !important;
+    border: 1pt solid #FCD34D !important;
+  }
+
+  /* ── Remove all animations in print ── */
+  * {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* ── Remove bottom padding meant for mobile nav ── */
+  .pb-32 {
+    padding-bottom: 0 !important;
+  }
+
+  /* ── Links print as text ── */
+  a { color: #7C2D12 !important; text-decoration: none !important; }
+
+  /* ── Print footer ── */
+  .print-footer {
+    display: block !important;
+    margin-top: 20pt;
+    padding-top: 12pt;
+    border-top: 1pt solid #E8D5C4;
+    text-align: center;
+    font-size: 8pt;
+    color: #A8603C;
+    font-weight: 500;
   }
 }

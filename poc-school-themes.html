@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WinSpeak — Pick Your Theme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Nunito:wght@500;700;800;900&family=Fredoka:wght@400;600;700&family=Poppins:wght@500;700;800;900&family=Gabarito:wght@500;700;900&family=Quicksand:wght@500;700&family=Outfit:wght@500;700;800&family=DM+Sans:opsz,wght@9..40,500;9..40,700;9..40,800&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Sora:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f0ede6;font-family:system-ui,sans-serif;color:#1a1a1a;min-height:100vh}
+
+  .page-header{
+    text-align:center;padding:48px 20px 12px;
+  }
+  .page-header h1{font-family:'Fraunces',serif;font-weight:900;font-size:36px;letter-spacing:-0.03em}
+  .page-header p{color:#777;font-size:15px;margin-top:8px;font-weight:500}
+
+  .themes{
+    display:flex;flex-direction:column;gap:48px;
+    max-width:520px;margin:36px auto 80px;padding:0 20px;
+  }
+
+  .theme-option{
+    border-radius:32px;overflow:hidden;
+    box-shadow:0 4px 0 rgba(0,0,0,0.08), 0 24px 48px -20px rgba(0,0,0,0.2);
+    cursor:pointer;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+    position:relative;
+  }
+  .theme-option:hover{
+    transform:translateY(-6px) scale(1.01);
+    box-shadow:0 6px 0 rgba(0,0,0,0.1), 0 36px 60px -20px rgba(0,0,0,0.28);
+  }
+  .theme-option.selected{outline:4px solid #E8794A;outline-offset:4px}
+  .theme-option.selected::before{
+    content:"✓ YOUR PICK";
+    position:absolute;top:16px;right:16px;z-index:10;
+    font-size:11px;font-weight:900;letter-spacing:0.12em;
+    color:#fff;background:#E8794A;
+    padding:6px 14px;border-radius:999px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  .theme-label{
+    padding:18px 24px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .theme-label h2{font-size:20px;font-weight:900;letter-spacing:-0.02em}
+  .theme-label span{font-size:12px;font-weight:700;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em}
+
+  .theme-body{padding:0 20px 24px}
+
+  /* ── Mini preview shared layout ── */
+  .mini{border-radius:22px;padding:24px 20px;position:relative;overflow:hidden}
+  .mini .eyebrow{
+    font-size:10px;font-weight:800;letter-spacing:0.15em;
+    text-transform:uppercase;margin-bottom:8px;
+    display:inline-block;padding:4px 10px;border-radius:999px;
+  }
+  .mini .greeting{font-weight:900;font-size:38px;line-height:0.95;letter-spacing:-0.03em;margin-bottom:8px}
+  .mini .greeting em{font-style:italic;font-weight:500;position:relative;display:inline-block}
+  .mini .greeting em::after{
+    content:"";position:absolute;left:-2%;right:-2%;bottom:4%;height:10px;
+    z-index:-1;border-radius:6px;transform:rotate(-1deg);opacity:0.8;
+  }
+  .mini .sub{font-size:13px;margin-bottom:18px;line-height:1.4;opacity:0.7}
+  .mini .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .mini .act{border-radius:16px;padding:14px 12px;text-align:left;border:1.5px solid}
+  .mini .act .em{font-size:22px;margin-bottom:6px}
+  .mini .act h4{font-weight:800;font-size:15px;margin-bottom:2px}
+  .mini .act span{font-size:11px;opacity:0.6;font-weight:600}
+  .mini .stu{
+    display:flex;align-items:center;gap:10px;
+    border-radius:14px;padding:10px 12px;
+  }
+  .mini .stu .av{
+    width:38px;height:38px;border-radius:12px;
+    display:grid;place-items:center;font-weight:900;font-size:16px;flex-shrink:0;
+  }
+  .mini .stu .nm{font-weight:700;font-size:14px}
+  .mini .stu .mt{font-size:11px;opacity:0.6;font-weight:600}
+
+  /* ══════════════════════════════════════════
+     THEME 1 — Storybook (warm cream + peach)
+     ══════════════════════════════════════════ */
+  .t1-label{background:#FBF6EC;color:#2A1F1A}
+  .t1{
+    background:#FBF6EC;color:#2A1F1A;
+    font-family:'Nunito',sans-serif;
+    background-image:radial-gradient(circle at 90% 10%,rgba(255,182,148,0.2),transparent 50%);
+  }
+  .t1 .eyebrow{background:#FFE9DC;color:#E8794A;border:1px solid #F4B89A}
+  .t1 .greeting{font-family:'Fraunces',serif}
+  .t1 .greeting em{color:#E8794A}
+  .t1 .greeting em::after{background:#FFE08A}
+  .t1 .act:first-child{background:#FFE9DC;border-color:#F4B89A;transform:rotate(-0.5deg)}
+  .t1 .act:last-child{background:#E1F1FA;border-color:#8BC8E2;transform:rotate(0.5deg)}
+  .t1 .act h4{font-family:'Fraunces',serif}
+  .t1 .stu{background:#fff;border:1.5px solid rgba(42,31,26,0.1)}
+  .t1 .stu .av{background:#E1F1FA;border:1.5px solid #8BC8E2;color:#2c7ea3}
+  .t1 .stu .nm{font-family:'Fraunces',serif}
+
+  /* ══════════════════════════════════════════
+     THEME 2 — Neon Playground (dark + vibrant)
+     ══════════════════════════════════════════ */
+  .t2-label{background:#1a1028;color:#f0e6ff}
+  .t2{
+    background:#1a1028;color:#f0e6ff;
+    font-family:'Fredoka',sans-serif;
+    background-image:
+      radial-gradient(circle at 80% 20%,rgba(168,85,247,0.2),transparent 50%),
+      radial-gradient(circle at 10% 80%,rgba(56,189,248,0.15),transparent 50%);
+  }
+  .t2 .eyebrow{background:rgba(168,85,247,0.25);color:#c084fc;border:1px solid rgba(168,85,247,0.4)}
+  .t2 .greeting{font-family:'Fredoka',sans-serif}
+  .t2 .greeting em{color:#c084fc}
+  .t2 .greeting em::after{background:#facc15;opacity:0.6}
+  .t2 .sub{color:rgba(240,230,255,0.6)}
+  .t2 .act:first-child{background:rgba(168,85,247,0.2);border-color:rgba(168,85,247,0.4);transform:rotate(-0.5deg)}
+  .t2 .act:last-child{background:rgba(56,189,248,0.15);border-color:rgba(56,189,248,0.35);transform:rotate(0.5deg)}
+  .t2 .act span{color:rgba(240,230,255,0.5)}
+  .t2 .stu{background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1)}
+  .t2 .stu .av{background:rgba(250,204,21,0.2);border:1.5px solid rgba(250,204,21,0.4);color:#facc15}
+  .t2 .stu .mt{color:rgba(240,230,255,0.5)}
+
+  /* ══════════════════════════════════════════
+     THEME 3 — Ocean Breeze (teal + sandy warm)
+     ══════════════════════════════════════════ */
+  .t3-label{background:#f0f7f4;color:#1a3a2f}
+  .t3{
+    background:#f0f7f4;color:#1a3a2f;
+    font-family:'Quicksand',sans-serif;
+    background-image:radial-gradient(circle at 80% 90%,rgba(45,212,191,0.12),transparent 50%);
+  }
+  .t3 .eyebrow{background:#ccfbf1;color:#0d9488;border:1px solid #99f6e4}
+  .t3 .greeting{font-family:'Gabarito',sans-serif}
+  .t3 .greeting em{color:#0d9488}
+  .t3 .greeting em::after{background:#fde68a}
+  .t3 .act:first-child{background:#ccfbf1;border-color:#5eead4;transform:rotate(-0.5deg)}
+  .t3 .act:last-child{background:#fef3c7;border-color:#fcd34d;transform:rotate(0.5deg)}
+  .t3 .act h4{font-family:'Gabarito',sans-serif}
+  .t3 .stu{background:#fff;border:1.5px solid rgba(26,58,47,0.1)}
+  .t3 .stu .av{background:#ccfbf1;border:1.5px solid #5eead4;color:#0f766e}
+  .t3 .stu .nm{font-family:'Gabarito',sans-serif}
+
+  /* ══════════════════════════════════════════
+     THEME 4 — Sunset Pop (warm gradient + bold)
+     ══════════════════════════════════════════ */
+  .t4-label{background:#fff5f0;color:#7c2d12}
+  .t4{
+    background:linear-gradient(160deg,#fff5f0 0%,#fef2e8 40%,#fce7f3 100%);
+    color:#7c2d12;
+    font-family:'Poppins',sans-serif;
+  }
+  .t4 .eyebrow{background:#fed7aa;color:#c2410c;border:1px solid #fdba74}
+  .t4 .greeting{font-family:'Sora',sans-serif;letter-spacing:-0.04em}
+  .t4 .greeting em{color:#ea580c}
+  .t4 .greeting em::after{background:#fbbf24}
+  .t4 .act:first-child{background:#fed7aa;border-color:#fdba74;transform:rotate(-0.5deg)}
+  .t4 .act:last-child{background:#fce7f3;border-color:#f9a8d4;transform:rotate(0.5deg)}
+  .t4 .act h4{font-family:'Sora',sans-serif}
+  .t4 .stu{background:#fff;border:1.5px solid rgba(124,45,18,0.12)}
+  .t4 .stu .av{background:#fce7f3;border:1.5px solid #f9a8d4;color:#be185d}
+  .t4 .stu .nm{font-family:'Sora',sans-serif}
+
+  /* ══════════════════════════════════════════
+     THEME 5 — Midnight Scholar (deep navy + gold)
+     ══════════════════════════════════════════ */
+  .t5-label{background:#0f172a;color:#e2e8f0}
+  .t5{
+    background:#0f172a;color:#e2e8f0;
+    font-family:'DM Sans',sans-serif;
+    background-image:
+      radial-gradient(circle at 20% 20%,rgba(99,102,241,0.12),transparent 50%),
+      radial-gradient(circle at 85% 80%,rgba(250,204,21,0.08),transparent 50%);
+  }
+  .t5 .eyebrow{background:rgba(250,204,21,0.15);color:#fbbf24;border:1px solid rgba(250,204,21,0.3)}
+  .t5 .greeting{font-family:'Bricolage Grotesque',sans-serif}
+  .t5 .greeting em{color:#fbbf24}
+  .t5 .greeting em::after{background:#6366f1;opacity:0.5}
+  .t5 .sub{color:rgba(226,232,240,0.6)}
+  .t5 .act:first-child{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3);transform:rotate(-0.5deg)}
+  .t5 .act:last-child{background:rgba(250,204,21,0.1);border-color:rgba(250,204,21,0.25);transform:rotate(0.5deg)}
+  .t5 .act span{color:rgba(226,232,240,0.5)}
+  .t5 .act h4{font-family:'Bricolage Grotesque',sans-serif}
+  .t5 .stu{background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1)}
+  .t5 .stu .av{background:rgba(250,204,21,0.15);border:1.5px solid rgba(250,204,21,0.3);color:#fbbf24}
+  .t5 .stu .nm{font-family:'Bricolage Grotesque',sans-serif}
+  .t5 .stu .mt{color:rgba(226,232,240,0.5)}
+
+  /* ══════════════════════════════════════════
+     THEME 6 — Zen Garden (sage + sand + minimal)
+     ══════════════════════════════════════════ */
+  .t6-label{background:#f5f1ea;color:#3d3929}
+  .t6{
+    background:#f5f1ea;color:#3d3929;
+    font-family:'Outfit',sans-serif;
+  }
+  .t6 .eyebrow{background:#e8e0d0;color:#7c7259;border:1px solid #d4c9b5}
+  .t6 .greeting{font-family:'Outfit',sans-serif;font-weight:800}
+  .t6 .greeting em{color:#6b8f71}
+  .t6 .greeting em::after{background:#c8d5b9;opacity:0.7}
+  .t6 .sub{color:#7c7259}
+  .t6 .act:first-child{background:#dce8d8;border-color:#b5cdb0;transform:rotate(-0.3deg)}
+  .t6 .act:last-child{background:#e8e0d0;border-color:#d4c9b5;transform:rotate(0.3deg)}
+  .t6 .act h4{font-family:'Outfit',sans-serif}
+  .t6 .act span{color:#7c7259}
+  .t6 .stu{background:#fff;border:1.5px solid rgba(61,57,41,0.1)}
+  .t6 .stu .av{background:#dce8d8;border:1.5px solid #b5cdb0;color:#4a7a50}
+  .t6 .stu .mt{color:#7c7259}
+
+  .pick-hint{
+    text-align:center;color:#999;font-size:14px;
+    padding:0 20px 60px;font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Pick a Theme</h1>
+  <p>6 completely different looks. Click the one you love.</p>
+</div>
+
+<div class="themes">
+
+  <!-- THEME 1 -->
+  <div class="theme-option" onclick="pick(this)">
+    <div class="theme-label t1-label">
+      <h2>1 — Storybook</h2>
+      <span>Warm cream · Peach · Picture-book</span>
+    </div>
+    <div class="theme-body" style="background:#FBF6EC">
+      <div class="mini t1">
+        <div class="eyebrow">★ Tuesday morning</div>
+        <div class="greeting">Hi,<br><em>Ms. Rao</em></div>
+        <div class="sub">Your class of 24 little voices is ready.</div>
+        <div class="cards">
+          <div class="act"><div class="em">👧</div><h4>Add a kiddo</h4><span>Add to roster</span></div>
+          <div class="act"><div class="em">🎤</div><h4>Run challenge</h4><span>Student by student</span></div>
+        </div>
+        <div class="stu">
+          <div class="av">A</div>
+          <div><div class="nm">Aanya Sharma</div><div class="mt">Grade 4 · Section A</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THEME 2 -->
+  <div class="theme-option" onclick="pick(this)">
+    <div class="theme-label t2-label">
+      <h2>2 — Neon Playground</h2>
+      <span>Dark · Purple · Vibrant glow</span>
+    </div>
+    <div class="theme-body" style="background:#1a1028">
+      <div class="mini t2">
+        <div class="eyebrow">★ Tuesday morning</div>
+        <div class="greeting">Hi,<br><em>Ms. Rao</em></div>
+        <div class="sub">Your class of 24 little voices is ready.</div>
+        <div class="cards">
+          <div class="act"><div class="em">👧</div><h4>Add a kiddo</h4><span>Add to roster</span></div>
+          <div class="act"><div class="em">🎤</div><h4>Run challenge</h4><span>Student by student</span></div>
+        </div>
+        <div class="stu">
+          <div class="av">A</div>
+          <div><div class="nm">Aanya Sharma</div><div class="mt">Grade 4 · Section A</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THEME 3 -->
+  <div class="theme-option" onclick="pick(this)">
+    <div class="theme-label t3-label">
+      <h2>3 — Ocean Breeze</h2>
+      <span>Light teal · Sandy · Fresh</span>
+    </div>
+    <div class="theme-body" style="background:#f0f7f4">
+      <div class="mini t3">
+        <div class="eyebrow">★ Tuesday morning</div>
+        <div class="greeting">Hi,<br><em>Ms. Rao</em></div>
+        <div class="sub">Your class of 24 little voices is ready.</div>
+        <div class="cards">
+          <div class="act"><div class="em">👧</div><h4>Add a kiddo</h4><span>Add to roster</span></div>
+          <div class="act"><div class="em">🎤</div><h4>Run challenge</h4><span>Student by student</span></div>
+        </div>
+        <div class="stu">
+          <div class="av">A</div>
+          <div><div class="nm">Aanya Sharma</div><div class="mt">Grade 4 · Section A</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THEME 4 -->
+  <div class="theme-option" onclick="pick(this)">
+    <div class="theme-label t4-label">
+      <h2>4 — Sunset Pop</h2>
+      <span>Warm gradient · Orange · Pink</span>
+    </div>
+    <div class="theme-body" style="background:#fff5f0">
+      <div class="mini t4">
+        <div class="eyebrow">★ Tuesday morning</div>
+        <div class="greeting">Hi,<br><em>Ms. Rao</em></div>
+        <div class="sub">Your class of 24 little voices is ready.</div>
+        <div class="cards">
+          <div class="act"><div class="em">👧</div><h4>Add a kiddo</h4><span>Add to roster</span></div>
+          <div class="act"><div class="em">🎤</div><h4>Run challenge</h4><span>Student by student</span></div>
+        </div>
+        <div class="stu">
+          <div class="av">A</div>
+          <div><div class="nm">Aanya Sharma</div><div class="mt">Grade 4 · Section A</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THEME 5 -->
+  <div class="theme-option" onclick="pick(this)">
+    <div class="theme-label t5-label">
+      <h2>5 — Midnight Scholar</h2>
+      <span>Deep navy · Gold · Sophisticated</span>
+    </div>
+    <div class="theme-body" style="background:#0f172a">
+      <div class="mini t5">
+        <div class="eyebrow">★ Tuesday morning</div>
+        <div class="greeting">Hi,<br><em>Ms. Rao</em></div>
+        <div class="sub">Your class of 24 little voices is ready.</div>
+        <div class="cards">
+          <div class="act"><div class="em">👧</div><h4>Add a kiddo</h4><span>Add to roster</span></div>
+          <div class="act"><div class="em">🎤</div><h4>Run challenge</h4><span>Student by student</span></div>
+        </div>
+        <div class="stu">
+          <div class="av">A</div>
+          <div><div class="nm">Aanya Sharma</div><div class="mt">Grade 4 · Section A</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THEME 6 -->
+  <div class="theme-option" onclick="pick(this)">
+    <div class="theme-label t6-label">
+      <h2>6 — Zen Garden</h2>
+      <span>Sage · Sand · Calm minimal</span>
+    </div>
+    <div class="theme-body" style="background:#f5f1ea">
+      <div class="mini t6">
+        <div class="eyebrow">★ Tuesday morning</div>
+        <div class="greeting">Hi,<br><em>Ms. Rao</em></div>
+        <div class="sub">Your class of 24 little voices is ready.</div>
+        <div class="cards">
+          <div class="act"><div class="em">👧</div><h4>Add a kiddo</h4><span>Add to roster</span></div>
+          <div class="act"><div class="em">🎤</div><h4>Run challenge</h4><span>Student by student</span></div>
+        </div>
+        <div class="stu">
+          <div class="av">A</div>
+          <div><div class="nm">Aanya Sharma</div><div class="mt">Grade 4 · Section A</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="pick-hint">Click a theme to select it, then tell me the number!</p>
+
+<script>
+function pick(el){
+  document.querySelectorAll('.theme-option').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

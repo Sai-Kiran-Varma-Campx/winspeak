@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>WinSpeak School — Storybook Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF6EC;
+    --paper-2:#F4ECDB;
+    --ink:#2A1F1A;
+    --ink-soft:#6B5C53;
+    --ink-line:rgba(42,31,26,0.12);
+    --peach:#FFB694;
+    --peach-bg:#FFE9DC;
+    --peach-bd:#F4B89A;
+    --peach-deep:#E8794A;
+    --butter:#FFE08A;
+    --butter-bg:#FFF4C9;
+    --butter-bd:#F2CE65;
+    --sky:#B6DDF0;
+    --sky-bg:#E1F1FA;
+    --sky-bd:#8BC8E2;
+    --mint:#B8E5C9;
+    --mint-bg:#DDF1E5;
+    --mint-bd:#85CFA0;
+    --coral:#F47C7C;
+    --card-radius:28px;
+    --card-shadow:0 2px 0 rgba(42,31,26,0.10), 0 18px 32px -22px rgba(42,31,26,0.30);
+    --card-shadow-hover:0 3px 0 rgba(42,31,26,0.12), 0 26px 44px -24px rgba(42,31,26,0.35);
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  body{
+    font-family:'Nunito',system-ui,sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    font-weight:600;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(255,182,148,0.18), transparent 38%),
+      radial-gradient(circle at 92% 4%, rgba(182,221,240,0.22), transparent 42%),
+      radial-gradient(circle at 50% 100%, rgba(255,224,138,0.18), transparent 50%);
+  }
+
+  .shell{
+    max-width:480px;
+    margin:0 auto;
+    padding:28px 22px 120px;
+  }
+  @media(min-width:780px){
+    .shell{max-width:980px;padding:48px 56px 140px}
+  }
+
+  /* ── Top bar ── */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:28px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    font-family:'Fraunces',Georgia,serif;font-weight:900;
+    font-size:22px;letter-spacing:-0.02em;
+  }
+  .brand .dot{
+    width:14px;height:14px;border-radius:50%;
+    background:var(--peach-deep);
+    box-shadow:0 0 0 4px var(--peach-bg);
+  }
+  .avatar{
+    width:42px;height:42px;border-radius:14px;
+    background:var(--butter-bg);
+    border:1.5px solid var(--butter-bd);
+    display:grid;place-items:center;
+    font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:18px;
+    color:var(--ink);
+    box-shadow:0 2px 0 rgba(42,31,26,0.10);
+    transform:rotate(-2deg);
+  }
+
+  /* ── Hero ── */
+  .hero{position:relative;margin-bottom:34px}
+  .eyebrow{
+    font-size:11px;font-weight:900;letter-spacing:0.18em;
+    color:var(--peach-deep);text-transform:uppercase;
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--peach-bg);
+    border:1.5px solid var(--peach-bd);
+    padding:6px 12px;border-radius:999px;
+  }
+  .greeting{
+    font-family:'Fraunces',Georgia,serif;
+    font-weight:900;
+    font-size:clamp(40px, 9vw, 64px);
+    line-height:0.95;
+    letter-spacing:-0.035em;
+    margin:14px 0 10px;
+  }
+  .greeting em{
+    font-style:italic;font-weight:500;
+    color:var(--peach-deep);
+    position:relative;display:inline-block;
+  }
+  .greeting em::after{
+    content:"";position:absolute;
+    left:-2%;right:-2%;bottom:6%;height:14px;
+    background:var(--butter);z-index:-1;
+    border-radius:8px;transform:rotate(-1deg);opacity:0.85;
+  }
+  .sub{font-size:15px;color:var(--ink-soft);font-weight:600;max-width:34ch}
+  .sparkle{
+    position:absolute;right:-6px;top:8px;
+    width:74px;height:74px;
+    animation:spin 20s linear infinite;opacity:0.9;
+  }
+  @media(min-width:780px){.sparkle{right:0;top:0;width:110px;height:110px}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ── Quick stats ── */
+  .strip{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:10px;margin:24px 0 30px;
+  }
+  .stat{
+    background:#fff;
+    border:1.5px solid var(--ink-line);
+    border-radius:18px;padding:14px 12px;
+    box-shadow:0 2px 0 rgba(42,31,26,0.06);
+  }
+  .stat .v{
+    font-family:'Fraunces',Georgia,serif;font-weight:900;
+    font-size:26px;line-height:1;letter-spacing:-0.02em;
+  }
+  .stat .l{
+    font-size:11px;color:var(--ink-soft);
+    margin-top:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
+  }
+  .stat:nth-child(1) .v{color:var(--peach-deep)}
+  .stat:nth-child(2) .v{color:#3a8fb7}
+  .stat:nth-child(3) .v{color:#c9a013}
+
+  /* ── Squiggle ── */
+  .squiggle{display:block;width:100%;height:14px;margin:6px 0 22px;color:var(--peach-bd)}
+
+  /* ── Section title ── */
+  .section-title{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin:6px 2px 14px;
+  }
+  .section-title h2{
+    font-family:'Fraunces',Georgia,serif;
+    font-weight:900;font-size:24px;letter-spacing:-0.02em;
+  }
+  .section-title a{
+    font-size:13px;font-weight:800;color:var(--peach-deep);
+    text-decoration:none;border-bottom:2px solid var(--peach-bd);padding-bottom:1px;
+    cursor:pointer;
+  }
+
+  /* ── Action cards ── */
+  .actions{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;
+    margin-bottom:36px;
+  }
+  .action{
+    position:relative;
+    border-radius:var(--card-radius);
+    padding:22px 20px 24px;
+    text-align:left;cursor:pointer;
+    border:1.5px solid;
+    box-shadow:var(--card-shadow);
+    transition:transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease;
+    font:inherit;color:var(--ink);
+    overflow:hidden;min-height:180px;
+    display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .action.peach{background:var(--peach-bg);border-color:var(--peach-bd);transform:rotate(-0.6deg)}
+  .action.sky{background:var(--sky-bg);border-color:var(--sky-bd);transform:rotate(0.7deg)}
+  .action:hover{
+    transform:translateY(-4px) rotate(0deg) scale(1.01);
+    box-shadow:var(--card-shadow-hover);
+  }
+  .action .ico{
+    width:54px;height:54px;border-radius:18px;
+    background:#fff;border:1.5px solid var(--ink-line);
+    display:grid;place-items:center;font-size:28px;
+    box-shadow:0 2px 0 rgba(42,31,26,0.10);
+    margin-bottom:18px;
+  }
+  .action h3{
+    font-family:'Fraunces',Georgia,serif;font-weight:900;
+    font-size:22px;letter-spacing:-0.02em;line-height:1.05;
+    margin-bottom:6px;
+  }
+  .action p{font-size:13px;color:var(--ink-soft);line-height:1.4;font-weight:600}
+  .action .arrow{
+    position:absolute;top:18px;right:18px;
+    width:34px;height:34px;border-radius:50%;
+    background:#fff;display:grid;place-items:center;
+    border:1.5px solid var(--ink-line);
+    font-weight:900;transition:transform .25s ease;
+  }
+  .action:hover .arrow{transform:translate(2px,-2px) rotate(-12deg)}
+  .action::before{
+    content:"";position:absolute;
+    width:140px;height:140px;border-radius:50%;
+    right:-50px;bottom:-60px;
+    background:rgba(255,255,255,0.45);pointer-events:none;
+  }
+
+  /* ── Roster ── */
+  .roster{display:flex;flex-direction:column;gap:12px}
+  .student{
+    background:#fff;
+    border:1.5px solid var(--ink-line);
+    border-radius:22px;padding:14px 16px;
+    display:flex;align-items:center;gap:14px;
+    box-shadow:0 2px 0 rgba(42,31,26,0.06);
+    transition:transform .2s ease, box-shadow .2s ease;
+    cursor:pointer;
+  }
+  .student:hover{
+    transform:translateX(4px);
+    box-shadow:0 3px 0 rgba(42,31,26,0.10), 0 16px 26px -22px rgba(42,31,26,0.3);
+  }
+  .student .a{
+    width:48px;height:48px;border-radius:16px;
+    display:grid;place-items:center;
+    font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:20px;
+    border:1.5px solid;flex-shrink:0;
+  }
+  .student:nth-child(4n+1) .a{background:var(--peach-bg);border-color:var(--peach-bd);color:var(--peach-deep)}
+  .student:nth-child(4n+2) .a{background:var(--sky-bg);border-color:var(--sky-bd);color:#2c7ea3}
+  .student:nth-child(4n+3) .a{background:var(--butter-bg);border-color:var(--butter-bd);color:#a37b00}
+  .student:nth-child(4n+4) .a{background:var(--mint-bg);border-color:var(--mint-bd);color:#2f8a52}
+  .student .name{
+    font-family:'Fraunces',Georgia,serif;font-weight:700;
+    font-size:17px;letter-spacing:-0.01em;margin-bottom:2px;
+  }
+  .student .meta{
+    font-size:12px;color:var(--ink-soft);font-weight:600;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .chip{
+    display:inline-flex;align-items:center;gap:4px;
+    padding:2px 8px;border-radius:999px;
+    font-size:11px;font-weight:800;
+    background:var(--paper-2);border:1px solid var(--ink-line);color:var(--ink-soft);
+  }
+  .chip.done{background:var(--mint-bg);border-color:var(--mint-bd);color:#2f8a52}
+  .chip.new{background:var(--butter-bg);border-color:var(--butter-bd);color:#a37b00}
+  .student .go{
+    margin-left:auto;
+    width:34px;height:34px;border-radius:50%;
+    border:1.5px solid var(--ink-line);
+    display:grid;place-items:center;color:var(--ink);
+    font-weight:900;background:var(--paper);flex-shrink:0;
+  }
+
+  /* ── Floating button ── */
+  .fab{
+    position:fixed;left:50%;bottom:22px;
+    transform:translateX(-50%);
+    background:var(--ink);color:var(--paper);
+    border:none;padding:16px 26px;border-radius:999px;
+    font:inherit;font-weight:900;font-size:15px;
+    display:flex;align-items:center;gap:10px;
+    box-shadow:0 4px 0 rgba(42,31,26,0.25), 0 22px 40px -16px rgba(42,31,26,0.45);
+    cursor:pointer;z-index:50;
+  }
+  .fab .pulse{
+    width:10px;height:10px;border-radius:50%;background:var(--coral);
+    box-shadow:0 0 0 0 rgba(244,124,124,0.7);
+    animation:pulse 1.6s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(244,124,124,0.7)}
+    70%{box-shadow:0 0 0 12px rgba(244,124,124,0)}
+    100%{box-shadow:0 0 0 0 rgba(244,124,124,0)}
+  }
+
+  /* ── Page-load entrance ── */
+  .reveal{opacity:0;transform:translateY(14px);animation:rise .8s cubic-bezier(.2,.8,.2,1) forwards}
+  .reveal:nth-child(1){animation-delay:.05s}
+  .reveal:nth-child(2){animation-delay:.12s}
+  .reveal:nth-child(3){animation-delay:.20s}
+  .reveal:nth-child(4){animation-delay:.28s}
+  .reveal:nth-child(5){animation-delay:.36s}
+  .reveal:nth-child(6){animation-delay:.44s}
+  .reveal:nth-child(7){animation-delay:.52s}
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+  @media(min-width:780px){
+    .layout{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:start}
+    .fab{display:none}
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+
+    <!-- Top bar -->
+    <div class="topbar reveal">
+      <div class="brand">
+        <span class="dot"></span>
+        WinSpeak
+      </div>
+      <div class="avatar">R</div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero reveal">
+      <span class="eyebrow">&#9733; Tuesday morning</span>
+      <h1 class="greeting">Hi,<br><em>Ms. Rao</em></h1>
+      <p class="sub">Your class of 24 little voices is ready. Let's hear them today.</p>
+      <svg class="sparkle" viewBox="0 0 100 100" fill="none">
+        <path d="M50 5 L55 45 L95 50 L55 55 L50 95 L45 55 L5 50 L45 45 Z" fill="#FFE08A" stroke="#2A1F1A" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="50" cy="50" r="6" fill="#E8794A"/>
+      </svg>
+    </div>
+
+    <!-- Stats -->
+    <div class="strip reveal">
+      <div class="stat"><div class="v">24</div><div class="l">Students</div></div>
+      <div class="stat"><div class="v">12</div><div class="l">Done today</div></div>
+      <div class="stat"><div class="v">7d</div><div class="l">Class streak</div></div>
+    </div>
+
+    <div class="layout">
+      <div class="left">
+        <!-- Squiggle divider -->
+        <svg class="squiggle reveal" viewBox="0 0 400 14" preserveAspectRatio="none">
+          <path d="M0 7 Q 25 0 50 7 T 100 7 T 150 7 T 200 7 T 250 7 T 300 7 T 350 7 T 400 7" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+
+        <!-- Action cards -->
+        <div class="actions reveal">
+          <button class="action peach">
+            <div class="arrow">&rarr;</div>
+            <div class="ico">&#x1F467;</div>
+            <div>
+              <h3>Add a kiddo</h3>
+              <p>Welcome a new student to your class roster.</p>
+            </div>
+          </button>
+          <button class="action sky">
+            <div class="arrow">&rarr;</div>
+            <div class="ico">&#x1F3A4;</div>
+            <div>
+              <h3>Run challenge</h3>
+              <p>Pick a category &amp; question, then go student by student.</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="right">
+        <!-- Roster -->
+        <div class="section-title reveal">
+          <h2>Your class</h2>
+          <a>View dashboard &rarr;</a>
+        </div>
+
+        <div class="roster reveal">
+          <div class="student">
+            <div class="a">A</div>
+            <div>
+              <div class="name">Aanya Sharma</div>
+              <div class="meta">Grade 4 &middot; A <span class="chip done">&#10003; Done today</span></div>
+            </div>
+            <div class="go">&rsaquo;</div>
+          </div>
+          <div class="student">
+            <div class="a">D</div>
+            <div>
+              <div class="name">Dhruv Iyer</div>
+              <div class="meta">Grade 4 &middot; A <span class="chip">Last: 2 days ago</span></div>
+            </div>
+            <div class="go">&rsaquo;</div>
+          </div>
+          <div class="student">
+            <div class="a">K</div>
+            <div>
+              <div class="name">Kavya Menon</div>
+              <div class="meta">Grade 4 &middot; B <span class="chip new">&#9733; New student</span></div>
+            </div>
+            <div class="go">&rsaquo;</div>
+          </div>
+          <div class="student">
+            <div class="a">R</div>
+            <div>
+              <div class="name">Rohan Das</div>
+              <div class="meta">Grade 4 &middot; A <span class="chip done">&#10003; Done today</span></div>
+            </div>
+            <div class="go">&rsaquo;</div>
+          </div>
+          <div class="student">
+            <div class="a">S</div>
+            <div>
+              <div class="name">Saanvi Pillai</div>
+              <div class="meta">Grade 4 &middot; B <span class="chip">Last: yesterday</span></div>
+            </div>
+            <div class="go">&rsaquo;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Floating CTA -->
+  <button class="fab">
+    <span class="pulse"></span>
+    Start today's session
+  </button>
+
+</body>
+</html>

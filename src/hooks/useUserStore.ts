@@ -71,6 +71,7 @@ interface StoreState {
   name: string;
   totalXp: number;
   streak: number;
+  grades: number[];
   completedChallengeIds: string[];
   attempts: Attempt[];
   loading: boolean;
@@ -83,6 +84,7 @@ function defaults(): StoreState {
     name: "",
     totalXp: 0,
     streak: 0,
+    grades: [],
     completedChallengeIds: [],
     attempts: [],
     loading: true,
@@ -99,6 +101,7 @@ export interface UserStore {
   xpToNext: number;
   xpProgress: number;
   streak: number;
+  grades: number[];
   completedChallengeIds: string[];
   attempts: Attempt[];
   loading: boolean;
@@ -109,7 +112,7 @@ export interface UserStore {
   resetChallengeAttempts(challengeId: string): void;
   setName(name: string): void;
   login(username: string, password: string): Promise<void>;
-  signup(username: string, password: string, name?: string): Promise<void>;
+  signup(username: string, password: string, name?: string, grades?: number[]): Promise<void>;
   resetPassword(username: string, newPassword: string): Promise<void>;
   logout(): void;
   reset(): void;
@@ -149,6 +152,7 @@ export function useUserStore(): UserStore {
           name: me.name,
           totalXp: me.totalXp ?? me.total_xp,
           streak: me.streak,
+          grades: me.grades ?? [],
           completedChallengeIds: me.completedChallengeIds ?? me.completed_challenge_ids ?? [],
           attempts: attemptsData.map(mapAttempt),
           loading: false,
@@ -250,6 +254,7 @@ export function useUserStore(): UserStore {
         name: me.name,
         totalXp: me.totalXp ?? me.total_xp,
         streak: me.streak,
+        grades: me.grades ?? [],
         completedChallengeIds: me.completedChallengeIds ?? me.completed_challenge_ids ?? [],
         attempts: attemptsData.map(mapAttempt),
         loading: false,
@@ -272,16 +277,17 @@ export function useUserStore(): UserStore {
     }
   }, []);
 
-  const signup = useCallback(async (username: string, password: string, name?: string) => {
+  const signup = useCallback(async (username: string, password: string, name?: string, grades?: number[]) => {
     setData((prev) => ({ ...prev, loading: true, authError: null }));
     try {
-      const res = await api.signup(username, password, name);
+      const res = await api.signup(username, password, name, grades);
       setToken(res.token);
       setData({
         hasOnboarded: true,
         name: res.user.name,
         totalXp: 0,
         streak: 0,
+        grades: res.user.grades ?? [],
         completedChallengeIds: [],
         attempts: [],
         loading: false,
@@ -343,6 +349,7 @@ export function useUserStore(): UserStore {
     xpToNext,
     xpProgress,
     streak: data.streak,
+    grades: data.grades,
     completedChallengeIds: data.completedChallengeIds,
     attempts: data.attempts,
     loading: data.loading,

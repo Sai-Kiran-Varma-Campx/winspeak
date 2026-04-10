@@ -66,13 +66,14 @@ const signupSchema = z.object({
   username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/, "Letters, numbers, underscores only"),
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100).optional(),
+  grades: z.array(z.number().int().min(1).max(4)).max(4).optional(),
 });
 
 app.post("/signup", async (c) => {
   const body = signupSchema.safeParse(await c.req.json());
   if (!body.success) return c.json({ error: body.error.flatten() }, 400);
 
-  const { username, password, name } = body.data;
+  const { username, password, name, grades } = body.data;
 
   // Check if username taken
   const [existing] = await db
@@ -82,6 +83,9 @@ app.post("/signup", async (c) => {
     .limit(1);
   if (existing) return c.json({ error: "Username already taken" }, 409);
 
+  // Dedupe + sort grades for consistent storage
+  const normalizedGrades = grades ? [...new Set(grades)].sort((a, b) => a - b) : [];
+
   const passwordHash = await hashPassword(password);
   const [created] = await db
     .insert(users)
@@ -90,11 +94,12 @@ app.post("/signup", async (c) => {
       passwordHash,
       name: (name ?? username).trim(),
       hasOnboarded: true,
+      grades: normalizedGrades,
     })
     .returning();
 
   const token = await createToken(created.id);
-  return c.json({ token, user: { id: created.id, name: created.name } }, 201);
+  return c.json({ token, user: { id: created.id, name: created.name, grades: created.grades } }, 201);
 });
 
 const loginSchema = z.object({

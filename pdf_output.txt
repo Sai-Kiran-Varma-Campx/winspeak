@@ -1,0 +1,404 @@
+
+--- PAGE 0 ---
+DESIGN CHANGE BRIEF 
+WinSpeak School POC — UI & UX Edits 
+This document specifies all proposed changes to the WinSpeak school POC for the original WinSpeak POC. 
+Each row defines one element: what it currently shows, what it should show, and the full specification for 
+implementation. 
+ 
+Element 
+Old Design 
+New Design 
+Specification 
+KEY AI MODEL UPDATES 
+Grade 
+Calibration 
+Single assessment 
+standard across all 
+grades 
+Grade-aware AI 
+scoring 
+AI must assess the student against the 
+expected baseline for their specific 
+grade. 
+Baseline definitions and calibration 
+parameters are to be established by the 
+AI and engineering team. 
+  Skill 
+Breakdown 
+↳ Clarity — 
+Assessment 
+Scope 
+Pronunciation and 
+word clarity only 
+Expanded to include 
+voice modulation 
+and voice throw 
+The Clarity skill card must assess four 
+dimensions: (1) pronunciation — how 
+clearly individual words are spoken, (2) 
+word clarity — whether the listener can 
+understand what is being said, (3) voice 
+modulation — variation in pitch and tone 
+to convey meaning and maintain listener 
+engagement, (4) voice throw — 
+projection and volume appropriate to the 
+speaking context. 
+All four dimensions feed into the single 
+Clarity star score for this card. 
+GLOBAL UI SETTINGS 
+Visual Theme 
+Dark mode 
+available; neutral 
+backgrounds 
+Light mode only; 
+soft pastel 
+backgrounds — 
+applies across the 
+entire portal 
+Default and only mode is light. 
+Dark mode removed entirely. 
+Backgrounds: white or soft pastels — sky 
+blue, warm yellow, mint green. 
+Typography: rounded, friendly typefaces 
+with large font sizes. 
+Icons: simple emoji-style or cartoon icons 
+per skill card. 
+Score Display 
+Numeric score 
+shown (e.g. 
+88/100) 
+Star rating only — 
+no numbers 
+No numeric score shown to students or 
+parents at any point. 
+Conversion formula: Stars = 
+CEILING(score ÷ 20, 0.5), giving a 0–5 
+value rounded up to the nearest 0.5. 
+Examples: 82 → 4.5 stars; 60 → 3.0 
+stars; 45 → 2.5 stars; 0 → 0 stars. 
+UI must support both full-star and half-
+star rendering. 
+XP Points 
+Present across the 
+portal 
+Removed entirely 
+All references to XP points must be 
+removed from every page across the 
+portal. 
+
+--- PAGE 1 ---
+This includes labels, counters, badges, 
+progress bars, and reward animations 
+tied to XP. 
+No replacement metric is needed — this 
+is a straight removal. 
+Practice page 
+avatar 
+Robot, no option to 
+pause 
+Friendly teacher 
+image instead of 
+robot face, option to 
+pause the 
+instructions 
+The robot image should be replaced with 
+a friendly teacher image. 
+ 
+The user should be able to pause the 
+instructions if they want to. 
+REPORT CARD SECTIONS 
+  ↳ Report 
+Download 
+Not present 
+Downloadable as 
+PDF by teacher and 
+parent 
+The report must be downloadable as a 
+PDF by both the teacher and the parent. 
+Confidence 
+Index 
+"Confidence Index" 
+shown as a % 
+"How Brave You 
+Sounded! 💪" 
+Section label renamed to "How Brave 
+You Sounded! 💪". 
+Replace percentage display with a visual 
+meter — emoji face or animal meter (e.g. 
+a lion that grows progressively bigger as 
+confidence increases). 
+No numeric percentage shown to 
+students or parents at any point. 
+Skill 
+Breakdown 
+"Skill Breakdown" 
+— vertical list with 
+percentage bars 
+"How Did You 
+Do? ⭐" — 2×3 
+card grid 
+Section heading renamed to 
+"How Did You Do? ⭐". 
+Layout changes from a vertical list to six 
+skill cards arranged in a 2-column × 3-
+row grid. 
+No list format or percentage bars. 
+  ↳ Card Content 
+Skill name + 
+percentage bar 
+Icon + title + star 
+rating + friendly 
+label 
+Each card displays: (1) a simple icon, (2) 
+the skill title — titles remain unchanged: 
+Clarity, Fluency, Grammar, Relevancy, 
+Structure, Vocabulary, (3) a star fill out of 
+5 using the score-to-stars formula above, 
+(4) one short friendly description beneath 
+the title (e.g. "Clear Words", "Good Flow" 
+— additive only, formal titles do not 
+change). 
+  ↳ Tap 
+Behaviour 
+No expand 
+behaviour 
+Tap to expand 
+Tapping a card expands it to reveal 
+detailed feedback text for the teacher or 
+parent to read and discuss with the child. 
+Collapsed state shows only the card 
+summary view. 
+WinSpeak 
+Analysis 
+Long prose 
+paragraph 
+2–3 short sentences 
++ audio button 
+AI-generated feedback must be broken 
+into a maximum of 2–3 very short 
+sentences using simple, age-appropriate 
+words. 
+No long paragraphs. 
+  ↳ Audio 
+Playback 
+Not present 
+"Read it to me 🔊" 
+button 
+A button labelled "Read it to me 🔊" 
+appears alongside the WinSpeak 
+Analysis feedback text. 
+
+--- PAGE 2 ---
+Tapping it reads the text aloud via text-to-
+speech in a child friendly voice. 
+This applies to the WinSpeak Analysis 
+section only. 
+Strengths 
+Multiple strength 
+items listed 
+Max 2 strengths 
+Maximum of 2 strengths displayed. 
+Language must be simple and 
+celebratory — written as a positive 
+statement in plain language. e.g. "You 
+spoke in full sentences! 👏" or "You 
+finished your speech well! 🌟". 
+Improve 
+"Improve" — single 
+tip, corrective tone 
+"Try This Next Time! 
+💡" — max 1 action 
+tip 
+Section renamed from "Improve" to "Try 
+This Next Time! 💡". 
+Maximum of 1 improvement tip. 
+Must be written as a simple, actionable 
+instruction — not a correction or criticism. 
+e.g. "Next time, try to use more 
+describing words, like big, bright, or 
+funny." 
+Grammar 
+Issues 
+"Grammar Issues" 
+— red "x found" 
+badge 
+"Let's Fix These! 
+✏️" — amber "x to 
+practise" badge 
+Section renamed from "Grammar Issues" 
+to "Let's Fix These! ✏️". 
+Badge colour changes from red to 
+amber/yellow. 
+Badge text changes from "x found" to "x 
+to practise". 
+  ↳ Filler Words 
+sub-section 
+"Filler Words" 
+"Pause Words 🤔" 
+Sub-section renamed from "Filler Words" 
+to "Pause Words 🤔". 
+No changes to logic or display beyond 
+the rename. 
+  ↳ Tips 
+Language 
+Clinical, corrective 
+tone 
+Encouraging, age-
+appropriate tone 
+All tip copy in this section must be 
+rewritten in simple, encouraging 
+language. 
+Tone should be instructive, not 
+corrective. 
+  ↳ What You 
+Got Right 
+Not present 
+"What you got right 
+👍" callout box 
+A callout box with a green/mint 
+background appears above the error list. 
+The AI generates 1–2 specific grammar 
+items the student got correct, written in 
+simple encouraging language. 
+This callout must always appear — 
+including when there are errors to 
+practise — so the section never feels 
+purely negative. e.g. "You used full 
+sentences the whole time! You 
+remembered to use 'and' to join your 
+ideas." 
+Ideal 
+Response 
+"Ideal Response" 
+— no sub-label 
+"A Better Way to 
+Say It 💡" + soft 
+sub-label 
+Section renamed from "Ideal Response" 
+to "A Better Way to Say It 💡". 
+A soft sub-label appears beneath the 
+title: "Here's one way this speech could 
+sound — use it to practise together!" 
+
+--- PAGE 3 ---
+  ↳ Spot the 
+Difference 
+prompt 
+Not present 
+Static prompt box 
+below AI response 
+A highlighted box appears beneath the 
+AI-generated ideal response with the 
+fixed static text: "Can you find 2 things 
+that changed from your speech? Ask 
+your teacher!" This is not AI-generated — 
+it is a fixed UI element. 
+Skill Radar 
+Spider/radar chart 
+displayed 
+Removed entirely 
+The skill radar chart is removed from the 
+report. 
+No replacement visual is needed. 
+TEACHER PORTAL PAGES 
+Teacher Home 
+Not present 
+New page — 
+primary landing 
+screen after login 
+This is the primary landing page a 
+teacher sees after logging in. 
+Displays the teacher's class roster with 
+each student's name and most recent 
+challenge date. 
+Two primary actions are available from 
+this page: Add Student and Administer 
+Challenge. 
+  ↳ Add Student 
+Not present 
+"Add Student" 
+action and form 
+A button on Teacher Home opens an 
+Add Student form. 
+Form fields: full name, student ID, grade, 
+section, parent email (optional). 
+On submit, the student is added to the 
+teacher's class roster immediately. 
+  ↳ Administer 
+Challenge 
+Not present 
+"Administer 
+Challenge" action 
+A button on Teacher Home initiates the 
+Challenge Administration Flow. 
+See Challenge Administration Flow 
+below for the full step-by-step 
+specification. 
+Challenge 
+Administration 
+Flow 
+Not present 
+New 3-step flow — 
+triggered from 
+Teacher Home 
+A three-step sequential flow initiated by 
+clicking Administer Challenge on the 
+Teacher Home page. 
+The teacher cannot proceed to the next 
+step without completing the current one. 
+  ↳ Step 1 — 
+Category 
+Not present 
+Category selection 
+screen 
+Teacher selects one category from 8 
+options: Circletime, Building Talks, 
+TEDlets, Interview Discussion, Voice for 
+Change, Podcast Playground, Student 
+Council Speeches, Policy Proposals. 
+Only one category can be selected per 
+session. 
+  ↳ Step 2 — 
+Grade & 
+Question 
+Not present 
+Grade and question 
+selection screen 
+Teacher selects a grade (1–4) and a 
+specific question from within the selected 
+category and grade. 
+Questions are filtered by the category 
+and grade selected in Step 1. 
+  ↳ Step 3 — 
+Administer 
+Not present 
+Per-student 
+administration 
+screen 
+Displays the full class roster for the 
+session. 
+
+--- PAGE 4 ---
+Teacher marks each student individually 
+— Start when the student begins 
+speaking, Done when they finish. 
+On Done, the system generates and 
+saves an individual report for that 
+student. 
+Students are assessed one by one; the 
+teacher moves through the roster 
+sequentially. 
+Teacher 
+Dashboard 
+Not present 
+New page — class 
+overview 
+Displays a class-level summary for all 
+students in the teacher's section. 
+Columns: student name, number of 
+challenges completed, average star 
+rating, top strength, area to improve. 
+No XP points, streak indicators, or 
+gamification metrics of any kind. 
+WinSpeak Portal — Design Change Brief  |  Winnify © 2026 

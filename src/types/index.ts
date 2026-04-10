@@ -76,4 +76,8 @@ export interface AnalysisResult {
   strengths: string[];
   improvements: string[];
   idealResponse: string;
+  /** School POC: 0-100 confidence/bravery score for "How Brave You Sounded!" meter. */
+  confidenceScore?: number;
+  /** School POC: 1-2 specific things the student got right grammatically. */
+  whatYouGotRight?: string[];
 }
