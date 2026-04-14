@@ -133,8 +133,21 @@ app.patch("/schools/:id", async (c) => {
 
 app.delete("/schools/:id", async (c) => {
   const id = c.req.param("id");
-  const [updated] = await db.update(schools).set({ isActive: false }).where(eq(schools.id, id)).returning();
-  if (!updated) return c.json({ error: "School not found" }, 404);
+
+  // Verify school exists
+  const [school] = await db.select({ id: schools.id }).from(schools).where(eq(schools.id, id)).limit(1);
+  if (!school) return c.json({ error: "School not found" }, 404);
+
+  // Cascade delete: attempts → students → teachers → school
+  // 1. Delete student attempts for this school
+  await db.delete(studentAttempts).where(eq(studentAttempts.schoolId, id));
+  // 2. Delete students for this school
+  await db.delete(students).where(eq(students.schoolId, id));
+  // 3. Delete teachers (users) for this school
+  await db.delete(users).where(and(eq(users.schoolId, id), eq(users.role, "teacher")));
+  // 4. Delete the school itself
+  await db.delete(schools).where(eq(schools.id, id));
+
   return c.json({ ok: true });
 });
 
