@@ -30,11 +30,11 @@ function parseFile(file: File): Promise<ParsedRow[]> {
     reader.onload = () => {
       try {
         const data = new Uint8Array(reader.result as ArrayBuffer);
-        const wb = read(data, { type: "array" });
+        const wb = read(data, { type: "array", raw: true, cellDates: false });
         const sheet = wb.Sheets[wb.SheetNames[0]];
         if (!sheet) { reject(new Error("No sheet found")); return; }
 
-        const raw: any[][] = utils.sheet_to_json(sheet, { header: 1, defval: "" });
+        const raw: any[][] = utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true });
         if (raw.length < 2) { reject(new Error("File must have a header row and at least one data row")); return; }
 
         // Find column indices from header row
