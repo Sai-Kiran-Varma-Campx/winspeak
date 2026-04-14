@@ -79,8 +79,8 @@ export const adminApi = {
   createTeacher(schoolId: string, data: { name: string; username: string; password: string; grades?: number[] }) {
     return request<any>(`/admin/schools/${schoolId}/teachers`, { method: "POST", body: JSON.stringify(data) });
   },
-  bulkImportTeachers(schoolId: string, teachers: { name: string; grades?: string }[]) {
-    return request<{ created: number; teachers: { name: string; username: string; password: string }[] }>(
+  bulkImportTeachers(schoolId: string, teachers: { name: string; email?: string; grades?: string }[]) {
+    return request<{ created: number; teachers: { name: string; email: string; username: string; password: string }[] }>(
       `/admin/schools/${schoolId}/teachers/bulk`,
       { method: "POST", body: JSON.stringify({ teachers }) }
     );

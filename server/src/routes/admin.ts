@@ -228,6 +228,7 @@ function generatePassword(): string {
 const bulkImportSchema = z.object({
   teachers: z.array(z.object({
     name: z.string().min(1).max(120),
+    email: z.string().max(200).optional(),
     grades: z.string().optional(),
   })).min(1).max(200),
 });
@@ -244,7 +245,7 @@ app.post("/schools/:id/teachers/bulk", async (c) => {
   const existingUsers = await db.select({ username: users.username }).from(users);
   const usedUsernames = new Set(existingUsers.map((u) => u.username));
 
-  const results: { name: string; username: string; password: string }[] = [];
+  const results: { name: string; email: string; username: string; password: string }[] = [];
 
   for (const teacher of body.data.teachers) {
     const firstName = teacher.name.trim().split(/\s+/)[0];
@@ -269,7 +270,7 @@ app.post("/schools/:id/teachers/bulk", async (c) => {
       hasOnboarded: true, grades, schoolId, role: "teacher",
     });
 
-    results.push({ name: teacher.name.trim(), username, password });
+    results.push({ name: teacher.name.trim(), email: (teacher.email || "").trim(), username, password });
   }
 
   return c.json({ created: results.length, teachers: results }, 201);
