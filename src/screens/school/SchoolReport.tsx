@@ -361,7 +361,7 @@ export default function SchoolReport() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4C1D95" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v10M7 12l5 5 5-5"/><path d="M5 19h14"/></svg>
               Download PDF
             </button>
-            <button onClick={() => navigate(-1)} style={{
+            <button onClick={() => { stopAudioPlayback(); navigate("/school/administer/run"); }} style={{
               padding: "10px 18px", borderRadius: 14, fontSize: 13, fontWeight: 700,
               background: "linear-gradient(135deg, #7C3AED, #A78BFA)", border: "none", color: "#fff",
               cursor: "pointer", ...cs,

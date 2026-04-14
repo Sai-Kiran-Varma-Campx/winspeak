@@ -215,7 +215,6 @@ export async function transcribeAudio(blob: Blob): Promise<string> {
 
 const TTS_MODELS = [
   "gemini-2.5-flash-preview-tts",
-  "gemini-2.5-flash",
 ];
 
 /**
@@ -311,7 +310,7 @@ export async function synthesizeSpeechCached(
 
 // ── Coach voice playback from Vercel Blob CDN ───────────────────────────────
 
-import { VOICE_URLS, SCHOOL_VOICE_URLS } from "@/constants/voiceUrls";
+import { SCHOOL_VOICE_URLS } from "@/constants/voiceUrls";
 
 /**
  * Play coach voice from Vercel Blob CDN. Throws if not available.
@@ -322,7 +321,7 @@ export async function playCoachVoice(
   _coachScript: string,
   onStart?: () => void
 ): Promise<void> {
-  const blobUrl = VOICE_URLS[challengeId] || SCHOOL_VOICE_URLS[challengeId];
+  const blobUrl = SCHOOL_VOICE_URLS[challengeId];
   if (!blobUrl) {
     throw new Error("Coach voice not available for this challenge");
   }

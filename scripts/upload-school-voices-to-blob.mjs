@@ -47,6 +47,7 @@ async function main() {
       const blob = await put(`voices/school/${id}.pcm`, fileBuffer, {
         access: "public",
         contentType: "application/octet-stream",
+        allowOverwrite: true,
       });
 
       urls[id] = blob.url;

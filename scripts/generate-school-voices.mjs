@@ -11,7 +11,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const OUT_DIR = path.join(ROOT, "public", "voices", "school");
 
-const API_KEY = "AIzaSyBTPmnGkkHDGZxrYZBcz9QTt2G1OcT0XM8";
+// Read from .env file
+import { readFileSync } from "fs";
+try {
+  const envContent = readFileSync(path.join(ROOT, ".env"), "utf-8");
+  for (const line of envContent.split("\n")) {
+    const idx = line.indexOf("=");
+    if (idx > 0) process.env[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
+  }
+} catch {}
+
+const API_KEY = process.env.VITE_GEMINI_API_KEY;
+if (!API_KEY) { console.error("❌ Set VITE_GEMINI_API_KEY in .env"); process.exit(1); }
 
 const MODEL = "gemini-2.5-flash-preview-tts";
 const URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;

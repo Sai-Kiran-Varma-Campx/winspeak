@@ -60,10 +60,26 @@ export default function SchoolRecording() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Tick elapsed seconds
+  // Stop all audio on unmount (navigation away)
+  useEffect(() => {
+    return () => { stopAudioPlayback(); };
+  }, []);
+
+  // Tick elapsed seconds + auto-stop at 60s
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
+
   useEffect(() => {
     if (phase !== "recording") return;
-    tickRef.current = window.setInterval(() => setElapsed((s) => s + 1), 1000) as unknown as number;
+    tickRef.current = window.setInterval(() => {
+      setElapsed((s) => {
+        if (s + 1 >= 60) {
+          // Auto-stop at 60 seconds
+          setTimeout(() => finishRef.current(), 0);
+        }
+        return s + 1;
+      });
+    }, 1000) as unknown as number;
     return () => {
       if (tickRef.current) window.clearInterval(tickRef.current);
     };
@@ -447,12 +463,12 @@ export default function SchoolRecording() {
               {String(Math.floor(elapsed / 60)).padStart(2, "0")}:{String(elapsed % 60).padStart(2, "0")}
             </div>
             <button
-              onClick={finish}
-              disabled={!isRecording || elapsed < 30}
+              onClick={() => { if (phase === "recording" && elapsed >= 30) finish(); }}
+              disabled={elapsed < 30}
               style={{
                 maxWidth: 280, width: "100%", margin: "0 auto", padding: "16px 0",
                 borderRadius: 30, border: "none",
-                cursor: (!isRecording || elapsed < 30) ? "not-allowed" : "pointer",
+                cursor: elapsed < 30 ? "not-allowed" : "pointer",
                 background: elapsed < 30
                   ? "rgba(124,58,237,0.25)"
                   : "linear-gradient(135deg, #7C3AED, #A78BFA)",
@@ -464,7 +480,7 @@ export default function SchoolRecording() {
               }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
-              {elapsed < 30 ? `Wait ${30 - elapsed}s` : "Stop Recording"}
+              {elapsed < 30 ? `Wait ${30 - elapsed}s` : elapsed >= 55 ? `Auto-stop in ${60 - elapsed}s` : "Stop Recording"}
             </button>
           </div>
         )}
