@@ -3,6 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { adminApi } from "@/lib/adminApi";
 import Spinner from "@/components/Spinner";
 
+const card = { background: "rgba(255,255,255,0.6)", backdropFilter: "blur(12px)", border: "1.5px solid rgba(124,58,237,0.12)", borderRadius: 16 } as const;
+const input = { padding: "12px 14px", borderRadius: 12, border: "1.5px solid rgba(124,58,237,0.15)", background: "rgba(255,255,255,0.6)", color: "#4C1D95", fontSize: 14, fontFamily: "'Poppins', sans-serif", outline: "none", width: "100%" } as const;
+const btn = { padding: "10px 20px", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #7C3AED, #A78BFA)", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 13, fontFamily: "'Fredoka', 'Sora', sans-serif", boxShadow: "0 4px 16px rgba(124,58,237,0.2)" } as const;
+const btnGhost = { padding: "10px 20px", borderRadius: 12, border: "1.5px solid rgba(124,58,237,0.15)", background: "transparent", color: "#6E5E8A", cursor: "pointer", fontSize: 13, fontFamily: "'Fredoka', 'Sora', sans-serif" } as const;
+const th = { padding: "12px 14px", textAlign: "left" as const, color: "#6E5E8A", fontWeight: 600, fontSize: 12, textTransform: "uppercase" as const };
+const td = { padding: "12px 14px", color: "#4C1D95", fontSize: 13 };
+
 export default function SchoolsList() {
   const navigate = useNavigate();
   const [schools, setSchools] = useState<any[]>([]);
@@ -12,9 +19,7 @@ export default function SchoolsList() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    adminApi.listSchools().then(setSchools).finally(() => setLoading(false));
-  }, []);
+  useEffect(() => { adminApi.listSchools().then(setSchools).finally(() => setLoading(false)); }, []);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -23,20 +28,11 @@ export default function SchoolsList() {
     if (!form.name.trim() || !form.code.trim()) { setError("Name and code are required"); return; }
     setCreating(true);
     try {
-      const created = await adminApi.createSchool({
-        name: form.name.trim(),
-        code: form.code.trim(),
-        address: form.address.trim() || undefined,
-        contactEmail: form.contactEmail.trim() || undefined,
-      });
+      const created = await adminApi.createSchool({ name: form.name.trim(), code: form.code.trim(), address: form.address.trim() || undefined, contactEmail: form.contactEmail.trim() || undefined });
       setSchools((prev) => [{ ...created, teacherCount: 0, studentCount: 0 }, ...prev]);
       setShowCreate(false);
       setForm({ name: "", code: "", address: "", contactEmail: "" });
-    } catch (e: any) {
-      setError(e.message || "Failed to create school");
-    } finally {
-      setCreating(false);
-    }
+    } catch (e: any) { setError(e.message || "Failed to create school"); } finally { setCreating(false); }
   }
 
   async function toggleActive(school: any) {
@@ -49,88 +45,59 @@ export default function SchoolsList() {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h1 style={{ fontSize: 22, color: "#e0e0ff", fontWeight: 700, margin: 0 }}>Schools</h1>
-        <button
-          onClick={() => setShowCreate(true)}
-          style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: "#6366f1", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 13 }}
-        >
-          + Add School
-        </button>
+        <h1 style={{ fontSize: 22, color: "#4C1D95", fontWeight: 700, margin: 0, fontFamily: "'Fredoka', 'Sora', sans-serif" }}>Schools</h1>
+        <button onClick={() => setShowCreate(true)} style={btn}>+ Add School</button>
       </div>
 
-      {/* Create modal */}
       {showCreate && (
-        <div style={{
-          background: "#1a1a2e", border: "1px solid #2a2a4a", borderRadius: 12, padding: 24, marginBottom: 20,
-        }}>
-          <h3 style={{ color: "#e0e0ff", marginTop: 0, marginBottom: 16 }}>New School</h3>
+        <div style={{ ...card, padding: 24, marginBottom: 20 }}>
+          <h3 style={{ color: "#4C1D95", marginTop: 0, marginBottom: 16, fontFamily: "'Fredoka', 'Sora', sans-serif" }}>New School</h3>
           <form onSubmit={handleCreate}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-              <input placeholder="School Name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                style={{ padding: "10px 12px", borderRadius: 8, border: "1px solid #2a2a4a", background: "#12122a", color: "#e0e0ff", fontSize: 13 }} />
-              <input placeholder="Code (e.g. DPS-HYD) *" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })}
-                style={{ padding: "10px 12px", borderRadius: 8, border: "1px solid #2a2a4a", background: "#12122a", color: "#e0e0ff", fontSize: 13 }} />
-              <input placeholder="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
-                style={{ padding: "10px 12px", borderRadius: 8, border: "1px solid #2a2a4a", background: "#12122a", color: "#e0e0ff", fontSize: 13 }} />
-              <input placeholder="Contact Email" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
-                style={{ padding: "10px 12px", borderRadius: 8, border: "1px solid #2a2a4a", background: "#12122a", color: "#e0e0ff", fontSize: 13 }} />
+              <input placeholder="School Name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={input} />
+              <input placeholder="Code (e.g. DPS-HYD) *" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} style={input} />
+              <input placeholder="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} style={input} />
+              <input placeholder="Contact Email" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} style={input} />
             </div>
-            {error && <p style={{ color: "#f43f5e", fontSize: 12, marginBottom: 8 }}>{error}</p>}
+            {error && <p style={{ color: "#F43F5E", fontSize: 12, marginBottom: 8, fontWeight: 600 }}>{error}</p>}
             <div style={{ display: "flex", gap: 8 }}>
-              <button type="submit" disabled={creating}
-                style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: "#6366f1", color: "#fff", cursor: "pointer", fontSize: 13 }}>
-                {creating ? "Creating..." : "Create"}
-              </button>
-              <button type="button" onClick={() => { setShowCreate(false); setError(""); }}
-                style={{ padding: "8px 18px", borderRadius: 8, border: "1px solid #2a2a4a", background: "transparent", color: "#888", cursor: "pointer", fontSize: 13 }}>
-                Cancel
-              </button>
+              <button type="submit" disabled={creating} style={btn}>{creating ? "Creating..." : "Create"}</button>
+              <button type="button" onClick={() => { setShowCreate(false); setError(""); }} style={btnGhost}>Cancel</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Schools table */}
-      <div style={{ background: "#1a1a2e", border: "1px solid #2a2a4a", borderRadius: 12, overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, color: "#ccc" }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid #2a2a4a" }}>
-              <th style={{ padding: "10px 14px", textAlign: "left", color: "#888" }}>Name</th>
-              <th style={{ padding: "10px 14px", textAlign: "left", color: "#888" }}>Code</th>
-              <th style={{ padding: "10px 14px", textAlign: "center", color: "#888" }}>Teachers</th>
-              <th style={{ padding: "10px 14px", textAlign: "center", color: "#888" }}>Students</th>
-              <th style={{ padding: "10px 14px", textAlign: "center", color: "#888" }}>Status</th>
-              <th style={{ padding: "10px 14px", textAlign: "right", color: "#888" }}>Actions</th>
-            </tr>
-          </thead>
+      <div style={{ ...card, padding: 0, overflow: "hidden" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead><tr style={{ borderBottom: "1.5px solid rgba(124,58,237,0.08)" }}>
+            <th style={th}>Name</th><th style={th}>Code</th>
+            <th style={{ ...th, textAlign: "center" }}>Teachers</th><th style={{ ...th, textAlign: "center" }}>Students</th>
+            <th style={{ ...th, textAlign: "center" }}>Status</th><th style={{ ...th, textAlign: "right" }}>Actions</th>
+          </tr></thead>
           <tbody>
             {schools.map((s) => (
-              <tr key={s.id} style={{ borderBottom: "1px solid #1f1f3a", cursor: "pointer" }}
+              <tr key={s.id} style={{ borderBottom: "1px solid rgba(124,58,237,0.06)", cursor: "pointer" }}
                 onClick={() => navigate(`/admin/schools/${s.id}`)}>
-                <td style={{ padding: "12px 14px", fontWeight: 500 }}>{s.name}</td>
-                <td style={{ padding: "12px 14px", color: "#6366f1" }}>{s.code}</td>
-                <td style={{ padding: "12px 14px", textAlign: "center" }}>{s.teacherCount}</td>
-                <td style={{ padding: "12px 14px", textAlign: "center" }}>{s.studentCount}</td>
-                <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                <td style={{ ...td, fontWeight: 600 }}>{s.name}</td>
+                <td style={{ ...td, color: "#7C3AED", fontWeight: 600 }}>{s.code}</td>
+                <td style={{ ...td, textAlign: "center" }}>{s.teacherCount}</td>
+                <td style={{ ...td, textAlign: "center" }}>{s.studentCount}</td>
+                <td style={{ ...td, textAlign: "center" }}>
                   <span style={{
-                    padding: "2px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600,
-                    background: s.isActive ? "rgba(34,197,94,0.15)" : "rgba(244,63,94,0.15)",
-                    color: s.isActive ? "#22c55e" : "#f43f5e",
-                  }}>
-                    {s.isActive ? "Active" : "Inactive"}
-                  </span>
+                    padding: "3px 12px", borderRadius: 20, fontSize: 11, fontWeight: 600,
+                    background: s.isActive ? "rgba(34,197,94,0.12)" : "rgba(244,63,94,0.12)",
+                    color: s.isActive ? "#16a34a" : "#e11d48",
+                  }}>{s.isActive ? "Active" : "Inactive"}</span>
                 </td>
-                <td style={{ padding: "12px 14px", textAlign: "right" }} onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => toggleActive(s)}
-                    style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #2a2a4a", background: "transparent", color: "#888", cursor: "pointer", fontSize: 11 }}>
+                <td style={{ ...td, textAlign: "right" }} onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => toggleActive(s)} style={{ ...btnGhost, padding: "4px 12px", fontSize: 11 }}>
                     {s.isActive ? "Deactivate" : "Activate"}
                   </button>
                 </td>
               </tr>
             ))}
-            {schools.length === 0 && (
-              <tr><td colSpan={6} style={{ padding: "30px 14px", textAlign: "center", color: "#555" }}>No schools yet. Click "Add School" to create one.</td></tr>
-            )}
+            {schools.length === 0 && <tr><td colSpan={6} style={{ padding: 30, textAlign: "center", color: "#8B7AA8" }}>No schools yet. Click "+ Add School" to create one.</td></tr>}
           </tbody>
         </table>
       </div>
