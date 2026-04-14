@@ -5,6 +5,7 @@ import { SessionProvider } from "@/context/SessionContext";
 import { UserStoreProvider } from "@/context/UserStoreContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { SchoolSessionProvider } from "@/context/SchoolSessionContext";
+import { AdminStoreProvider, useAdminStore } from "@/context/AdminStoreContext";
 import ToastContainer from "@/components/Toast";
 import OfflineBanner from "@/components/OfflineBanner";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -14,6 +15,8 @@ import SchoolTopNav from "@/components/SchoolTopNav";
 import CloudsBg from "@/components/CloudsBg";
 import SchoolBgDecorations from "@/components/SchoolBgDecorations";
 import Login from "@/screens/Login";
+import AdminLogin from "@/screens/admin/AdminLogin";
+import AdminLayout from "@/components/admin/AdminLayout";
 // School screens
 import TeacherHome from "@/screens/school/TeacherHome";
 import ChallengeStep1Category from "@/screens/school/ChallengeStep1Category";
@@ -52,22 +55,34 @@ function SchoolRoutes() {
   );
 }
 
-function AppContent() {
+function AdminApp() {
+  const admin = useAdminStore();
+
+  if (admin.loading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#0f0f23" }}>
+        <Spinner size={24} />
+      </div>
+    );
+  }
+
+  if (!admin.isLoggedIn) {
+    return <AdminLogin />;
+  }
+
+  return <AdminLayout />;
+}
+
+function SchoolApp() {
   const store = useStore();
 
-  // Always apply school mode class
   useEffect(() => {
     syncModeClass("school");
   }, []);
 
   if (store.loading) {
     return (
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-      }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
         <Spinner size={32} />
       </div>
     );
@@ -91,19 +106,36 @@ function AppContent() {
   );
 }
 
+function AppRouter() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith("/admin");
+
+  if (isAdmin) {
+    return (
+      <AdminStoreProvider>
+        <AdminApp />
+      </AdminStoreProvider>
+    );
+  }
+
+  return (
+    <UserStoreProvider>
+      <SessionProvider>
+        <SchoolSessionProvider>
+          <SchoolApp />
+        </SchoolSessionProvider>
+      </SessionProvider>
+    </UserStoreProvider>
+  );
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
       <ToastProvider>
-        <UserStoreProvider>
-          <SessionProvider>
-            <SchoolSessionProvider>
-              <OfflineBanner />
-              <AppContent />
-              <ToastContainer />
-            </SchoolSessionProvider>
-          </SessionProvider>
-        </UserStoreProvider>
+        <OfflineBanner />
+        <AppRouter />
+        <ToastContainer />
       </ToastProvider>
     </ErrorBoundary>
   );
