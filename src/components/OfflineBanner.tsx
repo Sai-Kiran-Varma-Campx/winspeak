@@ -13,7 +13,7 @@ export default function OfflineBanner() {
         left: 0,
         right: 0,
         zIndex: 10000,
-        background: "#FF4D6A",
+        background: "#CC6B7E",
         color: "#fff",
         textAlign: "center",
         padding: "6px 12px",

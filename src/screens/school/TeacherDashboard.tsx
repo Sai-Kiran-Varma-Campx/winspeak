@@ -168,7 +168,7 @@ export default function TeacherDashboard() {
                 >
                   <div>
                     <div style={{
-                      fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 600,
+                      fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500,
                       fontSize: 15, color: "#2d1b69",
                     }}>{r.student.fullName}</div>
                     <div style={{ fontSize: 11, color: "#5a3e8a", fontWeight: 500 }}>

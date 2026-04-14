@@ -7,7 +7,7 @@ interface SparklineProps {
 
 export default function Sparkline({
   data,
-  color = "#7C5CFC",
+  color = "#8B80C0",
   width = 80,
   height = 28,
 }: SparklineProps) {
@@ -32,7 +32,7 @@ export default function Sparkline({
     ` ${width},${height}`;
 
   const trend = data[data.length - 1] - data[0];
-  const trendColor = trend > 0 ? "#22D37A" : trend < 0 ? "#FF4D6A" : color;
+  const trendColor = trend > 0 ? "#5BAF7E" : trend < 0 ? "#CC6B7E" : color;
 
   return (
     <svg

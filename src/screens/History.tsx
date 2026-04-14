@@ -51,8 +51,8 @@ export default function History() {
                   borderColor: "var(--border)",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "#7C5CFC44";
-                  (e.currentTarget as HTMLButtonElement).style.background = "#7C5CFC08";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "#8B80C044";
+                  (e.currentTarget as HTMLButtonElement).style.background = "#8B80C008";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)";
@@ -88,7 +88,7 @@ export default function History() {
                 {/* XP badge */}
                 <div
                   className="border rounded-[8px] px-2 py-0.5 text-[11px] font-bold flex-shrink-0"
-                  style={{ background: "#FFB83022", borderColor: "#FFB83044", color: "#FFB830" }}
+                  style={{ background: "#CCA55022", borderColor: "#CCA55044", color: "#CCA550" }}
                 >
                   +{a.xpEarned} XP
                 </div>

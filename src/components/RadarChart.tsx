@@ -41,7 +41,7 @@ export default function RadarChart({ skills, size = 220 }: RadarChartProps) {
   const dots = LABELS.map((label, i) => {
     const val = Math.min((skills[label] ?? 0) / 100, 1);
     const score = skills[label] ?? 0;
-    const color = score >= 80 ? "#22D37A" : score >= 60 ? "#FFB830" : "#FF4D6A";
+    const color = score >= 80 ? "#5BAF7E" : score >= 60 ? "#CCA550" : "#CC6B7E";
     return { ...polarToXY(angles[i], maxR * val, cx, cy), color };
   });
 
@@ -80,9 +80,9 @@ export default function RadarChart({ skills, size = 220 }: RadarChartProps) {
       {/* Score filled polygon */}
       <polygon
         points={scorePoints}
-        fill="#7C5CFC"
+        fill="#8B80C0"
         fillOpacity={0.18}
-        stroke="#7C5CFC"
+        stroke="#8B80C0"
         strokeWidth="2"
         strokeLinejoin="round"
       />

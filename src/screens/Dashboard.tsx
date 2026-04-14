@@ -47,9 +47,9 @@ function challengeStatus(
 }
 
 const TIER_STYLES: Record<ChallengeTier, { bg: string; color: string; border: string }> = {
-  "Beginner": { bg: "#22D37A11", color: "#22D37A", border: "#22D37A44" },
-  "Intermediate": { bg: "#7C5CFC11", color: "#7C5CFC", border: "#7C5CFC44" },
-  "Advanced": { bg: "#FFB83011", color: "#FFB830", border: "#FFB83044" },
+  "Beginner": { bg: "#5BAF7E11", color: "#5BAF7E", border: "#5BAF7E44" },
+  "Intermediate": { bg: "#8B80C011", color: "#8B80C0", border: "#8B80C044" },
+  "Advanced": { bg: "#CCA55011", color: "#CCA550", border: "#CCA55044" },
 };
 
 const STREAK_MILESTONES = [
@@ -64,14 +64,14 @@ function StreakBadge({ streak }: { streak: number }) {
   return (
     <div
       className="border rounded-[10px] px-2.5 py-1 flex items-center gap-1.5"
-      style={{ background: "#FF4D6A11", borderColor: "#FF4D6A33" }}
+      style={{ background: "#CC6B7E11", borderColor: "#CC6B7E33" }}
     >
       <span className="text-[14px]">{milestone.icon}</span>
       <div>
-        <div className="text-[10px] font-bold" style={{ color: "#FF4D6A" }}>
+        <div className="text-[10px] font-bold" style={{ color: "#CC6B7E" }}>
           {streak} DAY STREAK
         </div>
-        <div className="text-[9px]" style={{ color: "#FF4D6A88" }}>
+        <div className="text-[9px]" style={{ color: "#CC6B7E88" }}>
           {milestone.label}
         </div>
       </div>
@@ -95,7 +95,7 @@ function ActiveChallengeCard({
         style={{ background: "var(--card)", borderColor: "var(--border)" }}
       >
         <div className="text-[32px] mb-2">🏆</div>
-        <div className="font-extrabold text-[17px] mb-1" style={{ color: "#22D37A" }}>
+        <div className="font-extrabold text-[17px] mb-1" style={{ color: "#5BAF7E" }}>
           All challenges completed!
         </div>
         <div className="text-[13px]" style={{ color: "var(--muted)" }}>
@@ -113,7 +113,7 @@ function ActiveChallengeCard({
   return (
     <div
       className="border rounded-[22px] p-5 mb-4 relative overflow-hidden"
-      style={{ background: "linear-gradient(135deg,#1A1D2E,#13151C)", borderColor: "#7C5CFC44" }}
+      style={{ background: "linear-gradient(135deg, var(--surface), var(--card))", borderColor: "#8B80C044" }}
     >
       <div
         className="absolute"
@@ -137,7 +137,7 @@ function ActiveChallengeCard({
           {challengeAttempts.length > 0 && (
             <span
               className="border rounded-[6px] px-2 py-0.5 text-[10px] font-bold"
-              style={{ background: "#FFB83011", borderColor: "#FFB83033", color: "#FFB830" }}
+              style={{ background: "#CCA55011", borderColor: "#CCA55033", color: "#CCA550" }}
             >
               Attempt {attemptNum}
             </span>
@@ -145,7 +145,7 @@ function ActiveChallengeCard({
         </div>
         <div
           className="border rounded-[8px] px-2.5 py-1 text-[12px] font-bold"
-          style={{ background: "#FFB83022", color: "#FFB830", borderColor: "#FFB83044" }}
+          style={{ background: "#CCA55022", color: "#CCA550", borderColor: "#CCA55044" }}
         >
           ⚡ {challenge.xp} XP
         </div>
@@ -158,7 +158,7 @@ function ActiveChallengeCard({
         Score {challenge.passingScore}+ to pass
       </div>
       {challenge.deadline && (
-        <div className="text-[12px] font-semibold mb-4" style={{ color: "#FFB830" }}>
+        <div className="text-[12px] font-semibold mb-4" style={{ color: "#CCA550" }}>
           🗓 {challenge.deadline}
         </div>
       )}
@@ -268,7 +268,7 @@ export default function Dashboard() {
           <div
             className="w-11 h-11 rounded-[14px] flex items-center justify-center text-[20px] font-extrabold lg:hidden"
             style={{
-              background: "linear-gradient(135deg,#7C5CFC,#C084FC)",
+              background: "linear-gradient(135deg,#8B80C0,#B09CD0)",
               boxShadow: "0 4px 16px var(--accent-glow)",
               color: "#fff",
             }}
@@ -293,9 +293,9 @@ export default function Dashboard() {
                   key={skill}
                   className="border rounded-[6px] px-2 py-0.5 text-[10px] font-bold"
                   style={{
-                    background: delta > 0 ? "#22D37A11" : "#FF4D6A11",
-                    borderColor: delta > 0 ? "#22D37A44" : "#FF4D6A44",
-                    color: delta > 0 ? "#22D37A" : "#FF4D6A",
+                    background: delta > 0 ? "#5BAF7E11" : "#CC6B7E11",
+                    borderColor: delta > 0 ? "#5BAF7E44" : "#CC6B7E44",
+                    color: delta > 0 ? "#5BAF7E" : "#CC6B7E",
                   }}
                 >
                   {skill} {delta > 0 ? "+" : ""}{delta}
@@ -309,8 +309,8 @@ export default function Dashboard() {
       {/* Stats chips */}
       <div className="flex gap-2 mb-5 flex-wrap">
         {[
-          { icon: "⚡", value: store.totalXp.toLocaleString(), label: "Total XP", color: "#FFB830" },
-          { icon: "🏆", value: String(store.completedChallengeIds.length), label: "Completed", color: "#22D37A" },
+          { icon: "⚡", value: store.totalXp.toLocaleString(), label: "Total XP", color: "#CCA550" },
+          { icon: "🏆", value: String(store.completedChallengeIds.length), label: "Completed", color: "#5BAF7E" },
           { icon: "📈", value: `Lv ${store.level}`, label: "Level", color: "var(--accent)" },
         ].map(({ icon, value, label, color }) => (
           <div
@@ -341,8 +341,8 @@ export default function Dashboard() {
             className="h-full rounded-full transition-all duration-1000"
             style={{
               width: `${xpBarWidth}%`,
-              background: "linear-gradient(90deg,#FFB830,#FFB830cc)",
-              boxShadow: "0 0 8px #FFB83088",
+              background: "linear-gradient(90deg,#CCA550,#CCA550cc)",
+              boxShadow: "0 0 8px #CCA55088",
             }}
           />
         </div>
@@ -374,17 +374,17 @@ export default function Dashboard() {
           <div
             className="border rounded-[22px] p-5 mb-4 cursor-pointer transition-all"
             style={{
-              background: "linear-gradient(135deg,#1A1D2E,#13151C)",
-              borderColor: "#7C5CFC33",
+              background: "linear-gradient(135deg, var(--surface), var(--card))",
+              borderColor: "#8B80C033",
             }}
             onClick={() => navigate("/interview-prep")}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = "#7C5CFC66"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = "#7C5CFC33"; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = "#8B80C066"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = "#8B80C033"; }}
           >
             <div className="flex items-center gap-3">
               <div
                 className="w-12 h-12 rounded-[14px] flex items-center justify-center text-[22px] flex-shrink-0"
-                style={{ background: "#7C5CFC22" }}
+                style={{ background: "#8B80C022" }}
               >
                 🎯
               </div>
@@ -426,9 +426,9 @@ export default function Dashboard() {
                       style={{
                         color:
                           sparkData[sparkData.length - 1] > sparkData[0]
-                            ? "#22D37A"
+                            ? "#5BAF7E"
                             : sparkData[sparkData.length - 1] < sparkData[0]
-                            ? "#FF4D6A"
+                            ? "#CC6B7E"
                             : "var(--muted)",
                       }}
                     >
@@ -445,8 +445,8 @@ export default function Dashboard() {
                     className="border rounded-[14px] p-3.5 flex items-center gap-3 w-full text-left cursor-pointer transition-all"
                     style={{ background: "var(--card)", borderColor: "var(--border)" }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = "#7C5CFC44";
-                      (e.currentTarget as HTMLButtonElement).style.background = "#7C5CFC08";
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = "#8B80C044";
+                      (e.currentTarget as HTMLButtonElement).style.background = "#8B80C008";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)";
@@ -467,7 +467,7 @@ export default function Dashboard() {
                     </div>
                     <div
                       className="border rounded-[8px] px-2 py-0.5 text-[11px] font-bold flex-shrink-0"
-                      style={{ background: "#FFB83022", borderColor: "#FFB83044", color: "#FFB830" }}
+                      style={{ background: "#CCA55022", borderColor: "#CCA55044", color: "#CCA550" }}
                     >
                       +{a.xpEarned} XP
                     </div>
@@ -499,15 +499,15 @@ export default function Dashboard() {
               className="border rounded-[18px] p-4 flex items-center gap-3.5 mb-2.5"
               style={{
                 background: "var(--card)",
-                borderColor: ch.status === "completed" ? "#22D37A33" : "var(--border)",
+                borderColor: ch.status === "completed" ? "#5BAF7E33" : "var(--border)",
                 opacity: ch.status === "locked" ? 0.5 : 1,
               }}
             >
               <div
                 className="w-11 h-11 rounded-[12px] flex items-center justify-center text-[14px] font-extrabold flex-shrink-0"
                 style={{
-                  background: ch.status === "completed" ? "#22D37A22" : "var(--surface)",
-                  color: ch.status === "completed" ? "#22D37A" : "var(--muted)",
+                  background: ch.status === "completed" ? "#5BAF7E22" : "var(--surface)",
+                  color: ch.status === "completed" ? "#5BAF7E" : "var(--muted)",
                 }}
               >
                 {ch.status === "completed" ? "✓" : ch.week}
@@ -543,7 +543,7 @@ export default function Dashboard() {
                   <button
                     onClick={() => startChallenge(ch.id)}
                     className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
-                    style={{ background: "#7C5CFC22", color: "#A78BFA" }}
+                    style={{ background: "#8B80C022", color: "#9990B8" }}
                   >
                     Retry
                   </button>
@@ -554,7 +554,7 @@ export default function Dashboard() {
                       else navigate("/history");
                     }}
                     className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
-                    style={{ background: "#22D37A22", color: "#22D37A" }}
+                    style={{ background: "#5BAF7E22", color: "#5BAF7E" }}
                   >
                     Results
                   </button>
@@ -563,7 +563,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => startChallenge(ch.id)}
                   className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer flex-shrink-0"
-                  style={{ background: "#7C5CFC22", color: "#A78BFA" }}
+                  style={{ background: "#8B80C022", color: "#9990B8" }}
                 >
                   Start →
                 </button>

@@ -52,7 +52,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               window.location.href = "/";
             }}
             style={{
-              background: "linear-gradient(135deg, #7C5CFC, #C084FC)",
+              background: "linear-gradient(135deg, #8B80C0, #B09CD0)",
               color: "#fff",
               border: "none",
               borderRadius: 14,

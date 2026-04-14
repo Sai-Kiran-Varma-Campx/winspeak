@@ -1,9 +1,9 @@
 import { useToast, type ToastType } from "@/context/ToastContext";
 
 const STYLE: Record<ToastType, { bg: string; border: string; color: string }> = {
-  error:   { bg: "#FF4D6A18", border: "#FF4D6A66", color: "#FF7A8E" },
-  success: { bg: "#22D37A18", border: "#22D37A66", color: "#4DEBA0" },
-  info:    { bg: "#7C5CFC18", border: "#7C5CFC66", color: "#A78BFA" },
+  error:   { bg: "#CC6B7E18", border: "#CC6B7E66", color: "#C48A96" },
+  success: { bg: "#5BAF7E18", border: "#5BAF7E66", color: "#7BC4A0" },
+  info:    { bg: "#8B80C018", border: "#8B80C066", color: "#9990B8" },
 };
 
 export default function ToastContainer() {

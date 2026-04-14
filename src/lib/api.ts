@@ -203,4 +203,8 @@ export const api = {
   getSchoolAttempt(id: string) {
     return request<any>(`/school/attempts/${id}`);
   },
+  listSchoolQuestions(categoryId?: string) {
+    const qs = categoryId ? `?categoryId=${categoryId}` : "";
+    return request<any[]>(`/school/questions${qs}`);
+  },
 };

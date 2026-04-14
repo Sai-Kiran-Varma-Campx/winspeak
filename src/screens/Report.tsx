@@ -74,7 +74,7 @@ function IdealWaveViz({ playing, progress }: { playing: boolean; progress: numbe
             style={{
               height: `${h * 100}%`,
               background: isPast
-                ? "linear-gradient(180deg, #FFB830, #FF8C00)"
+                ? "linear-gradient(180deg, #CCA550, #FF8C00)"
                 : "var(--border)",
               opacity: isPast ? 1 : 0.4,
               animation: playing && isPast
@@ -102,13 +102,13 @@ function generateShareCard(
   const ctx = canvas.getContext("2d")!;
 
   const bg = ctx.createLinearGradient(0, 0, 1200, 630);
-  bg.addColorStop(0, "#0A0B0F");
-  bg.addColorStop(1, "#1A1D2E");
+  bg.addColorStop(0, "#1C1D22");
+  bg.addColorStop(1, "#2F3038");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, 1200, 630);
 
   const glow = ctx.createRadialGradient(1100, 100, 0, 1100, 100, 300);
-  glow.addColorStop(0, "#7C5CFC33");
+  glow.addColorStop(0, "#8B80C033");
   glow.addColorStop(1, "transparent");
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, 1200, 630);
@@ -121,7 +121,7 @@ function generateShareCard(
   ctx.stroke();
   const startAngle = -Math.PI / 2;
   const endAngle = startAngle + (score / 100) * Math.PI * 2;
-  const ringColor = score >= 80 ? "#22D37A" : score >= 60 ? "#FFB830" : "#FF4D6A";
+  const ringColor = score >= 80 ? "#5BAF7E" : score >= 60 ? "#CCA550" : "#CC6B7E";
   ctx.beginPath();
   ctx.arc(cx, cy, r, startAngle, endAngle);
   ctx.strokeStyle = ringColor;
@@ -143,14 +143,14 @@ function generateShareCard(
   ctx.fillStyle = "#6B7194";
   ctx.font = "28px system-ui, sans-serif";
   ctx.fillText(challengeTitle, 370, 285);
-  ctx.fillStyle = "#FFB830";
+  ctx.fillStyle = "#CCA550";
   ctx.font = "bold 34px system-ui, sans-serif";
   ctx.fillText(`+${xpEarned} XP Earned`, 370, 345);
 
   const stars = Math.round(score / 20);
   ctx.font = "30px system-ui, sans-serif";
   for (let i = 0; i < 5; i++) {
-    ctx.fillStyle = i < stars ? "#FFB830" : "#1E2130";
+    ctx.fillStyle = i < stars ? "#CCA550" : "#1E2130";
     ctx.fillText("★", 370 + i * 42, 400);
   }
 
@@ -160,7 +160,7 @@ function generateShareCard(
   skillNames.forEach((skill, i) => {
     const val = skills[skill] ?? 0;
     const y = barStartY + i * gap;
-    const color = val >= 80 ? "#22D37A" : val >= 60 ? "#FFB830" : "#FF4D6A";
+    const color = val >= 80 ? "#5BAF7E" : val >= 60 ? "#CCA550" : "#CC6B7E";
     ctx.fillStyle = "#6B7194";
     ctx.fillText(skill, barX, y + 14);
     ctx.fillStyle = "#1E2130";
@@ -175,7 +175,7 @@ function generateShareCard(
     ctx.textAlign = "left";
   });
 
-  ctx.fillStyle = "#7C5CFC";
+  ctx.fillStyle = "#8B80C0";
   ctx.font = "bold 28px system-ui, sans-serif";
   ctx.textAlign = "right";
   ctx.fillText("WinSpeak", 1160, 600);
@@ -400,7 +400,7 @@ export default function Report() {
 
         <div
           className="border rounded-[24px] p-5 sm:p-6 text-center mb-5 relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg,#1A1D2E,#13151C)", borderColor: "#7C5CFC44" }}
+          style={{ background: "linear-gradient(135deg, var(--surface), var(--card))", borderColor: "#8B80C044" }}
         >
           <div className="text-[11px] font-semibold tracking-[1.5px] mb-4" style={{ color: "var(--muted)" }}>
             OVERALL SCORE
@@ -409,7 +409,7 @@ export default function Report() {
             {historicalAttempt.score}
           </div>
           <div className="text-[14px] font-bold" style={{ color: "var(--muted)" }}>/ 100</div>
-          <div className="text-[15px] font-bold mt-3" style={{ color: "#FFB830" }}>
+          <div className="text-[15px] font-bold mt-3" style={{ color: "#CCA550" }}>
             +{historicalAttempt.xpEarned} XP Earned
           </div>
         </div>
@@ -503,14 +503,14 @@ export default function Report() {
         <div
           className="border rounded-[14px] p-3.5 mb-4 flex items-center gap-3"
           style={{
-            background: "#22D37A11",
-            borderColor: "#22D37A44",
+            background: "#5BAF7E11",
+            borderColor: "#5BAF7E44",
             animation: "fadeSlideIn 0.4s ease",
           }}
         >
           <span className="text-[22px]">⚡</span>
           <div className="flex-1">
-            <div className="text-[13px] font-extrabold" style={{ color: "#22D37A" }}>
+            <div className="text-[13px] font-extrabold" style={{ color: "#5BAF7E" }}>
               +{displayXp} XP saved to your profile!
             </div>
             <div className="text-[11px]" style={{ color: "var(--muted)" }}>
@@ -549,7 +549,7 @@ export default function Report() {
           ) : (
             <span
               className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold"
-              style={{ background: "#FF4D6A22", borderColor: "#FF4D6A44", color: "#FF4D6A" }}
+              style={{ background: "#CC6B7E22", borderColor: "#CC6B7E44", color: "#CC6B7E" }}
             >
               NOT PASSED
             </span>
@@ -562,14 +562,14 @@ export default function Report() {
         passed ? (
           <div
             className="border rounded-[16px] p-4 mb-5 flex items-center gap-3"
-            style={{ background: "#22D37A11", borderColor: "#22D37A44" }}
+            style={{ background: "#5BAF7E11", borderColor: "#5BAF7E44" }}
           >
             <span className="text-[24px]">🎉</span>
             <div className="flex-1">
-              <div className="text-[14px] font-extrabold" style={{ color: "#22D37A" }}>
+              <div className="text-[14px] font-extrabold" style={{ color: "#5BAF7E" }}>
                 Challenge Passed!
               </div>
-              <div className="text-[12px]" style={{ color: "#22D37Acc" }}>
+              <div className="text-[12px]" style={{ color: "#5BAF7Ecc" }}>
                 You scored {overallScore}/{activeChallenge.passingScore} required. Next challenge unlocked!
               </div>
             </div>
@@ -577,14 +577,14 @@ export default function Report() {
         ) : (
           <div
             className="border rounded-[16px] p-4 mb-5 flex items-center gap-3"
-            style={{ background: "#FFB83011", borderColor: "#FFB83044" }}
+            style={{ background: "#CCA55011", borderColor: "#CCA55044" }}
           >
             <span className="text-[24px]">⚠️</span>
             <div className="flex-1">
-              <div className="text-[14px] font-extrabold" style={{ color: "#FFB830" }}>
+              <div className="text-[14px] font-extrabold" style={{ color: "#CCA550" }}>
                 Not Yet — Keep practising!
               </div>
-              <div className="text-[12px]" style={{ color: "#FFB830cc" }}>
+              <div className="text-[12px]" style={{ color: "#CCA550cc" }}>
                 You need {activeChallenge.passingScore} to pass. You scored {overallScore}. Try again anytime.
               </div>
             </div>
@@ -600,8 +600,8 @@ export default function Report() {
           <div
             className="border rounded-[24px] p-5 sm:p-6 text-center mb-4 sm:mb-5 relative overflow-hidden"
             style={{
-              background: "linear-gradient(135deg,#1A1D2E,#13151C)",
-              borderColor: "#7C5CFC44",
+              background: "linear-gradient(135deg,var(--surface),var(--card))",
+              borderColor: "#8B80C044",
             }}
           >
             <div
@@ -657,7 +657,7 @@ export default function Report() {
               </div>
             </div>
 
-            <div className="text-[15px] font-bold" style={{ color: "#FFB830" }}>
+            <div className="text-[15px] font-bold" style={{ color: "#CCA550" }}>
               +{xpEarned} XP Earned!
             </div>
           </div>
@@ -666,8 +666,8 @@ export default function Report() {
           <div
             className="border rounded-[20px] p-4 sm:p-5 mb-4"
             style={{
-              background: "linear-gradient(135deg,#7C5CFC0A,#1A1D2E)",
-              borderColor: "#7C5CFC33",
+              background: "linear-gradient(135deg,#8B80C00A,var(--surface))",
+              borderColor: "#8B80C033",
             }}
           >
             <div className="flex items-center justify-between mb-3">
@@ -719,9 +719,9 @@ export default function Report() {
                       key={skill}
                       className="border rounded-[6px] px-2 py-0.5 text-[10px] font-bold"
                       style={{
-                        background: delta > 0 ? "#22D37A11" : "#FF4D6A11",
-                        borderColor: delta > 0 ? "#22D37A44" : "#FF4D6A44",
-                        color: delta > 0 ? "#22D37A" : "#FF4D6A",
+                        background: delta > 0 ? "#5BAF7E11" : "#CC6B7E11",
+                        borderColor: delta > 0 ? "#5BAF7E44" : "#CC6B7E44",
+                        color: delta > 0 ? "#5BAF7E" : "#CC6B7E",
                       }}
                     >
                       {skill} {delta > 0 ? "+" : ""}{delta}
@@ -832,7 +832,7 @@ export default function Report() {
           <div className="border rounded-[20px] p-4 sm:p-5 mb-4" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="flex justify-between items-center mb-3.5">
               <div className="text-[15px] font-extrabold">Grammar Issues</div>
-              <span className="rounded-[8px] px-2.5 py-1 text-[12px] font-bold" style={{ background: "#FF4D6A22", color: "#FF4D6A" }}>
+              <span className="rounded-[8px] px-2.5 py-1 text-[12px] font-bold" style={{ background: "#CC6B7E22", color: "#CC6B7E" }}>
                 {grammarIssues.length} found
               </span>
             </div>
@@ -840,8 +840,8 @@ export default function Report() {
               <div className="text-[13px]" style={{ color: "var(--green)" }}>No grammar issues detected!</div>
             ) : grammarIssues.map((issue, i) => (
               <div key={i} className="rounded-[12px] p-2.5 mb-2 last:mb-0" style={{ background: "var(--surface)" }}>
-                <div className="text-[12px] line-through mb-0.5" style={{ color: "#FF4D6A" }}>{issue.wrong}</div>
-                <div className="text-[12px] font-bold" style={{ color: "#22D37A" }}>{issue.correct}</div>
+                <div className="text-[12px] line-through mb-0.5" style={{ color: "#CC6B7E" }}>{issue.wrong}</div>
+                <div className="text-[12px] font-bold" style={{ color: "#5BAF7E" }}>{issue.correct}</div>
               </div>
             ))}
           </div>
@@ -854,7 +854,7 @@ export default function Report() {
             ) : (
               <div className="flex gap-2 flex-wrap">
                 {fillerWords.map((fw) => (
-                  <div key={fw.word} className="border rounded-[8px] px-3 py-1.5 text-[12px] font-semibold" style={{ background: "#FFB83022", borderColor: "#FFB83044", color: "#FFB830" }}>
+                  <div key={fw.word} className="border rounded-[8px] px-3 py-1.5 text-[12px] font-semibold" style={{ background: "#CCA55022", borderColor: "#CCA55044", color: "#CCA550" }}>
                     "{fw.word}" x{fw.count}
                   </div>
                 ))}
@@ -868,7 +868,7 @@ export default function Report() {
           </div>
 
           {/* WinSpeak Analysis */}
-          <div className="border rounded-[20px] p-4 sm:p-5 mb-4" style={{ background: "linear-gradient(135deg,#7C5CFC11,#1A1D2E)", borderColor: "#7C5CFC44" }}>
+          <div className="border rounded-[20px] p-4 sm:p-5 mb-4" style={{ background: "linear-gradient(135deg,#8B80C011,var(--surface))", borderColor: "#8B80C044" }}>
             <div className="text-[15px] font-extrabold mb-3">WinSpeak Analysis</div>
             <div className="text-[13px] leading-[1.7]" style={{ color: "var(--muted-soft)" }}>
               {winSpeakAnalysis}
@@ -877,7 +877,7 @@ export default function Report() {
 
           {/* Strengths & Improve */}
           <div className="flex flex-col sm:flex-row gap-3 mb-4">
-            <div className="flex-1 border rounded-[18px] p-3.5 sm:p-4" style={{ background: "#22D37A11", borderColor: "#22D37A44" }}>
+            <div className="flex-1 border rounded-[18px] p-3.5 sm:p-4" style={{ background: "#5BAF7E11", borderColor: "#5BAF7E44" }}>
               <div className="text-[13px] font-extrabold mb-2.5" style={{ color: "#4DEBA0" }}>Strengths</div>
               {strengths.map((s) => (
                 <div key={s} className="text-[11px] mb-1.5 flex gap-1.5 items-start" style={{ color: "#D4FAE9" }}>
@@ -885,7 +885,7 @@ export default function Report() {
                 </div>
               ))}
             </div>
-            <div className="flex-1 border rounded-[18px] p-3.5 sm:p-4" style={{ background: "#FF4D6A11", borderColor: "#FF4D6A44" }}>
+            <div className="flex-1 border rounded-[18px] p-3.5 sm:p-4" style={{ background: "#CC6B7E11", borderColor: "#CC6B7E44" }}>
               <div className="text-[13px] font-extrabold mb-2.5" style={{ color: "#FF7A8E" }}>Improve</div>
               {improvements.map((s) => (
                 <div key={s} className="text-[11px] mb-1.5 flex gap-1.5 items-start" style={{ color: "#FFD6DD" }}>
@@ -901,21 +901,21 @@ export default function Report() {
           {overallScore >= 40 && <div
             className="border rounded-[20px] p-4 sm:p-5 mb-5"
             style={{
-              background: "linear-gradient(135deg,#FFB83008,#1A1D2E)",
-              borderColor: idealPlaying ? "#FFB83066" : "#FFB83044",
+              background: "linear-gradient(135deg,#CCA55008,var(--surface))",
+              borderColor: idealPlaying ? "#CCA55066" : "#CCA55044",
               transition: "border-color 0.3s",
             }}
           >
             {/* Header */}
             <div className="flex justify-between items-center mb-1">
               <div className="text-[15px] font-extrabold">Ideal Response</div>
-              <div className="border rounded-[8px] px-2.5 py-1 text-[10px] font-bold" style={{ background: "#FFB83022", borderColor: "#FFB83044", color: "#FFB830" }}>
+              <div className="border rounded-[8px] px-2.5 py-1 text-[10px] font-bold" style={{ background: "#CCA55022", borderColor: "#CCA55044", color: "#CCA550" }}>
                 {activeChallenge?.category === "abap" ? "Reference Answer" : "AI Generated"}
               </div>
             </div>
 
             {/* Ideal response text — ALWAYS shown */}
-            <div className="rounded-[14px] p-3.5 my-4" style={{ background: "var(--surface)", borderLeft: "3px solid #FFB830" }}>
+            <div className="rounded-[14px] p-3.5 my-4" style={{ background: "var(--surface)", borderLeft: "3px solid #CCA550" }}>
               <div className="text-[10px] font-bold tracking-[1px] mb-2.5" style={{ color: "var(--muted)" }}>
                 {activeChallenge?.category === "abap" ? "REFERENCE ANSWER" : "IMPROVED VERSION OF YOUR RESPONSE"}
               </div>
@@ -937,9 +937,9 @@ export default function Report() {
                   className="border rounded-[16px] p-4 sm:p-5 mb-4"
                   style={{
                     background: idealPlaying
-                      ? "linear-gradient(135deg, #1A1D2E, #FFB83008)"
+                      ? "linear-gradient(135deg, var(--surface), #CCA55008)"
                       : "var(--card)",
-                    borderColor: idealPlaying ? "#FFB83044" : "var(--border)",
+                    borderColor: idealPlaying ? "#CCA55044" : "var(--border)",
                     transition: "all 0.3s ease",
                   }}
                 >
@@ -957,13 +957,13 @@ export default function Report() {
                               className="w-[2.5px] rounded-full block"
                               style={{
                                 height: h * 2.5,
-                                background: "#FFB830",
+                                background: "#CCA550",
                                 animation: `soundwave 0.8s ${i * 0.1}s ease-in-out infinite alternate`,
                               }}
                             />
                           ))}
                         </span>
-                        <span className="text-[10px] font-semibold" style={{ color: "#FFB830" }}>
+                        <span className="text-[10px] font-semibold" style={{ color: "#CCA550" }}>
                           Playing
                         </span>
                       </div>
@@ -978,11 +978,11 @@ export default function Report() {
                       className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-none flex items-center justify-center cursor-pointer flex-shrink-0 disabled:opacity-40 transition-all"
                       style={{
                         background: idealPlaying
-                          ? "linear-gradient(135deg,#FFB830,#FF8C00)"
+                          ? "linear-gradient(135deg,#CCA550,#FF8C00)"
                           : idealLoading
                           ? "var(--surface)"
                           : "var(--surface)",
-                        boxShadow: idealPlaying ? "0 0 24px #FFB83044" : "none",
+                        boxShadow: idealPlaying ? "0 0 24px #CCA55044" : "none",
                         color: idealPlaying ? "#000" : "var(--text)",
                       }}
                     >
@@ -1036,8 +1036,8 @@ export default function Report() {
                       className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-100"
                       style={{
                         width: `${idealProgress * 100}%`,
-                        background: "linear-gradient(90deg, #FFB830, #FF8C00)",
-                        boxShadow: idealPlaying ? "0 0 8px #FFB83044" : "none",
+                        background: "linear-gradient(90deg, #CCA550, #FF8C00)",
+                        boxShadow: idealPlaying ? "0 0 8px #CCA55044" : "none",
                       }}
                     />
                     <div
@@ -1045,7 +1045,7 @@ export default function Report() {
                       style={{
                         left: `calc(${idealProgress * 100}% - 10px)`,
                         background: "#fff",
-                        boxShadow: "0 0 8px #FFB83088",
+                        boxShadow: "0 0 8px #CCA55088",
                       }}
                     />
                   </div>
@@ -1125,8 +1125,8 @@ export default function Report() {
               <div
                 className="border rounded-[22px] p-5 sm:p-6 mb-5"
                 style={{
-                  background: "linear-gradient(135deg, #FF4D6A08, #1A1D2E)",
-                  borderColor: "#FF4D6A44",
+                  background: "linear-gradient(135deg, #CC6B7E08, var(--surface))",
+                  borderColor: "#CC6B7E44",
                 }}
               >
                 <div className="flex items-center gap-2 mb-4">
@@ -1167,7 +1167,7 @@ export default function Report() {
 
                 {/* Practice Exercises */}
                 <div className="mb-4">
-                  <div className="text-[12px] font-bold tracking-[1px] mb-2.5" style={{ color: "#FFB830" }}>
+                  <div className="text-[12px] font-bold tracking-[1px] mb-2.5" style={{ color: "#CCA550" }}>
                     PRACTICE EXERCISES
                   </div>
                   <div className="flex flex-col gap-2">
@@ -1189,7 +1189,7 @@ export default function Report() {
                 {/* Key Mistakes */}
                 {(allGrammarIssues.length > 0 || topFillers.length > 0) && (
                   <div className="mb-4">
-                    <div className="text-[12px] font-bold tracking-[1px] mb-2.5" style={{ color: "#FF4D6A" }}>
+                    <div className="text-[12px] font-bold tracking-[1px] mb-2.5" style={{ color: "#CC6B7E" }}>
                       KEY MISTAKES TO FIX
                     </div>
                     <div className="rounded-[12px] p-3" style={{ background: "var(--surface)" }}>
@@ -1198,7 +1198,7 @@ export default function Report() {
                           <div className="text-[11px] font-bold mb-1">Recurring grammar issues:</div>
                           <div className="text-[11px] leading-relaxed" style={{ color: "var(--muted-soft)" }}>
                             {allGrammarIssues.slice(0, 5).map((g, i) => (
-                              <span key={i} className="inline-block border rounded-[6px] px-2 py-0.5 mr-1.5 mb-1" style={{ background: "#FF4D6A11", borderColor: "#FF4D6A33", color: "#FF7A8E" }}>
+                              <span key={i} className="inline-block border rounded-[6px] px-2 py-0.5 mr-1.5 mb-1" style={{ background: "#CC6B7E11", borderColor: "#CC6B7E33", color: "#FF7A8E" }}>
                                 "{g}"
                               </span>
                             ))}
@@ -1210,7 +1210,7 @@ export default function Report() {
                           <div className="text-[11px] font-bold mb-1">Top filler words:</div>
                           <div className="flex gap-1.5 flex-wrap">
                             {topFillers.map(([word, count]) => (
-                              <span key={word} className="border rounded-[6px] px-2 py-0.5 text-[10px] font-bold" style={{ background: "#FFB83011", borderColor: "#FFB83033", color: "#FFB830" }}>
+                              <span key={word} className="border rounded-[6px] px-2 py-0.5 text-[10px] font-bold" style={{ background: "#CCA55011", borderColor: "#CCA55033", color: "#CCA550" }}>
                                 "{word}" x{count}
                               </span>
                             ))}

@@ -230,7 +230,7 @@ export default function MobileNav() {
           <div className="flex items-center gap-2.5">
             <div
               className="w-8 h-8 rounded-[8px] flex items-center justify-center text-[15px] font-black flex-shrink-0"
-              style={{ background: "linear-gradient(135deg,#7C5CFC,#C084FC)", color: "#fff" }}
+              style={{ background: "linear-gradient(135deg,#8B80C0,#B09CD0)", color: "#fff" }}
             >
               W
             </div>
@@ -255,7 +255,7 @@ export default function MobileNav() {
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center text-[16px] font-extrabold flex-shrink-0"
-              style={{ background: "linear-gradient(135deg,#7C5CFC,#C084FC)", color: "#fff" }}
+              style={{ background: "linear-gradient(135deg,#8B80C0,#B09CD0)", color: "#fff" }}
             >
               {store.name.charAt(0).toUpperCase()}
             </div>
@@ -264,15 +264,15 @@ export default function MobileNav() {
               <div className="flex items-center gap-2 mt-0.5">
                 <span
                   className="rounded-[5px] px-1.5 py-0.5 text-[10px] font-bold"
-                  style={{ background: "#7C5CFC22", color: "#A78BFA" }}
+                  style={{ background: "#8B80C022", color: "#9990B8" }}
                 >
                   Lv {store.level}
                 </span>
-                <span className="text-[11px] font-semibold" style={{ color: "#FFB830" }}>
+                <span className="text-[11px] font-semibold" style={{ color: "#CCA550" }}>
                   {store.totalXp.toLocaleString()} XP
                 </span>
                 {store.streak > 0 && (
-                  <span className="text-[11px] font-semibold" style={{ color: "#FF4D6A" }}>
+                  <span className="text-[11px] font-semibold" style={{ color: "#CC6B7E" }}>
                     {store.streak}d streak
                   </span>
                 )}
@@ -294,9 +294,9 @@ export default function MobileNav() {
                 onClick={() => { navigate(path); setDrawerOpen(false); }}
                 className="flex items-center gap-3 px-3.5 py-3 rounded-[10px] text-[14px] font-medium w-full border-none cursor-pointer"
                 style={{
-                  background: isActive ? "#7C5CFC18" : "transparent",
-                  color: isActive ? "#A78BFA" : "var(--text-secondary)",
-                  borderLeft: isActive ? "2px solid #7C5CFC" : "2px solid transparent",
+                  background: isActive ? "#8B80C018" : "transparent",
+                  color: isActive ? "#9990B8" : "var(--text-secondary)",
+                  borderLeft: isActive ? "2px solid #8B80C0" : "2px solid transparent",
                 }}
               >
                 <span style={{ opacity: isActive ? 1 : 0.6 }}>{icon}</span>
@@ -312,9 +312,9 @@ export default function MobileNav() {
             onClick={() => { navigate("/question"); setDrawerOpen(false); }}
             className="w-full rounded-[12px] py-3 text-[14px] font-bold border-none cursor-pointer flex items-center justify-center gap-2"
             style={{
-              background: "linear-gradient(135deg,#7C5CFC,#9B7BFF)",
+              background: "linear-gradient(135deg,#8B80C0,#8E84B5)",
               color: "#fff",
-              boxShadow: "0 4px 16px #7C5CFC33",
+              boxShadow: "0 4px 16px #8B80C033",
             }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
@@ -349,8 +349,8 @@ export default function MobileNav() {
                   className="flex-1 rounded-full"
                   style={{
                     height: 4,
-                    background: done ? "var(--accent)" : isNext ? "#7C5CFC44" : "var(--border)",
-                    boxShadow: done ? "0 0 6px #7C5CFC66" : "none",
+                    background: done ? "var(--accent)" : isNext ? "#8B80C044" : "var(--border)",
+                    boxShadow: done ? "0 0 6px #8B80C066" : "none",
                   }}
                 />
               );
@@ -365,7 +365,7 @@ export default function MobileNav() {
             >
               <div
                 className="w-7 h-7 rounded-[7px] flex items-center justify-center text-[11px] font-extrabold flex-shrink-0"
-                style={{ background: "#7C5CFC22", color: "var(--accent)" }}
+                style={{ background: "#8B80C022", color: "var(--accent)" }}
               >
                 {activeChallenge.week}
               </div>
@@ -399,8 +399,8 @@ export default function MobileNav() {
             className="w-full rounded-[12px] py-3 text-[13px] font-bold border cursor-pointer flex items-center justify-center gap-2"
             style={{
               background: "transparent",
-              borderColor: "#FF4D6A33",
-              color: "#FF4D6A",
+              borderColor: "#CC6B7E33",
+              color: "#CC6B7E",
             }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

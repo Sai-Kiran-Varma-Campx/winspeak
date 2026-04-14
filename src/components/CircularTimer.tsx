@@ -10,8 +10,8 @@ export default function CircularTimer({ seconds, isRecording }: CircularTimerPro
   const pct = elapsed / RECORDING_DURATION_SECS;
   const offset = CIRCULAR_TIMER_CIRCUMFERENCE * (1 - pct);
   const isRed = seconds <= 20;
-  const strokeColor = isRed ? "#FF4D6A" : "var(--accent)";
-  const textColor = isRed ? "#FF4D6A" : "var(--text)";
+  const strokeColor = isRed ? "#CC6B7E" : "var(--accent)";
+  const textColor = isRed ? "#CC6B7E" : "var(--text)";
 
   return (
     <div className="relative w-[160px] h-[160px] sm:w-[200px] sm:h-[200px]">
@@ -59,9 +59,9 @@ export default function CircularTimer({ seconds, isRecording }: CircularTimerPro
           <div className="flex items-center gap-1.5 mt-2">
             <div
               className="w-2 h-2 rounded-full"
-              style={{ background: "#FF4D6A" }}
+              style={{ background: "#CC6B7E" }}
             />
-            <span className="text-[11px] font-bold" style={{ color: "#FF4D6A" }}>
+            <span className="text-[11px] font-bold" style={{ color: "#CC6B7E" }}>
               RECORDING
             </span>
           </div>

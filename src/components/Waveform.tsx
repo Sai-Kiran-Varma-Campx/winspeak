@@ -28,8 +28,8 @@ export default function Waveform({
             height: active ? h : 8,
             borderRadius: 99,
             background: isRecording
-              ? "linear-gradient(to top, #FF4D6A, #7C5CFC)"
-              : "linear-gradient(to top, var(--accent), #C084FC)",
+              ? "linear-gradient(to top, #CC6B7E, #8B80C0)"
+              : "linear-gradient(to top, var(--accent), #B09CD0)",
             opacity: isRecording ? 0.7 : 0.6 + Math.random() * 0.4,
             transition: active ? "height 0.1s ease" : undefined,
           }}

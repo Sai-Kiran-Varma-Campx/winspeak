@@ -45,7 +45,7 @@ function AudioWaveViz({ playing, progress }: { playing: boolean; progress: numbe
             style={{
               height: `${h * 100}%`,
               background: isPast
-                ? "linear-gradient(180deg, #7C5CFC, #C084FC)"
+                ? "linear-gradient(180deg, #8B80C0, #B09CD0)"
                 : "var(--border)",
               opacity: isPast ? 1 : 0.4,
               animation: playing && isPast
@@ -235,7 +235,7 @@ export default function Recording() {
           {isRecording && (
             <div
               className="border rounded-[18px] p-3 sm:p-4"
-              style={{ background: "var(--card)", borderColor: "#FF4D6A33" }}
+              style={{ background: "var(--card)", borderColor: "#CC6B7E33" }}
             >
               <Waveform barCount={40} active={isRecording} variant="recording" />
             </div>
@@ -257,13 +257,13 @@ export default function Recording() {
           {/* Saved confirmation */}
           <div
             className="border rounded-[18px] sm:rounded-[20px] p-3.5 sm:p-4 flex items-center gap-3"
-            style={{ background: "#22D37A11", borderColor: "#22D37A44" }}
+            style={{ background: "#5BAF7E11", borderColor: "#5BAF7E44" }}
           >
             <div
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: "#22D37A22" }}
+              style={{ background: "#5BAF7E22" }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22D37A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5BAF7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
                 <line x1="12" y1="19" x2="12" y2="23"/>
@@ -271,7 +271,7 @@ export default function Recording() {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-extrabold text-[14px] sm:text-[15px]" style={{ color: "#22D37A" }}>
+              <div className="font-extrabold text-[14px] sm:text-[15px]" style={{ color: "#5BAF7E" }}>
                 Recording Saved!
               </div>
               <div className="text-[11px] sm:text-[12px] mt-0.5" style={{ color: "var(--muted)" }}>
@@ -280,9 +280,9 @@ export default function Recording() {
             </div>
             <div
               className="hidden sm:flex border rounded-[10px] px-2.5 py-1.5 items-center gap-1.5 flex-shrink-0"
-              style={{ background: "#7C5CFC11", borderColor: "#7C5CFC33" }}
+              style={{ background: "#8B80C011", borderColor: "#8B80C033" }}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9990B8" strokeWidth="2" strokeLinecap="round">
                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
                 <polyline points="17 21 17 13 7 13 7 21"/>
                 <polyline points="7 3 7 8 15 8"/>
@@ -298,9 +298,9 @@ export default function Recording() {
             className="border rounded-[18px] sm:rounded-[20px] p-4 sm:p-5"
             style={{
               background: isPlaying
-                ? "linear-gradient(135deg, #1A1D2E, #7C5CFC08)"
+                ? "linear-gradient(135deg, var(--surface), #8B80C008)"
                 : "var(--card)",
-              borderColor: isPlaying ? "#7C5CFC44" : "var(--border)",
+              borderColor: isPlaying ? "#8B80C044" : "var(--border)",
               transition: "all 0.3s ease",
             }}
           >
@@ -321,13 +321,13 @@ export default function Recording() {
                         className="w-[2.5px] rounded-full block"
                         style={{
                           height: h * 2.5,
-                          background: "#7C5CFC",
+                          background: "#8B80C0",
                           animation: `soundwave 0.8s ${i * 0.1}s ease-in-out infinite alternate`,
                         }}
                       />
                     ))}
                   </span>
-                  <span className="text-[10px] font-semibold" style={{ color: "#A78BFA" }}>
+                  <span className="text-[10px] font-semibold" style={{ color: "#9990B8" }}>
                     Playing
                   </span>
                 </div>
@@ -343,9 +343,9 @@ export default function Recording() {
                 className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-none flex items-center justify-center cursor-pointer flex-shrink-0 disabled:opacity-40 transition-all"
                 style={{
                   background: isPlaying
-                    ? "linear-gradient(135deg,#7C5CFC,#C084FC)"
+                    ? "linear-gradient(135deg,#8B80C0,#B09CD0)"
                     : "var(--surface)",
-                  boxShadow: isPlaying ? "0 0 24px #7C5CFC44" : "none",
+                  boxShadow: isPlaying ? "0 0 24px #8B80C044" : "none",
                   color: isPlaying ? "#fff" : "var(--text)",
                 }}
               >
@@ -386,8 +386,8 @@ export default function Recording() {
                 className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-100"
                 style={{
                   width: `${progress * 100}%`,
-                  background: "linear-gradient(90deg, #7C5CFC, #C084FC)",
-                  boxShadow: isPlaying ? "0 0 8px #7C5CFC44" : "none",
+                  background: "linear-gradient(90deg, #8B80C0, #B09CD0)",
+                  boxShadow: isPlaying ? "0 0 8px #8B80C044" : "none",
                 }}
               />
               {/* Scrubber dot */}
@@ -396,7 +396,7 @@ export default function Recording() {
                 style={{
                   left: `calc(${progress * 100}% - 10px)`,
                   background: "#fff",
-                  boxShadow: "0 0 8px #7C5CFC88",
+                  boxShadow: "0 0 8px #8B80C088",
                 }}
               />
             </div>
@@ -416,13 +416,13 @@ export default function Recording() {
           {elapsed > 0 && elapsed < 30 && (
             <div
               className="border rounded-[14px] p-3 flex items-center gap-2.5"
-              style={{ background: "#FF4D6A11", borderColor: "#FF4D6A44" }}
+              style={{ background: "#CC6B7E11", borderColor: "#CC6B7E44" }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4D6A" strokeWidth="2" strokeLinecap="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CC6B7E" strokeWidth="2" strokeLinecap="round">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                 <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
-              <div className="text-[12px]" style={{ color: "#FF4D6A" }}>
+              <div className="text-[12px]" style={{ color: "#CC6B7E" }}>
                 Minimum 30 seconds required to submit. Record a longer answer for better feedback.
               </div>
             </div>
@@ -438,10 +438,10 @@ export default function Recording() {
           {saveError && (
             <div
               className="border rounded-[14px] p-3 flex items-center gap-2.5"
-              style={{ background: "#FF4D6A11", borderColor: "#FF4D6A44" }}
+              style={{ background: "#CC6B7E11", borderColor: "#CC6B7E44" }}
             >
               <span className="text-[16px]">⚠️</span>
-              <div className="text-[12px]" style={{ color: "#FF4D6A" }}>{saveError}</div>
+              <div className="text-[12px]" style={{ color: "#CC6B7E" }}>{saveError}</div>
             </div>
           )}
 

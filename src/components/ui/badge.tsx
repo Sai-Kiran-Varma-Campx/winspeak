@@ -8,9 +8,9 @@ const badgeVariants = cva(
     variants: {
       variant: {
         active:
-          "bg-[#22D37A22] text-green border border-[#22D37A44]",
+          "bg-[#5BAF7E22] text-green border border-[#5BAF7E44]",
         completed:
-          "bg-[#7C5CFC22] text-accent border border-[#7C5CFC44]",
+          "bg-[#8B80C022] text-accent border border-[#8B80C044]",
         locked:
           "bg-[#6B719422] text-muted border border-[#6B719444]",
         default:

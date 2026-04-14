@@ -43,7 +43,7 @@ function AudioWaveViz({ playing, progress }: { playing: boolean; progress: numbe
             style={{
               height: `${h * 100}%`,
               background: isPast
-                ? "linear-gradient(180deg, #7C5CFC, #C084FC)"
+                ? "linear-gradient(180deg, #8B80C0, #B09CD0)"
                 : "var(--border)",
               opacity: isPast ? 1 : 0.5,
               animation: playing && isPast
@@ -196,8 +196,8 @@ export default function AudioCheck() {
       <div
         className="border rounded-[22px] flex flex-col items-center justify-center gap-3 relative overflow-hidden max-h-[200px] sm:max-h-none"
         style={{
-          background: "linear-gradient(135deg,#1A1D2E,#0F1018)",
-          borderColor: isPlaying ? "#7C5CFC66" : "var(--border)",
+          background: "linear-gradient(135deg, var(--surface), var(--bg))",
+          borderColor: isPlaying ? "#8B80C066" : "var(--border)",
           aspectRatio: "16/9",
           transition: "border-color 0.3s",
         }}
@@ -216,7 +216,7 @@ export default function AudioCheck() {
             padding: 6,
             borderRadius: "50%",
             background: isPlaying
-              ? "conic-gradient(from 0deg, #7C5CFC, #C084FC, #22D37A, #7C5CFC)"
+              ? "conic-gradient(from 0deg, #8B80C0, #B09CD0, #5BAF7E, #8B80C0)"
               : "transparent",
             animation: isPlaying ? "spin 3s linear infinite" : "none",
           }}
@@ -224,8 +224,8 @@ export default function AudioCheck() {
           <div
             className="w-[64px] h-[64px] rounded-full flex items-center justify-center text-[28px]"
             style={{
-              background: "linear-gradient(135deg,#7C5CFC,#C084FC)",
-              boxShadow: isPlaying ? "0 0 30px #7C5CFC66" : "0 0 20px var(--accent-glow)",
+              background: "linear-gradient(135deg,#8B80C0,#B09CD0)",
+              boxShadow: isPlaying ? "0 0 30px #8B80C066" : "0 0 20px var(--accent-glow)",
               transition: "box-shadow 0.3s",
             }}
           >
@@ -251,7 +251,7 @@ export default function AudioCheck() {
                     className="w-[3px] rounded-full block"
                     style={{
                       height: h * 3,
-                      background: "#7C5CFC",
+                      background: "#8B80C0",
                       animation: `soundwave 0.8s ${i * 0.1}s ease-in-out infinite alternate`,
                     }}
                   />
@@ -276,7 +276,7 @@ export default function AudioCheck() {
 
         <div
           className="absolute top-3 right-3 rounded-[6px] px-2 py-0.5 text-[10px] font-bold text-white z-20"
-          style={{ background: state === "recording" ? "#FF4D6A" : isPlaying ? "#7C5CFC" : "#6B7194" }}
+          style={{ background: state === "recording" ? "#CC6B7E" : isPlaying ? "#8B80C0" : "#7A7D94" }}
         >
           {state === "recording" ? "● LIVE" : isPlaying ? "● PLAYING" : "● READY"}
         </div>
@@ -288,7 +288,7 @@ export default function AudioCheck() {
           className="border rounded-[16px] p-4"
           style={{
             background: "var(--card)",
-            borderColor: isPlaying ? "#7C5CFC44" : "var(--border)",
+            borderColor: isPlaying ? "#8B80C044" : "var(--border)",
             transition: "border-color 0.3s",
           }}
         >
@@ -299,9 +299,9 @@ export default function AudioCheck() {
               className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 border-none cursor-pointer transition-all"
               style={{
                 background: isPlaying
-                  ? "linear-gradient(135deg,#7C5CFC,#C084FC)"
+                  ? "linear-gradient(135deg,#8B80C0,#B09CD0)"
                   : "var(--surface)",
-                boxShadow: isPlaying ? "0 0 20px #7C5CFC44" : "none",
+                boxShadow: isPlaying ? "0 0 20px #8B80C044" : "none",
                 color: isPlaying ? "#fff" : "var(--text)",
               }}
             >
@@ -350,7 +350,7 @@ export default function AudioCheck() {
               className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-100"
               style={{
                 width: `${progress * 100}%`,
-                background: "linear-gradient(90deg,#7C5CFC,#C084FC)",
+                background: "linear-gradient(90deg,#8B80C0,#B09CD0)",
               }}
             />
             {/* Scrubber dot */}
@@ -359,7 +359,7 @@ export default function AudioCheck() {
               style={{
                 left: `calc(${progress * 100}% - 10px)`,
                 background: "#fff",
-                boxShadow: "0 0 6px #7C5CFC88",
+                boxShadow: "0 0 6px #8B80C088",
               }}
             />
           </div>
@@ -381,7 +381,7 @@ export default function AudioCheck() {
       {errorMsg && (
         <div
           className="border rounded-[12px] p-3 text-[12px]"
-          style={{ background: "#FF4D6A11", borderColor: "#FF4D6A44", color: "#FF4D6A" }}
+          style={{ background: "#CC6B7E11", borderColor: "#CC6B7E44", color: "#CC6B7E" }}
         >
           {errorMsg}
         </div>
@@ -404,15 +404,15 @@ export default function AudioCheck() {
         <div className="flex flex-col gap-3.5">
           <div
             className="border rounded-[18px] p-5"
-            style={{ background: "var(--card)", borderColor: "#FF4D6A44" }}
+            style={{ background: "var(--card)", borderColor: "#CC6B7E44" }}
           >
             <div className="flex justify-between mb-3.5">
               <div className="flex items-center gap-2">
                 <div
                   className="w-2.5 h-2.5 rounded-full"
-                  style={{ background: "#FF4D6A", animation: "pulse 1s infinite" }}
+                  style={{ background: "#CC6B7E", animation: "pulse 1s infinite" }}
                 />
-                <span className="font-bold text-[13px]" style={{ color: "#FF4D6A" }}>
+                <span className="font-bold text-[13px]" style={{ color: "#CC6B7E" }}>
                   Listening...
                 </span>
               </div>
@@ -452,10 +452,10 @@ export default function AudioCheck() {
         <div className="flex flex-col gap-3.5">
           <div
             className="border rounded-[18px] p-5 text-center"
-            style={{ background: "#FF4D6A11", borderColor: "#FF4D6A44" }}
+            style={{ background: "#CC6B7E11", borderColor: "#CC6B7E44" }}
           >
             <div className="text-[32px] mb-2">🎙</div>
-            <div className="font-extrabold text-[17px] mb-1" style={{ color: "#FF4D6A" }}>
+            <div className="font-extrabold text-[17px] mb-1" style={{ color: "#CC6B7E" }}>
               Couldn't hear that clearly
             </div>
             <div className="text-[13px]" style={{ color: "var(--muted)" }}>
@@ -474,10 +474,10 @@ export default function AudioCheck() {
         <div className="flex flex-col gap-3.5 pb-4">
           <div
             className="border rounded-[18px] p-5 text-center"
-            style={{ background: "#22D37A11", borderColor: "#22D37A44" }}
+            style={{ background: "#5BAF7E11", borderColor: "#5BAF7E44" }}
           >
             <div className="text-[40px] mb-2">✅</div>
-            <div className="font-extrabold text-[17px] mb-1" style={{ color: "#22D37A" }}>
+            <div className="font-extrabold text-[17px] mb-1" style={{ color: "#5BAF7E" }}>
               Audio Detected!
             </div>
             <div className="text-[13px]" style={{ color: "var(--muted)" }}>

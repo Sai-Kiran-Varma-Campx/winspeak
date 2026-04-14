@@ -38,7 +38,7 @@ export default function ModeSwitcher() {
         letterSpacing: 0.3,
         background: isSchool
           ? "linear-gradient(135deg,#5B8DEF,#7CB1FF)"
-          : "linear-gradient(135deg,#7C5CFC,#C084FC)",
+          : "linear-gradient(135deg,#8B80C0,#B09CD0)",
         color: "#fff",
         boxShadow: isSchool
           ? "0 6px 20px rgba(91,141,239,0.35)"

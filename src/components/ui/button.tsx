@@ -9,13 +9,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-gradient-to-br from-accent to-[#9B7BFF] text-white shadow-[0_4px_20px_var(--accent-glow)]",
+          "bg-gradient-to-br from-accent to-[#8E84B5] text-white shadow-[0_4px_20px_var(--accent-glow)]",
         secondary:
           "bg-surface text-text border border-border",
         danger:
-          "bg-[#FF4D6A22] text-red border border-[#FF4D6A44]",
+          "bg-[#CC6B7E22] text-red border border-[#CC6B7E44]",
         success:
-          "bg-[#22D37A22] text-green border border-[#22D37A44]",
+          "bg-[#5BAF7E22] text-green border border-[#5BAF7E44]",
         ghost:
           "bg-transparent border border-border text-muted hover:text-text",
         outline:

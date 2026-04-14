@@ -17,6 +17,7 @@ interface SchoolSessionState {
   selectedCategory: SchoolCategoryId | null;
   // Step 2
   selectedGrade: number | null;
+  selectedSection: string | null;
   selectedQuestion: SchoolQuestion | null;
   // Step 3
   rosterSnapshot: SchoolStudentLite[];
@@ -25,7 +26,7 @@ interface SchoolSessionState {
   studentStatus: Record<string, "pending" | "active" | "done">;
 
   setCategory: (id: SchoolCategoryId) => void;
-  setCustomChallenge: (title: string, prompt: string, scenario: string) => void;
+  setCustomChallenge: (title: string, prompt: string, scenario: string, grade: number, section: string | null) => void;
   setGradeAndQuestion: (grade: number, q: SchoolQuestion) => void;
   setRoster: (students: SchoolStudentLite[]) => void;
   startStudent: (id: string) => void;
@@ -38,6 +39,7 @@ const Ctx = createContext<SchoolSessionState | null>(null);
 export function SchoolSessionProvider({ children }: { children: ReactNode }) {
   const [selectedCategory, setSelectedCategory] = useState<SchoolCategoryId | null>(null);
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<SchoolQuestion | null>(null);
   const [rosterSnapshot, setRosterSnapshot] = useState<SchoolStudentLite[]>([]);
   const [currentStudentId, setCurrentStudentId] = useState<string | null>(null);
@@ -46,26 +48,36 @@ export function SchoolSessionProvider({ children }: { children: ReactNode }) {
   const setCategory = useCallback((id: SchoolCategoryId) => {
     setSelectedCategory(id);
     setSelectedGrade(null);
+    setSelectedSection(null);
     setSelectedQuestion(null);
   }, []);
 
-  const setCustomChallenge = useCallback((title: string, prompt: string, scenario: string) => {
-    setSelectedCategory("circletime" as SchoolCategoryId); // fallback category
-    setSelectedGrade(1);
+  const setCustomChallenge = useCallback((title: string, prompt: string, scenario: string, grade: number, section: string | null) => {
+    setSelectedCategory("custom" as SchoolCategoryId);
+    setSelectedGrade(grade);
+    setSelectedSection(section);
     setSelectedQuestion({
       id: `custom_${Date.now()}`,
-      categoryId: "circletime" as SchoolCategoryId,
-      grade: 1,
+      categoryId: "custom",
       title,
       prompt,
       scenario,
       durationSecs: 60,
     });
+    // Reset roster so Step 3 reloads students for the selected grade
+    setRosterSnapshot([]);
+    setCurrentStudentId(null);
+    setStudentStatus({});
   }, []);
 
   const setGradeAndQuestion = useCallback((grade: number, q: SchoolQuestion) => {
     setSelectedGrade(grade);
+    setSelectedSection(null);
     setSelectedQuestion(q);
+    // Reset roster so Step 3 reloads students for this grade
+    setRosterSnapshot([]);
+    setCurrentStudentId(null);
+    setStudentStatus({});
   }, []);
 
   const setRoster = useCallback((students: SchoolStudentLite[]) => {
@@ -91,6 +103,7 @@ export function SchoolSessionProvider({ children }: { children: ReactNode }) {
   const reset = useCallback(() => {
     setSelectedCategory(null);
     setSelectedGrade(null);
+    setSelectedSection(null);
     setSelectedQuestion(null);
     setRosterSnapshot([]);
     setCurrentStudentId(null);
@@ -102,6 +115,7 @@ export function SchoolSessionProvider({ children }: { children: ReactNode }) {
       value={{
         selectedCategory,
         selectedGrade,
+        selectedSection,
         selectedQuestion,
         rosterSnapshot,
         currentStudentId,

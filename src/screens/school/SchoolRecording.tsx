@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useSchoolSession } from "@/context/SchoolSessionContext";
-import { synthesizeSpeech, stopAudioPlayback, transcribeAudio, analyzeAnswer, preRenderSpeech } from "@/services/gemini";
+import { synthesizeSpeech, stopAudioPlayback, transcribeAudio, analyzeAnswer, preRenderSpeech, playCoachVoice } from "@/services/gemini";
+import { SCHOOL_VOICE_URLS } from "@/constants/voiceUrls";
 import { api } from "@/lib/api";
 import Spinner from "@/components/Spinner";
 import FriendlyTeacher from "@/components/FriendlyTeacher";
@@ -14,9 +15,10 @@ const SCHOOL_ANALYSIS_STEPS = [
   { emoji: "🎧", label: "Listening to the recording..." },
   { emoji: "📝", label: "Checking fluency & grammar..." },
   { emoji: "⭐", label: "Scoring vocabulary & clarity..." },
+  { emoji: "🔊", label: "Generating ideal audio..." },
   { emoji: "✨", label: "Creating your report card..." },
 ];
-const STEP_THRESHOLDS = [15, 40, 65, 88];
+const STEP_THRESHOLDS = [12, 30, 55, 75, 90];
 
 /* Pulsing ring animation for recording state */
 const pulseKeyframes = `
@@ -40,6 +42,7 @@ export default function SchoolRecording() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState("");
+  const [loadingVoice, setLoadingVoice] = useState(false);
   const [readingInstructions, setReadingInstructions] = useState(false);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -67,16 +70,37 @@ export default function SchoolRecording() {
   }, [phase]);
 
   const readInstructions = useCallback(async () => {
-    if (!q || readingInstructions || paused) return;
-    setReadingInstructions(true);
+    if (!q || readingInstructions || loadingVoice || paused) return;
+    setLoadingVoice(true);
     try {
-      await synthesizeSpeech(`${q.scenario}. ${q.prompt}`);
+      // Try pre-generated voice from CDN first (instant)
+      const hasPreGenerated = !!SCHOOL_VOICE_URLS[q.id];
+      if (hasPreGenerated) {
+        await playCoachVoice(
+          q.id,
+          "",
+          () => {
+            setLoadingVoice(false);
+            setReadingInstructions(true);
+          }
+        );
+      } else {
+        // Fallback to live TTS for custom challenges
+        await synthesizeSpeech(
+          `${q.scenario}. ${q.prompt}`,
+          () => {
+            setLoadingVoice(false);
+            setReadingInstructions(true);
+          }
+        );
+      }
     } catch {
       // best effort
     } finally {
+      setLoadingVoice(false);
       setReadingInstructions(false);
     }
-  }, [q, readingInstructions, paused]);
+  }, [q, readingInstructions, loadingVoice, paused]);
 
   const pauseInstructions = useCallback(() => {
     stopAudioPlayback();
@@ -107,15 +131,52 @@ export default function SchoolRecording() {
     try {
       const blob = await stopRecording();
 
-      // Step 1: Transcribe
+      // Step 1: Listening to the recording (transcribe)
       setProgress(5);
       const transcript = await transcribeAudio(blob);
-      setProgress(25);
+      setProgress(20);
 
-      // Progress ticker while analysis runs
-      let stepProgress = 25;
+      // Check for minimal/no speech — if less than 5 words, skip AI analysis
+      const wordCount = (transcript || "").trim().split(/\s+/).filter(Boolean).length;
+      if (wordCount < 5) {
+        // Too little speech — save with near-zero scores
+        const saved = await api.createSchoolAttempt({
+          studentId,
+          categoryId: q.categoryId,
+          questionId: q.id,
+          questionTitle: q.title,
+          grade,
+          score: 0,
+          skills: { Fluency: 0, Grammar: 0, Vocabulary: 0, Clarity: 0, Structure: 0, Relevancy: 0 },
+          confidenceScore: 0,
+          analysisResult: {
+            overallScore: 0,
+            transcript: transcript || "(no speech detected)",
+            skills: {
+              Fluency: { score: 0, feedback: "We couldn't hear enough words. Try speaking more next time!" },
+              Grammar: { score: 0, feedback: "Speak in full sentences so we can check your grammar." },
+              Vocabulary: { score: 0, feedback: "Use more words to show your vocabulary." },
+              Clarity: { score: 0, feedback: "Try speaking clearly and loudly into the mic." },
+              Structure: { score: 0, feedback: "Tell us a full answer with a beginning, middle, and end." },
+              Relevancy: { score: 0, feedback: "Make sure to answer the question that was asked." },
+            },
+            winSpeakAnalysis: "It looks like you didn't speak enough this time. That's okay! Next time, try to talk about the topic for the full time.",
+            strengths: ["You showed up and tried — that takes courage!"],
+            improvements: ["Next time, try to speak for the full 30 seconds about the topic."],
+            confidenceScore: 0,
+            whatYouGotRight: [],
+          },
+        });
+        session.markStudentDone(studentId);
+        setProgress(100);
+        setTimeout(() => navigate(`/school/report/${saved.id}`, { replace: true }), 800);
+        return;
+      }
+
+      // Step 2-3: Checking fluency, grammar, vocabulary, clarity (analysis)
+      let stepProgress = 20;
       const ticker = setInterval(() => {
-        stepProgress = Math.min(stepProgress + 2, 88);
+        stepProgress = Math.min(stepProgress + 2, 70);
         setProgress(stepProgress);
       }, 400);
 
@@ -131,15 +192,16 @@ export default function SchoolRecording() {
         passingScore: 50,
         maxAttempts: 99,
         category: "speaking",
-        tier: grade <= 2 ? "Beginner" : grade === 3 ? "Intermediate" : "Advanced",
+        tier: `Grade${grade}` as any,
       };
 
       const result = await analyzeAnswer(transcript, q.prompt, challengeStub, [], {
-        grade: grade as 1 | 2 | 3 | 4,
+        grade,
       });
       clearInterval(ticker);
-      setProgress(92);
+      setProgress(72);
 
+      // Step 4: Generate ideal audio (so it's instant on the report)
       const skills: Record<string, number> = {};
       if (result.skills) {
         Object.entries(result.skills).forEach(([k, v]) => {
@@ -147,6 +209,7 @@ export default function SchoolRecording() {
         });
       }
 
+      // Save attempt first to get the ID for caching
       const saved = await api.createSchoolAttempt({
         studentId,
         categoryId: q.categoryId,
@@ -158,14 +221,21 @@ export default function SchoolRecording() {
         confidenceScore: result.confidenceScore,
         analysisResult: result,
       });
+      setProgress(78);
 
-      setProgress(100);
-      session.markStudentDone(studentId);
-
-      // Pre-render ideal response audio in background so it's instant on the report
+      // Generate ideal response audio now (not in background)
       if (result.idealResponse) {
-        preRenderSpeech(result.idealResponse, `school_ideal_${saved.id}`).catch(() => {});
+        try {
+          await preRenderSpeech(result.idealResponse, `school_ideal_${saved.id}`);
+        } catch {
+          // best effort — report still works without audio
+        }
       }
+      setProgress(92);
+
+      // Step 5: Creating report card
+      session.markStudentDone(studentId);
+      setProgress(100);
 
       // Show 100% briefly, then navigate to report
       setTimeout(() => {
@@ -197,42 +267,109 @@ export default function SchoolRecording() {
             <path d="M19 12H5" /><polyline points="12 19 5 12 12 5" />
           </svg>
         </button>
-        <div className="inline-block px-3 py-1 mb-3 rounded-full bg-[#FEF2E8] border-[1.5px] border-[rgba(124,45,18,0.12)] text-[11px] font-black tracking-widest text-[#A8603C] uppercase">
-          GRADE {grade}
+        <div style={{
+          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+          border: "1.5px solid rgba(124,58,237,0.18)", borderRadius: 20,
+          padding: "20px 24px", display: "flex", alignItems: "center", gap: 16,
+        }}>
+          <div style={{
+            width: 48, height: 48, borderRadius: 14,
+            background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 22, flexShrink: 0,
+          }}>🎤</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>
+              Grade {grade} Challenge
+            </div>
+            <h1 style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", color: "#4C1D95", fontSize: 24, fontWeight: 500, margin: 0, lineHeight: 1.2 }}>
+              {q.title}
+            </h1>
+          </div>
         </div>
-        <h1 style={{ fontFamily: "'Sora', sans-serif" }} className="font-black text-[36px] tracking-[-0.02em] text-[#7C2D12] leading-tight">{q.title}</h1>
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-        {/* Friendly teacher avatar */}
-        <div className="bg-[#FED7AA] border-[1.5px] border-[#FDBA74] p-6 text-center mb-6 shadow-[0_2px_0_rgba(42,31,26,0.06)] rounded-[24px]">
+        {/* Teacher avatar — only shows speaking animation when audio is actually playing */}
+        <div style={{
+          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+          border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+          padding: 24, textAlign: "center", marginBottom: 24, borderRadius: 24,
+        }}>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <FriendlyTeacher speaking={readingInstructions} size={100} />
           </div>
-          <div style={{ fontFamily: "'Sora', sans-serif" }} className="text-[20px] mt-2 font-black text-[#7C2D12]">Hi! I'm your speaking coach.</div>
-          <div className="text-[14px] mt-1 font-semibold text-[#A8603C]">
-            Listen to the question, then tap Record when you're ready.
+          <div style={{
+            fontFamily: "'Fredoka', 'Sora', sans-serif",
+            fontSize: 20, marginTop: 8, fontWeight: 800, color: "#4C1D95",
+          }}>
+            {loadingVoice ? "Preparing voice..." : readingInstructions ? "Listen carefully..." : "Your Speaking Coach"}
+          </div>
+          <div style={{ fontSize: 14, marginTop: 4, fontWeight: 600, color: "#6E5E8A" }}>
+            {loadingVoice
+              ? "Generating audio, one moment..."
+              : readingInstructions
+              ? "The question is being read out to you."
+              : "Tap 'Read it to me' to hear the question, then record your answer."}
           </div>
         </div>
 
-        {/* Question + audio with pause */}
-        <div className="bg-white border-[1.5px] border-[rgba(124,45,18,0.12)] p-6 mb-8 rounded-[24px] shadow-[0_2px_0_rgba(42,31,26,0.06)]">
-          <div className="text-[12px] font-black tracking-[0.08em] uppercase mb-4 text-[#A8603C]">QUESTION</div>
-          <div className="text-[16px] mb-3 leading-relaxed text-[#7C2D12]"><strong className="font-black">Scene:</strong> {q.scenario}</div>
-          <div className="text-[16px] mb-6 leading-relaxed text-[#7C2D12]"><strong className="font-black">Your task:</strong> {q.prompt}</div>
+        {/* Question + audio controls */}
+        <div style={{
+          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+          border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+          padding: 24, marginBottom: 32, borderRadius: 24,
+        }}>
+          <div style={{
+            fontSize: 12, fontWeight: 800, letterSpacing: "0.08em",
+            textTransform: "uppercase" as const, marginBottom: 16, color: "#6E5E8A",
+          }}>QUESTION</div>
+          <div style={{ fontSize: 16, marginBottom: 12, lineHeight: 1.6, color: "#4C1D95" }}>
+            <strong style={{ fontWeight: 800 }}>Scene:</strong> {q.scenario}
+          </div>
+          <div style={{ fontSize: 16, marginBottom: 24, lineHeight: 1.6, color: "#4C1D95" }}>
+            <strong style={{ fontWeight: 800 }}>Your task:</strong> {q.prompt}
+          </div>
           <div className="flex gap-3">
-            {!readingInstructions && !paused && (
+            {!readingInstructions && !loadingVoice && !paused && (
               <button
                 onClick={readInstructions}
-                className="rounded-full px-5 py-2.5 text-[13px] uppercase tracking-widest font-black border-[1.5px] border-[#F9A8D4] bg-[#FCE7F3] text-[#DB2777] shadow-[0_2px_0_rgba(219,39,119,0.2)] cursor-pointer hover:-translate-y-0.5 transition-all w-fit flex items-center justify-center gap-2"
+                style={{
+                  borderRadius: 999, padding: "10px 20px",
+                  fontSize: 13, textTransform: "uppercase" as const, letterSpacing: "0.1em",
+                  fontWeight: 800, cursor: "pointer",
+                  background: "#EDE9FE", border: "1.5px solid #C4B5FD", color: "#7C3AED",
+                  boxShadow: "0 2px 0 rgba(124,58,237,0.15)",
+                  display: "flex", alignItems: "center", gap: 8,
+                  transition: "all 0.2s",
+                }}
               >
                 Read it to me 🔊
               </button>
             )}
+            {loadingVoice && (
+              <div style={{
+                borderRadius: 999, padding: "10px 20px",
+                fontSize: 13, textTransform: "uppercase" as const, letterSpacing: "0.1em",
+                fontWeight: 800,
+                background: "#F3E8FF", border: "1.5px solid #D8B4FE", color: "#9333EA",
+                display: "flex", alignItems: "center", gap: 8,
+              }}>
+                <Spinner size={14} /> Generating voice...
+              </div>
+            )}
             {readingInstructions && (
               <button
                 onClick={pauseInstructions}
-                className="rounded-full px-5 py-2.5 text-[13px] uppercase tracking-widest font-black border-[1.5px] border-[#FCD34D] bg-[#FEF3C7] text-[#D97706] shadow-[0_2px_0_rgba(163,123,0,0.2)] cursor-pointer hover:-translate-y-0.5 transition-all w-fit flex items-center justify-center gap-2"
+                style={{
+                  borderRadius: 999, padding: "10px 20px",
+                  fontSize: 13, textTransform: "uppercase" as const, letterSpacing: "0.1em",
+                  fontWeight: 800, cursor: "pointer",
+                  background: "#F3E8FF", border: "1.5px solid #D8B4FE", color: "#9333EA",
+                  boxShadow: "0 2px 0 rgba(147,51,234,0.15)",
+                  display: "flex", alignItems: "center", gap: 8,
+                  transition: "all 0.2s",
+                }}
               >
                 ⏸ Pause
               </button>
@@ -240,7 +377,15 @@ export default function SchoolRecording() {
             {paused && (
               <button
                 onClick={resume}
-                className="rounded-full px-5 py-2.5 text-[13px] uppercase tracking-widest font-black border-[1.5px] border-[#5EEAD4] bg-[#CCFBF1] text-[#0D9488] shadow-[0_2px_0_rgba(13,148,136,0.2)] cursor-pointer hover:-translate-y-0.5 transition-all w-fit flex items-center justify-center gap-2"
+                style={{
+                  borderRadius: 999, padding: "10px 20px",
+                  fontSize: 13, textTransform: "uppercase" as const, letterSpacing: "0.1em",
+                  fontWeight: 800, cursor: "pointer",
+                  background: "#CCFBF1", border: "1.5px solid #5EEAD4", color: "#0D9488",
+                  boxShadow: "0 2px 0 rgba(13,148,136,0.15)",
+                  display: "flex", alignItems: "center", gap: 8,
+                  transition: "all 0.2s",
+                }}
               >
                 ▶ Continue
               </button>
@@ -252,129 +397,148 @@ export default function SchoolRecording() {
         {phase === "intro" && (
           <button
             onClick={begin}
-            style={{ background: "linear-gradient(135deg, #EA580C, #DB2777)" }}
-            className="w-full rounded-[20px] py-4 text-[16px] font-black border-none text-[#fff] shadow-[0_4px_0_#B7350F] cursor-pointer hover:translate-y-[1px] hover:shadow-[0_3px_0_#B7350F] transition-all active:translate-y-[3px] active:shadow-[0_1px_0_#B7350F] uppercase tracking-widest flex items-center justify-center gap-2"
+            style={{
+              background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
+              width: "100%", borderRadius: 20, padding: "16px 0",
+              fontSize: 16, fontWeight: 800, border: "none", color: "#fff",
+              boxShadow: "0 4px 0 #5B21B6",
+              cursor: "pointer", textTransform: "uppercase" as const, letterSpacing: "0.1em",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              transition: "all 0.2s",
+            }}
           >
             🎙 Start Recording
           </button>
         )}
 
-        {/* Phase: recording — kid-friendly big mic with pulsing rings */}
+        {/* Phase: recording */}
         {phase === "recording" && (
-          <div className="bg-white border-[2px] border-[#F43F5E] p-10 text-center rounded-[26px] shadow-[0_4px_16px_rgba(244,63,94,0.18)] animate-in zoom-in-95 duration-300">
+          <div style={{
+            background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+            border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+            padding: 40, textAlign: "center", borderRadius: 26,
+          }}>
             {/* Pulsing mic area */}
             <div className="flex justify-center mb-4">
-              <div style={{ position: "relative", width: 120, height: 120 }}>
-                {/* Outer pulse ring */}
+              <div style={{ position: "relative", width: 110, height: 110 }}>
                 <div style={{
-                  position: "absolute", inset: 0,
-                  borderRadius: "50%",
-                  border: "3px solid #F43F5E",
+                  position: "absolute", inset: 0, borderRadius: "50%",
+                  border: "2.5px solid rgba(124,58,237,0.3)",
                   animation: "pulse-ring 2s ease-out infinite",
                 }} />
-                {/* Inner pulse ring */}
                 <div style={{
-                  position: "absolute", inset: 10,
-                  borderRadius: "50%",
-                  border: "3px solid #EA580C",
+                  position: "absolute", inset: 10, borderRadius: "50%",
+                  border: "2.5px solid rgba(167,139,250,0.3)",
                   animation: "pulse-ring-2 2s ease-out infinite 0.4s",
                 }} />
-                {/* Center mic */}
                 <div style={{
-                  position: "absolute", inset: 20,
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #EA580C, #DB2777)",
-                  display: "grid", placeItems: "center",
-                  fontSize: 40,
-                  boxShadow: "0 4px 20px rgba(234,88,12,0.3)",
+                  position: "absolute", inset: 22, borderRadius: "50%",
+                  background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
+                  display: "grid", placeItems: "center", fontSize: 34,
+                  boxShadow: "0 4px 20px rgba(124,58,237,0.25)",
                 }}>
                   🎙
                 </div>
               </div>
             </div>
 
-            <div style={{ fontFamily: "'Sora', sans-serif" }} className="text-[26px] font-black text-[#F43F5E] mb-2">Recording...</div>
-            <div style={{ fontFamily: "'Sora', sans-serif" }} className="text-[36px] font-black text-[#7C2D12] font-mono tracking-wider mb-6">
+            <div style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", fontSize: 14, fontWeight: 500, color: "#7C3AED", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Recording</div>
+            <div style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", fontSize: 40, fontWeight: 500, color: "#4C1D95", letterSpacing: "0.05em", marginBottom: 28 }}>
               {String(Math.floor(elapsed / 60)).padStart(2, "0")}:{String(elapsed % 60).padStart(2, "0")}
             </div>
             <button
               onClick={finish}
-              disabled={!isRecording}
-              className="school-btn-next"
-              style={{ maxWidth: 260, margin: "0 auto", height: 54, borderRadius: 18 }}
+              disabled={!isRecording || elapsed < 30}
+              style={{
+                maxWidth: 280, width: "100%", margin: "0 auto", padding: "16px 0",
+                borderRadius: 30, border: "none",
+                cursor: (!isRecording || elapsed < 30) ? "not-allowed" : "pointer",
+                background: elapsed < 30
+                  ? "rgba(124,58,237,0.25)"
+                  : "linear-gradient(135deg, #7C3AED, #A78BFA)",
+                color: "#fff", fontSize: 16, fontWeight: 800,
+                fontFamily: "'Fredoka', 'Sora', sans-serif",
+                boxShadow: elapsed < 30 ? "none" : "0 4px 15px rgba(124,58,237,0.3)",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                transition: "all 0.2s",
+              }}
             >
-              ⏹ Done <span className="btn-icon">✓</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+              {elapsed < 30 ? `Wait ${30 - elapsed}s` : "Stop Recording"}
             </button>
           </div>
         )}
 
-        {/* Phase: analysing — kid-friendly progress */}
+        {/* Phase: analysing */}
         {phase === "analysing" && (
-          <div className="animate-in zoom-in-95 duration-300" style={{
-            background: "#fff", border: "1.5px solid rgba(124,45,18,0.12)",
+          <div style={{
+            background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+            border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
             borderRadius: 26, padding: "32px 24px",
-            boxShadow: "0 2px 0 rgba(124,45,18,0.06)",
           }}>
-            {/* Header */}
             <div style={{ textAlign: "center", marginBottom: 24 }}>
-              <div style={{ fontSize: 48, marginBottom: 8 }}>
+              <div style={{
+                width: 56, height: 56, borderRadius: "50%", margin: "0 auto 12px",
+                background: progress < 100 ? "linear-gradient(135deg, #7C3AED, #A78BFA)" : "linear-gradient(135deg, #7C3AED, #C4B5FD)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 28,
+                boxShadow: "0 4px 15px rgba(124,58,237,0.25)",
+              }}>
                 {progress < 100 ? "🧠" : "🎉"}
               </div>
               <div style={{
-                fontFamily: "'Sora', sans-serif", fontWeight: 800,
-                fontSize: 22, color: "#7C2D12", marginBottom: 4,
+                fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500,
+                fontSize: 22, color: "#4C1D95", marginBottom: 4,
               }}>
                 {progress < 100 ? "Creating your report..." : "Report ready!"}
               </div>
-              <div style={{ fontSize: 13, color: "#A8603C", fontWeight: 500 }}>
+              <div style={{ fontSize: 13, color: "#6E5E8A", fontWeight: 500 }}>
                 {progress < 100 ? "This takes about 30 seconds" : "Let's see how you did!"}
               </div>
             </div>
 
             {/* Progress bar */}
             <div style={{
-              height: 12, borderRadius: 999, background: "rgba(124,45,18,0.06)",
+              height: 8, borderRadius: 999, background: "rgba(124,58,237,0.08)",
               overflow: "hidden", marginBottom: 24,
             }}>
               <div style={{
                 height: "100%", borderRadius: 999,
-                background: progress < 100
-                  ? "linear-gradient(90deg, #EA580C, #DB2777)"
-                  : "#0D9488",
+                background: "linear-gradient(90deg, #7C3AED, #A78BFA)",
                 width: `${progress}%`,
-                transition: "width 0.5s ease, background 0.3s",
-                boxShadow: "0 0 10px rgba(234,88,12,0.3)",
+                transition: "width 0.5s ease",
+                boxShadow: "0 0 8px rgba(124,58,237,0.3)",
               }} />
             </div>
 
             {/* Steps */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {SCHOOL_ANALYSIS_STEPS.map((step, i) => {
                 const isComplete = progress > STEP_THRESHOLDS[i];
                 const isActive = !isComplete && (i === 0 || progress > STEP_THRESHOLDS[i - 1]);
                 return (
                   <div key={i} style={{
                     display: "flex", alignItems: "center", gap: 12,
-                    padding: "10px 14px", borderRadius: 16,
-                    background: isComplete ? "#CCFBF1" : isActive ? "#FEF3C7" : "#FFF8F3",
-                    border: `1.5px solid ${isComplete ? "#5EEAD4" : isActive ? "#FCD34D" : "rgba(124,45,18,0.08)"}`,
+                    padding: "10px 14px", borderRadius: 14,
+                    background: isComplete ? "rgba(124,58,237,0.08)" : isActive ? "rgba(124,58,237,0.05)" : "rgba(255,255,255,0.4)",
+                    border: `1px solid ${isComplete ? "rgba(124,58,237,0.2)" : isActive ? "rgba(124,58,237,0.15)" : "rgba(124,58,237,0.06)"}`,
                     transition: "all 0.4s ease",
                   }}>
                     <div style={{
-                      width: 32, height: 32, borderRadius: 10,
-                      background: isComplete ? "#0D9488" : isActive ? "#F59E0B" : "rgba(124,45,18,0.06)",
+                      width: 30, height: 30, borderRadius: 8,
+                      background: isComplete ? "#7C3AED" : isActive ? "linear-gradient(135deg, #7C3AED, #A78BFA)" : "rgba(124,58,237,0.06)",
                       display: "grid", placeItems: "center",
-                      fontSize: isComplete ? 16 : 18, color: "#fff",
+                      fontSize: isComplete ? 14 : 16, color: isComplete || isActive ? "#fff" : "#6E5E8A",
                       flexShrink: 0,
                       transition: "all 0.4s ease",
                     }}>
                       {isComplete ? "✓" : step.emoji}
                     </div>
                     <span style={{
-                      fontFamily: "'Sora', sans-serif",
+                      fontFamily: "'Fredoka', 'Sora', sans-serif",
                       fontSize: 14,
                       fontWeight: isComplete ? 700 : isActive ? 700 : 500,
-                      color: isComplete ? "#0D9488" : isActive ? "#92400E" : "#A8603C",
+                      color: isComplete ? "#4C1D95" : isActive ? "#4C1D95" : "#6E5E8A",
                       transition: "all 0.4s ease",
                     }}>
                       {isComplete ? step.label.replace("...", " ✓") : step.label}
@@ -388,14 +552,28 @@ export default function SchoolRecording() {
 
         {/* Phase: error */}
         {phase === "error" && (
-          <div className="bg-white border-[2px] border-[#F43F5E] p-8 text-center rounded-[24px] shadow-[0_4px_12px_rgba(244,63,94,0.15)]">
-            <div className="text-[40px] mb-3">😞</div>
-            <div style={{ fontFamily: "'Sora', sans-serif" }} className="text-[22px] font-black text-[#7C2D12] mb-1">Oops, something went wrong</div>
-            <div className="text-[14px] font-semibold text-[#A8603C] mb-5">{error}</div>
+          <div style={{
+            background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+            border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+            padding: 32, textAlign: "center", borderRadius: 24,
+          }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>😞</div>
+            <div style={{
+              fontFamily: "'Fredoka', 'Sora', sans-serif",
+              fontSize: 22, fontWeight: 800, color: "#4C1D95", marginBottom: 4,
+            }}>Oops, something went wrong</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#6E5E8A", marginBottom: 20 }}>{error}</div>
             <button
               onClick={() => setPhase("intro")}
-              style={{ background: "linear-gradient(135deg, #EA580C, #DB2777)" }}
-              className="rounded-[18px] px-8 py-3 text-[14px] uppercase tracking-widest font-black border-none text-white shadow-[0_4px_0_#B7350F] cursor-pointer hover:translate-y-[1px] hover:shadow-[0_3px_0_#B7350F] transition-all active:translate-y-[3px] active:shadow-[0_1px_0_#B7350F]"
+              style={{
+                background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
+                borderRadius: 30, padding: "14px 36px",
+                fontSize: 15, fontWeight: 700,
+                fontFamily: "'Fredoka', 'Sora', sans-serif",
+                border: "none", color: "white",
+                boxShadow: "0 4px 15px rgba(124,58,237,0.3)",
+                cursor: "pointer", transition: "all 0.2s",
+              }}
             >
               Try Again
             </button>

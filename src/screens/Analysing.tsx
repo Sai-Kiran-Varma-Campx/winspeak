@@ -96,8 +96,8 @@ export default function Analysing() {
         <div
           className="border rounded-[22px] p-6 w-full text-center"
           style={{
-            background: "linear-gradient(135deg, #FF4D6A08, #1A1D2E)",
-            borderColor: "#FF4D6A44",
+            background: "linear-gradient(135deg, #CC6B7E08, var(--surface))",
+            borderColor: "#CC6B7E44",
           }}
         >
           <div className="text-[40px] mb-4">
@@ -175,15 +175,15 @@ export default function Analysing() {
               className="border rounded-[14px] p-3 flex items-center gap-3 transition-colors duration-500"
               style={{
                 background: "var(--card)",
-                borderColor: isComplete ? "#7C5CFC44" : "var(--border)",
+                borderColor: isComplete ? "#8B80C044" : "var(--border)",
               }}
             >
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center text-[12px] flex-shrink-0 border-2 transition-all duration-500"
                 style={{
-                  background: isComplete ? "#22D37A22" : "var(--surface)",
-                  borderColor: isComplete ? "#22D37A" : "var(--border)",
-                  color: isComplete ? "#22D37A" : "var(--muted)",
+                  background: isComplete ? "#5BAF7E22" : "var(--surface)",
+                  borderColor: isComplete ? "#5BAF7E" : "var(--border)",
+                  color: isComplete ? "#5BAF7E" : "var(--muted)",
                 }}
               >
                 {isComplete ? "✓" : "○"}

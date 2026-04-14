@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
 import { useSchoolSession } from "@/context/SchoolSessionContext";
@@ -22,7 +22,18 @@ export default function ChallengeStep3Administer() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "done">("all");
+  const [statusDropOpen, setStatusDropOpen] = useState(false);
+  const statusDropRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    if (!statusDropOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (statusDropRef.current && !statusDropRef.current.contains(e.target as Node)) setStatusDropOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [statusDropOpen]);
 
   // Bounce out if previous steps were skipped
   useEffect(() => {
@@ -39,7 +50,11 @@ export default function ChallengeStep3Administer() {
     }
     (async () => {
       try {
-        const rows = (await api.listStudents(session.selectedGrade!)) as StudentRow[];
+        let rows = (await api.listStudents(session.selectedGrade!)) as StudentRow[];
+        // Filter by selected section if one was chosen (custom challenge flow)
+        if (session.selectedSection) {
+          rows = rows.filter((r) => r.section === session.selectedSection);
+        }
         session.setRoster(rows);
       } finally {
         setLoading(false);
@@ -84,49 +99,62 @@ export default function ChallengeStep3Administer() {
   // Reset page when filters change
   useEffect(() => { setPage(1); }, [search, statusFilter]);
 
-  const avatarColors = [
-    "bg-[#FED7AA] border-[#FDBA74] text-[#EA580C]",
-    "bg-[#FCE7F3] border-[#F9A8D4] text-[#DB2777]",
-    "bg-[#FEF3C7] border-[#FCD34D] text-[#D97706]",
-    "bg-[#CCFBF1] border-[#5EEAD4] text-[#0D9488]"
-  ];
-
   return (
     <div className="max-w-[800px] mx-auto px-6 py-8 pb-48">
       <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="inline-block px-3 py-1 mb-3 rounded-full bg-[#FEF2E8] border-[1.5px] border-[rgba(124,45,18,0.12)] text-[11px] font-black tracking-widest text-[#A8603C] uppercase">
-          STEP 3 OF 3
+        <div style={{ fontSize: 11, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>
+          Step 3 of 3
         </div>
-        <h1 style={{ fontFamily: "'Sora', sans-serif" }} className="font-black text-[36px] tracking-[-0.02em] text-[#7C2D12]">Administer to Class</h1>
+        <h1 style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", fontSize: 28, fontWeight: 500, color: "#4C1D95", margin: 0, lineHeight: 1.2 }}>
+          Administer Challenge
+        </h1>
+        <p style={{ fontSize: 14, fontWeight: 600, color: "#6E5E8A", marginTop: 6 }}>
+          Start recording for each student in your class.
+        </p>
 
         {q && (() => {
-          const cat = session.selectedCategory ? getSchoolCategory(session.selectedCategory) : null;
+          const isCustom = q.id?.startsWith("custom_");
+          const cat = !isCustom && session.selectedCategory ? getSchoolCategory(session.selectedCategory) : null;
           return (
-            <div className="bg-[#FEF3C7] border-[1.5px] border-[#FCD34D] rounded-[22px] p-5 mt-5 shadow-[0_2px_0_rgba(42,31,26,0.06)] relative overflow-hidden">
+            <div style={{
+              background: "#EDE9FE", border: "1.5px solid #C4B5FD",
+              borderRadius: 22, padding: 20, marginTop: 20,
+              boxShadow: "0 2px 0 rgba(124,58,237,0.06)", position: "relative", overflow: "hidden",
+            }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
-                {cat && (
+                {isCustom ? (
+                  <>
+                    <span style={{
+                      fontSize: 18, width: 32, height: 32, borderRadius: 10,
+                      background: "#fff", border: "1.5px solid #C4B5FD",
+                      display: "inline-grid", placeItems: "center",
+                    }}>&#9997;&#65039;</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: "#4C1D95" }}>Custom Challenge</span>
+                    <span style={{ color: "#7C3AED", fontSize: 13, fontWeight: 600 }}>·</span>
+                  </>
+                ) : cat && (
                   <>
                     <span style={{
                       fontSize: 20, width: 32, height: 32, borderRadius: 10,
-                      background: "#fff", border: "1.5px solid #FCD34D",
+                      background: "#fff", border: "1.5px solid #C4B5FD",
                       display: "inline-grid", placeItems: "center",
                     }}>{cat.emoji}</span>
-                    <span className="text-[13px] font-black text-[#92400E]">{cat.title}</span>
-                    <span style={{ color: "#D97706", fontSize: 13, fontWeight: 600 }}>·</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: "#4C1D95" }}>{cat.title}</span>
+                    <span style={{ color: "#7C3AED", fontSize: 13, fontWeight: 600 }}>·</span>
                   </>
                 )}
                 {session.selectedGrade != null && (
                   <span style={{
                     fontSize: 12, fontWeight: 700, padding: "2px 10px",
-                    borderRadius: 999, background: "#FED7AA",
-                    border: "1px solid #FDBA74", color: "#92400E",
+                    borderRadius: 999, background: "#C4B5FD",
+                    border: "1px solid #A78BFA", color: "#4C1D95",
                   }}>
-                    Grade {session.selectedGrade}
+                    Grade {session.selectedGrade}{session.selectedSection ? ` · Section ${session.selectedSection}` : ""}
                   </span>
                 )}
               </div>
-              <div style={{ fontFamily: "'Sora', sans-serif" }} className="text-[17px] font-black text-[#7C2D12] mb-1">{q.title}</div>
-              <div className="text-[14px] font-medium text-[#A8603C] leading-snug">{q.prompt}</div>
+              <div style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", fontSize: 17, fontWeight: 500, color: "#4C1D95", marginBottom: 4 }}>{q.title}</div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: "#6E5E8A", lineHeight: 1.5 }}>{q.prompt}</div>
             </div>
           );
         })()}
@@ -138,10 +166,14 @@ export default function ChallengeStep3Administer() {
             <Spinner size={32} />
           </div>
         ) : session.rosterSnapshot.length === 0 ? (
-          <div className="bg-[white] border-[1.5px] border-[rgba(124,45,18,0.12)] p-8 text-center shadow-[0_2px_0_rgba(42,31,26,0.06)] rounded-[24px]">
-            <div className="text-[36px] mb-3">👥</div>
-            <div style={{ fontFamily: "'Sora', sans-serif" }} className="text-[20px] font-black text-[#7C2D12] mb-2">No students in Grade {session.selectedGrade}</div>
-            <div className="text-[14px] font-semibold text-[#A8603C]">
+          <div style={{
+            background: "white", border: "1.5px solid rgba(124,58,237,0.12)",
+            padding: 32, textAlign: "center", borderRadius: 24,
+            boxShadow: "0 2px 0 rgba(124,58,237,0.04)",
+          }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>👥</div>
+            <div style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", fontSize: 20, fontWeight: 500, color: "#4C1D95", marginBottom: 8 }}>No students in Grade {session.selectedGrade}{session.selectedSection ? ` · Section ${session.selectedSection}` : ""}</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#6E5E8A" }}>
               Add students from your Teacher Home before administering challenges.
             </div>
           </div>
@@ -153,81 +185,106 @@ export default function ChallengeStep3Administer() {
           }}>
             {/* Search */}
             <div style={{ flex: 1, minWidth: 160, position: "relative" }}>
-              <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.4 }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7C2D12" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.4 }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4C1D95" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name..."
                 style={{
                   width: "100%", padding: "10px 12px 10px 34px", borderRadius: 12,
-                  border: "1.5px solid rgba(124,45,18,0.12)", background: "#fff",
+                  border: "1.5px solid rgba(124,58,237,0.12)", background: "#fff",
                   fontFamily: "'Poppins', sans-serif", fontSize: 13, fontWeight: 500,
-                  color: "#7C2D12", outline: "none",
+                  color: "#4C1D95", outline: "none",
                 }}
               />
             </div>
 
             {/* Status filter dropdown */}
-            <div style={{ position: "relative" }}>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as "all" | "pending" | "done")}
+            <div ref={statusDropRef} style={{ position: "relative" }}>
+              <div
+                onClick={() => setStatusDropOpen((p) => !p)}
                 style={{
-                  appearance: "none",
-                  padding: "10px 36px 10px 14px",
-                  borderRadius: 12,
-                  border: "1.5px solid rgba(124,45,18,0.12)",
-                  background: "#fff",
-                  fontFamily: "'Sora', sans-serif",
-                  fontWeight: 700,
-                  fontSize: 13,
-                  color: "#7C2D12",
-                  cursor: "pointer",
-                  outline: "none",
-                  minWidth: 150,
+                  padding: "12px 40px 12px 16px",
+                  borderRadius: 30,
+                  background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
+                  fontFamily: "'Fredoka', 'Sora', sans-serif",
+                  fontWeight: 700, fontSize: 14, color: "#fff",
+                  cursor: "pointer", minWidth: 150, userSelect: "none",
+                  boxShadow: "0 4px 15px rgba(124,58,237,0.3)",
                 }}
               >
-                <option value="all">All Students ({totalCount})</option>
-                <option value="pending">Pending ({totalCount - doneCount})</option>
-                <option value="done">Completed ({doneCount})</option>
-              </select>
-              <svg style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8603C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                {statusFilter === "all" ? `All Students (${totalCount})` : statusFilter === "pending" ? `Pending (${totalCount - doneCount})` : `Completed (${doneCount})`}
+              </div>
+              <svg style={{ position: "absolute", right: 16, top: "50%", transform: statusDropOpen ? "translateY(-50%) rotate(180deg)" : "translateY(-50%)", transition: "transform 0.2s", pointerEvents: "none" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
+              {statusDropOpen && (
+                <div style={{
+                  position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0,
+                  background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+                  border: "1.5px solid rgba(124,58,237,0.18)",
+                  borderRadius: 14, padding: 4,
+                  boxShadow: "0 8px 24px rgba(124,58,237,0.15)",
+                  zIndex: 50,
+                }}>
+                  {([
+                    { value: "all" as const, label: `All Students (${totalCount})` },
+                    { value: "pending" as const, label: `Pending (${totalCount - doneCount})` },
+                    { value: "done" as const, label: `Completed (${doneCount})` },
+                  ]).map((opt) => (
+                    <div
+                      key={opt.value}
+                      onClick={() => { setStatusFilter(opt.value); setStatusDropOpen(false); }}
+                      style={{
+                        padding: "10px 14px", borderRadius: 10, cursor: "pointer",
+                        fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500, fontSize: 14,
+                        color: statusFilter === opt.value ? "#fff" : "#4C1D95",
+                        background: statusFilter === opt.value ? "linear-gradient(135deg, #7C3AED, #A78BFA)" : "transparent",
+                        transition: "all 0.15s",
+                      }}
+                      onMouseEnter={(e) => { if (statusFilter !== opt.value) e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}
+                      onMouseLeave={(e) => { if (statusFilter !== opt.value) e.currentTarget.style.background = "transparent"; }}
+                    >
+                      {opt.label}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
           <div style={{
-            background: "#fff", border: "1.5px solid rgba(124,45,18,0.1)",
+            background: "#fff", border: "1.5px solid rgba(124,58,237,0.1)",
             borderRadius: 22, overflow: "hidden",
-            boxShadow: "0 2px 0 rgba(124,45,18,0.04), 0 8px 24px -16px rgba(124,45,18,0.1)",
+            boxShadow: "0 2px 0 rgba(124,58,237,0.04), 0 8px 24px -16px rgba(124,58,237,0.1)",
           }}>
             {/* Table header */}
             <div style={{
               display: "grid", gridTemplateColumns: "1fr 120px 100px",
               padding: "12px 20px", gap: 12,
-              background: "#FED7AA", borderBottom: "1.5px solid #FDBA74",
+              background: "#EDE9FE", borderBottom: "1.5px solid #C4B5FD",
             }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: "#92400E", textTransform: "uppercase", letterSpacing: "0.08em" }}>Student</div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: "#92400E", textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>Status</div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: "#92400E", textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>Action</div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: "#4C1D95", textTransform: "uppercase", letterSpacing: "0.08em" }}>Student</div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: "#4C1D95", textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>Status</div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: "#4C1D95", textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>Action</div>
             </div>
 
             {/* Table rows */}
             {paginated.length === 0 ? (
               <div style={{ padding: "32px 20px", textAlign: "center" }}>
                 <div style={{ fontSize: 28, marginBottom: 6 }}>🔍</div>
-                <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 14, color: "#7C2D12" }}>No students match</div>
-                <div style={{ fontSize: 12, color: "#A8603C", marginTop: 2 }}>Try a different search or filter.</div>
+                <div style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500, fontSize: 14, color: "#4C1D95" }}>No students match</div>
+                <div style={{ fontSize: 12, color: "#6E5E8A", marginTop: 2 }}>Try a different search or filter.</div>
               </div>
             ) : paginated.map((s, idx) => {
               const status = session.studentStatus[s.id] ?? "pending";
-              const avatarStyle = [
-                { bg: "#FED7AA", bd: "#FDBA74", text: "#EA580C" },
-                { bg: "#FCE7F3", bd: "#F9A8D4", text: "#DB2777" },
-                { bg: "#FEF3C7", bd: "#FCD34D", text: "#D97706" },
-                { bg: "#CCFBF1", bd: "#5EEAD4", text: "#0D9488" },
-              ][idx % 4];
+              const avatarColors = [
+                { bg: "#EDE9FE", bd: "#C4B5FD", text: "#7C3AED" },
+                { bg: "#F3E8FF", bd: "#D8B4FE", text: "#9333EA" },
+                { bg: "#E0E7FF", bd: "#A5B4FC", text: "#4F46E5" },
+                { bg: "#EDE9FE", bd: "#C4B5FD", text: "#7C3AED" },
+              ];
+              const avatarStyle = avatarColors[idx % 4];
 
               return (
                 <div
@@ -236,10 +293,10 @@ export default function ChallengeStep3Administer() {
                     display: "grid", gridTemplateColumns: "1fr 120px 100px",
                     padding: "14px 20px", gap: 12,
                     alignItems: "center",
-                    borderBottom: idx < paginated.length - 1 ? "1px solid rgba(124,45,18,0.06)" : "none",
+                    borderBottom: idx < paginated.length - 1 ? "1px solid rgba(124,58,237,0.06)" : "none",
                     transition: "background 0.15s",
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = "#FFF8F3"}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "#FAFAFE"}
                   onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                 >
                   {/* Student name + avatar */}
@@ -247,7 +304,7 @@ export default function ChallengeStep3Administer() {
                     <div style={{
                       width: 40, height: 40, borderRadius: 12,
                       display: "grid", placeItems: "center",
-                      fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 17,
+                      fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500, fontSize: 17,
                       background: avatarStyle.bg, border: `1.5px solid ${avatarStyle.bd}`,
                       color: avatarStyle.text, flexShrink: 0,
                     }}>
@@ -255,11 +312,11 @@ export default function ChallengeStep3Administer() {
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{
-                        fontFamily: "'Sora', sans-serif", fontWeight: 700,
-                        fontSize: 15, color: "#7C2D12",
+                        fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500,
+                        fontSize: 15, color: "#4C1D95",
                         whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                       }}>{s.fullName}</div>
-                      <div style={{ fontSize: 11, color: "#A8603C", fontWeight: 500 }}>
+                      <div style={{ fontSize: 11, color: "#6E5E8A", fontWeight: 500 }}>
                         Grade {s.grade}{s.section ? ` · ${s.section}` : ""}
                       </div>
                     </div>
@@ -280,8 +337,8 @@ export default function ChallengeStep3Administer() {
                       <span style={{
                         display: "inline-flex", alignItems: "center", gap: 4,
                         padding: "4px 12px", borderRadius: 999,
-                        background: "#FEF3C7", border: "1px solid #FCD34D",
-                        fontSize: 12, fontWeight: 700, color: "#B45309",
+                        background: "#EDE9FE", border: "1px solid #C4B5FD",
+                        fontSize: 12, fontWeight: 700, color: "#7C3AED",
                       }}>
                         ● In Progress
                       </span>
@@ -289,8 +346,8 @@ export default function ChallengeStep3Administer() {
                       <span style={{
                         display: "inline-flex", alignItems: "center", gap: 4,
                         padding: "4px 12px", borderRadius: 999,
-                        background: "#FEF2E8", border: "1px solid rgba(124,45,18,0.12)",
-                        fontSize: 12, fontWeight: 700, color: "#A8603C",
+                        background: "#F5F3FF", border: "1px solid rgba(124,58,237,0.12)",
+                        fontSize: 12, fontWeight: 700, color: "#6E5E8A",
                       }}>
                         Not Started
                       </span>
@@ -303,31 +360,37 @@ export default function ChallengeStep3Administer() {
                       <button
                         onClick={() => startStudent(s)}
                         style={{
-                          padding: "7px 14px", borderRadius: 12,
-                          background: "#fff",
-                          border: "1.5px solid #FDBA74",
-                          color: "#EA580C",
-                          fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 12,
+                          padding: "8px 18px", borderRadius: 30,
+                          background: "rgba(124,58,237,0.08)",
+                          border: "1.5px solid rgba(124,58,237,0.2)",
+                          color: "#4C1D95",
+                          fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500, fontSize: 13,
                           cursor: "pointer",
+                          display: "flex", alignItems: "center", gap: 6,
                           transition: "all 0.15s ease",
                         }}
                       >
-                        🔄 Retry
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 4v6h6" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                        </svg>
+                        Retry
                       </button>
                     ) : (
                       <button
                         onClick={() => startStudent(s)}
                         style={{
-                          padding: "7px 18px", borderRadius: 12,
-                          background: "linear-gradient(135deg, #EA580C, #DB2777)",
+                          padding: "8px 18px", borderRadius: 30,
+                          background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
                           border: "none", color: "#fff",
-                          fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 13,
+                          fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500, fontSize: 13,
                           cursor: "pointer",
-                          boxShadow: "0 2px 0 #B7350F",
+                          boxShadow: "0 4px 12px rgba(124,58,237,0.25)",
+                          display: "flex", alignItems: "center", gap: 6,
                           transition: "all 0.15s ease",
                         }}
                       >
-                        ▶ Start
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                        Start
                       </button>
                     )}
                   </div>
@@ -347,11 +410,11 @@ export default function ChallengeStep3Administer() {
                 disabled={safePage <= 1}
                 style={{
                   width: 36, height: 36, borderRadius: 10,
-                  border: "1.5px solid rgba(124,45,18,0.12)",
+                  border: "1.5px solid rgba(124,58,237,0.12)",
                   background: "#fff", cursor: safePage <= 1 ? "not-allowed" : "pointer",
                   display: "grid", placeItems: "center",
                   opacity: safePage <= 1 ? 0.4 : 1,
-                  color: "#7C2D12", fontWeight: 800, fontSize: 14,
+                  color: "#4C1D95", fontWeight: 800, fontSize: 14,
                 }}
               >
                 ‹
@@ -362,12 +425,12 @@ export default function ChallengeStep3Administer() {
                   onClick={() => setPage(p)}
                   style={{
                     width: 36, height: 36, borderRadius: 10,
-                    border: p === safePage ? "none" : "1.5px solid rgba(124,45,18,0.12)",
-                    background: p === safePage ? "linear-gradient(135deg, #EA580C, #DB2777)" : "#fff",
-                    color: p === safePage ? "#fff" : "#7C2D12",
-                    fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 13,
+                    border: p === safePage ? "none" : "1.5px solid rgba(124,58,237,0.12)",
+                    background: p === safePage ? "linear-gradient(135deg, #7C3AED, #A78BFA)" : "#fff",
+                    color: p === safePage ? "#fff" : "#4C1D95",
+                    fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500, fontSize: 13,
                     cursor: "pointer",
-                    boxShadow: p === safePage ? "0 2px 6px rgba(234,88,12,0.2)" : "none",
+                    boxShadow: p === safePage ? "0 2px 6px rgba(124,58,237,0.2)" : "none",
                   }}
                 >
                   {p}
@@ -378,11 +441,11 @@ export default function ChallengeStep3Administer() {
                 disabled={safePage >= totalPages}
                 style={{
                   width: 36, height: 36, borderRadius: 10,
-                  border: "1.5px solid rgba(124,45,18,0.12)",
+                  border: "1.5px solid rgba(124,58,237,0.12)",
                   background: "#fff", cursor: safePage >= totalPages ? "not-allowed" : "pointer",
                   display: "grid", placeItems: "center",
                   opacity: safePage >= totalPages ? 0.4 : 1,
-                  color: "#7C2D12", fontWeight: 800, fontSize: 14,
+                  color: "#4C1D95", fontWeight: 800, fontSize: 14,
                 }}
               >
                 ›
@@ -393,7 +456,7 @@ export default function ChallengeStep3Administer() {
           {/* Showing count */}
           <div style={{
             textAlign: "center", marginTop: 10,
-            fontSize: 12, fontWeight: 600, color: "#A8603C", opacity: 0.6,
+            fontSize: 12, fontWeight: 600, color: "#6E5E8A", opacity: 0.6,
           }}>
             Showing {paginated.length} of {filtered.length} student{filtered.length !== 1 ? "s" : ""}
             {filtered.length !== totalCount && ` (filtered from ${totalCount})`}

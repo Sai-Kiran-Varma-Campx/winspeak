@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { eq, and, desc } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { students, studentAttempts, type User } from "../db/schema.js";
+import { students, studentAttempts, schoolQuestions, type User } from "../db/schema.js";
 import { resolveUser } from "../middleware/auth.js";
 
 const app = new Hono<{ Variables: { user: User } }>();
@@ -53,7 +53,7 @@ app.get("/students", async (c) => {
 const createStudentSchema = z.object({
   fullName: z.string().min(1).max(120),
   studentExternalId: z.string().max(60).optional().nullable(),
-  grade: z.number().int().min(1).max(4),
+  grade: z.number().int().min(1).max(10),
   section: z.string().max(40).optional().nullable(),
   parentEmail: z.string().email().max(200).optional().nullable(),
 });
@@ -89,6 +89,29 @@ app.delete("/students/:id", async (c) => {
   return c.json({ ok: true });
 });
 
+// ── School questions ──────────────────────────────────────────────────────
+
+// GET /api/school/questions?categoryId=circletime
+app.get("/questions", async (c) => {
+  const categoryId = c.req.query("categoryId");
+
+  if (!categoryId) {
+    const rows = await db
+      .select()
+      .from(schoolQuestions)
+      .orderBy(schoolQuestions.categoryId, schoolQuestions.questionNumber);
+    return c.json(rows);
+  }
+
+  const rows = await db
+    .select()
+    .from(schoolQuestions)
+    .where(eq(schoolQuestions.categoryId, categoryId))
+    .orderBy(schoolQuestions.questionNumber);
+
+  return c.json(rows);
+});
+
 // ── Student attempts (school-mode reports) ────────────────────────────────
 
 const createAttemptSchema = z.object({
@@ -96,7 +119,7 @@ const createAttemptSchema = z.object({
   categoryId: z.string().min(1),
   questionId: z.string().min(1),
   questionTitle: z.string().min(1),
-  grade: z.number().int().min(1).max(4),
+  grade: z.number().int().min(1).max(10),
   score: z.number().int(),
   skills: z.record(z.string(), z.number()).optional(),
   confidenceScore: z.number().int().optional(),

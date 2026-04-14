@@ -8,9 +8,9 @@ import { scoreColor } from "@/lib/challengeUtils";
 import type { ChallengeTier } from "@/types";
 
 const TIER_STYLES: Record<ChallengeTier, { bg: string; color: string; border: string }> = {
-  Beginner: { bg: "#22D37A11", color: "#22D37A", border: "#22D37A44" },
-  Intermediate: { bg: "#7C5CFC11", color: "#7C5CFC", border: "#7C5CFC44" },
-  Advanced: { bg: "#FFB83011", color: "#FFB830", border: "#FFB83044" },
+  Beginner: { bg: "#5BAF7E11", color: "#5BAF7E", border: "#5BAF7E44" },
+  Intermediate: { bg: "#8B80C011", color: "#8B80C0", border: "#8B80C044" },
+  Advanced: { bg: "#CCA55011", color: "#CCA550", border: "#CCA55044" },
 };
 
 type Tab = "hr" | "abap";
@@ -66,9 +66,9 @@ export default function InterviewPrep() {
             onClick={() => setActiveTab(key)}
             className="flex-1 border rounded-[14px] p-3 text-center cursor-pointer transition-all"
             style={{
-              background: activeTab === key ? "#7C5CFC18" : "var(--card)",
-              borderColor: activeTab === key ? "#7C5CFC66" : "var(--border)",
-              color: activeTab === key ? "#A78BFA" : "var(--text)",
+              background: activeTab === key ? "#8B80C018" : "var(--card)",
+              borderColor: activeTab === key ? "#8B80C066" : "var(--border)",
+              color: activeTab === key ? "#9990B8" : "var(--text)",
             }}
           >
             <div className="text-[14px] font-bold">{label}</div>
@@ -93,14 +93,14 @@ export default function InterviewPrep() {
               className="border rounded-[18px] p-4 flex items-center gap-3.5"
               style={{
                 background: "var(--card)",
-                borderColor: isCompleted ? "#22D37A33" : "var(--border)",
+                borderColor: isCompleted ? "#5BAF7E33" : "var(--border)",
               }}
             >
               <div
                 className="w-11 h-11 rounded-[12px] flex items-center justify-center text-[14px] font-extrabold flex-shrink-0"
                 style={{
-                  background: isCompleted ? "#22D37A22" : "var(--surface)",
-                  color: isCompleted ? "#22D37A" : "var(--muted)",
+                  background: isCompleted ? "#5BAF7E22" : "var(--surface)",
+                  color: isCompleted ? "#5BAF7E" : "var(--muted)",
                 }}
               >
                 {isCompleted ? "✓" : ch.id.replace(/[a-z]/g, "").slice(0, 3)}
@@ -129,7 +129,7 @@ export default function InterviewPrep() {
                   <button
                     onClick={() => startChallenge(ch.id)}
                     className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
-                    style={{ background: "#7C5CFC22", color: "#A78BFA" }}
+                    style={{ background: "#8B80C022", color: "#9990B8" }}
                   >
                     Retry
                   </button>
@@ -140,7 +140,7 @@ export default function InterviewPrep() {
                       else navigate("/history");
                     }}
                     className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer"
-                    style={{ background: "#22D37A22", color: "#22D37A" }}
+                    style={{ background: "#5BAF7E22", color: "#5BAF7E" }}
                   >
                     Results
                   </button>
@@ -149,7 +149,7 @@ export default function InterviewPrep() {
                 <button
                   onClick={() => startChallenge(ch.id)}
                   className="border rounded-[8px] px-2.5 py-1 text-[11px] font-bold border-none cursor-pointer flex-shrink-0"
-                  style={{ background: "#7C5CFC22", color: "#A78BFA" }}
+                  style={{ background: "#8B80C022", color: "#9990B8" }}
                 >
                   Start →
                 </button>

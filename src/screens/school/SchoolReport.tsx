@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "@/lib/api";
-import { synthesizeSpeech, stopAudioPlayback } from "@/services/gemini";
+import { synthesizeSpeech, synthesizeSpeechCached, stopAudioPlayback } from "@/services/gemini";
 import Spinner from "@/components/Spinner";
 import StarRating from "@/components/StarRating";
 import { scoreToStars } from "@/lib/stars";
@@ -21,37 +21,80 @@ interface SchoolAttemptRow {
   createdAt: string;
 }
 
-const CARD_COLORS = [
-  { bg: "#FCE7F3", bd: "#F9A8D4", icon: "#FDF2F8" },   // Clarity — pink
-  { bg: "#CCFBF1", bd: "#5EEAD4", icon: "#F0FDFA" },   // Fluency — teal
-  { bg: "#FEF3C7", bd: "#FCD34D", icon: "#FFFBEB" },   // Grammar — amber
-  { bg: "#FCE7F3", bd: "#F9A8D4", icon: "#FDF2F8" },   // Relevancy — pink
-  { bg: "#CCFBF1", bd: "#5EEAD4", icon: "#F0FDFA" },   // Structure — teal
-  { bg: "#FEF3C7", bd: "#FCD34D", icon: "#FFFBEB" },   // Vocabulary — amber
+const SKILL_CARDS: { key: keyof SchoolAttemptRow; title: string; icon: React.ReactNode; friendly: string; parentTip: string }[] = [
+  { key: "skillClarity",    title: "Clarity",    icon: (
+    <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="16" fill="#C4B5FD" opacity="0.3"/>
+      {/* Megaphone shape */}
+      <path d="M12 17h3l8-5v16l-8-5h-3a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2z" fill="#7C3AED"/>
+      {/* Sound waves */}
+      <path d="M27 16c2 2 2 6 0 8" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" fill="none">
+        <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
+      </path>
+      <path d="M30 13c3 3.5 3 10.5 0 14" stroke="#C4B5FD" strokeWidth="2" strokeLinecap="round" fill="none">
+        <animate attributeName="opacity" values="0.7;0.2;0.7" dur="1.5s" repeatCount="indefinite" begin="0.3s"/>
+      </path>
+    </svg>
+  ), friendly: "Clear Words", parentTip: "How clearly the student spoke — includes pronunciation, word clarity, voice modulation, and voice projection. Practice by having them describe objects around the house in full, clear sentences." },
+  { key: "skillFluency",    title: "Fluency",    icon: (
+    <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+      <path d="M6 24c4-6 8-6 12 0s8 6 12 0" stroke="#A78BFA" strokeWidth="2.5" strokeLinecap="round" fill="none">
+        <animate attributeName="d" values="M6 24c4-6 8-6 12 0s8 6 12 0;M6 20c4 6 8 6 12 0s8-6 12 0;M6 24c4-6 8-6 12 0s8 6 12 0" dur="3s" repeatCount="indefinite"/>
+      </path>
+      <path d="M6 18c4-6 8-6 12 0s8 6 12 0" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" fill="none">
+        <animate attributeName="d" values="M6 18c4-6 8-6 12 0s8 6 12 0;M6 14c4 6 8 6 12 0s8-6 12 0;M6 18c4-6 8-6 12 0s8 6 12 0" dur="3s" repeatCount="indefinite" begin="0.3s"/>
+      </path>
+      <path d="M6 30c4-6 8-6 12 0s8 6 12 0" stroke="#C4B5FD" strokeWidth="2" strokeLinecap="round" fill="none">
+        <animate attributeName="d" values="M6 30c4-6 8-6 12 0s8 6 12 0;M6 26c4 6 8 6 12 0s8-6 12 0;M6 30c4-6 8-6 12 0s8 6 12 0" dur="3s" repeatCount="indefinite" begin="0.6s"/>
+      </path>
+    </svg>
+  ), friendly: "Good Flow", parentTip: "How smoothly the student spoke without long pauses or hesitation. Encourage reading aloud at home for 5 minutes daily — it builds natural flow over time." },
+  { key: "skillGrammar",    title: "Grammar",    icon: (
+    <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+      <rect x="8" y="6" width="24" height="28" rx="3" fill="#C4B5FD" opacity="0.3"/>
+      <rect x="10" y="8" width="20" height="24" rx="2" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.5"/>
+      <path d="M14 15h12M14 20h8M14 25h10" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="30" cy="28" r="6" fill="#7C3AED"/>
+      <path d="M28 28l1.5 1.5 3-3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ), friendly: "Word Builder", parentTip: "How correctly the student used grammar — tenses, sentence construction, and word agreement. When you notice a mistake in conversation, gently model the correct version rather than correcting directly." },
+  { key: "skillRelevancy",  title: "Relevancy",  icon: (
+    <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="14" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.5"/>
+      <circle cx="20" cy="20" r="10" stroke="#A78BFA" strokeWidth="1.5" fill="none"/>
+      <circle cx="20" cy="20" r="6" stroke="#7C3AED" strokeWidth="1.5" fill="none"/>
+      <circle cx="20" cy="20" r="3" fill="#7C3AED"/>
+      <path d="M30 10l2-2" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  ), friendly: "On Topic", parentTip: "How well the student stayed on topic and addressed the question asked. Practice by giving a topic and asking them to talk about it for 30 seconds without going off track." },
+  { key: "skillStructure",  title: "Structure",  icon: (
+    <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+      <rect x="6" y="24" width="10" height="10" rx="2" fill="#C4B5FD"/>
+      <rect x="15" y="16" width="10" height="18" rx="2" fill="#A78BFA"/>
+      <rect x="24" y="8" width="10" height="26" rx="2" fill="#7C3AED"/>
+      <path d="M11 22l9-7 9-5" stroke="#4C1D95" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    </svg>
+  ), friendly: "Strong Shape", parentTip: "How well organised the student's response was — did it have a clear beginning, middle, and end? Teach them to start with 'First...', 'Then...', 'Finally...' to build structure." },
+  { key: "skillVocabulary",  title: "Vocabulary", icon: (
+    <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+      <rect x="6" y="8" width="18" height="24" rx="2" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.5"/>
+      <rect x="16" y="12" width="18" height="24" rx="2" fill="#C4B5FD" stroke="#7C3AED" strokeWidth="1.5"/>
+      <path d="M20 20h10M20 25h7M20 30h9" stroke="#4C1D95" strokeWidth="1.5" strokeLinecap="round"/>
+      <text x="12" y="24" fill="#7C3AED" fontSize="14" fontWeight="800" fontFamily="serif" textAnchor="middle">A</text>
+    </svg>
+  ), friendly: "Big Words", parentTip: "How varied and age-appropriate the student's word choices were. Introduce one new word a day at dinner and have them use it in a sentence — this builds vocabulary naturally." },
 ];
 
-const SKILL_CARDS: { key: keyof SchoolAttemptRow; title: string; emoji: string; friendly: string; parentTip: string }[] = [
-  { key: "skillClarity",    title: "Clarity",    emoji: "🔊", friendly: "Clear Words",   parentTip: "How clearly the student spoke — includes pronunciation, word clarity, voice modulation, and voice projection. Practice by having them describe objects around the house in full, clear sentences." },
-  { key: "skillFluency",    title: "Fluency",    emoji: "🌊", friendly: "Good Flow",     parentTip: "How smoothly the student spoke without long pauses or hesitation. Encourage reading aloud at home for 5 minutes daily — it builds natural flow over time." },
-  { key: "skillGrammar",    title: "Grammar",    emoji: "✏️", friendly: "Word Builder",  parentTip: "How correctly the student used grammar — tenses, sentence construction, and word agreement. When you notice a mistake in conversation, gently model the correct version rather than correcting directly." },
-  { key: "skillRelevancy",  title: "Relevancy",  emoji: "🎯", friendly: "On Topic",      parentTip: "How well the student stayed on topic and addressed the question asked. Practice by giving a topic and asking them to talk about it for 30 seconds without going off track." },
-  { key: "skillStructure",  title: "Structure",  emoji: "🧱", friendly: "Strong Shape",  parentTip: "How well organised the student's response was — did it have a clear beginning, middle, and end? Teach them to start with 'First...', 'Then...', 'Finally...' to build structure." },
-  { key: "skillVocabulary",  title: "Vocabulary", emoji: "📚", friendly: "Big Words",    parentTip: "How varied and age-appropriate the student's word choices were. Introduce one new word a day at dinner and have them use it in a sentence — this builds vocabulary naturally." },
-];
+/* Purple palette only:
+   Dark:   #4C1D95, #5B21B6
+   Mid:    #7C3AED, #8B5CF6
+   Light:  #A78BFA, #C4B5FD
+   Bg:     #EDE9FE, #F5F3FF
+   White:  #fff
+   Text:   #4C1D95 (heading), #6E5E8A (body)
+*/
 
-function LionIllustration({ tier }: { tier: 0 | 1 | 2 | 3 | 4 }) {
-  const emojiSize = [56, 64, 72, 84, 96][tier];
-  return (
-    <span style={{
-      fontSize: emojiSize, lineHeight: 1, userSelect: "none",
-      transition: "font-size 600ms cubic-bezier(0.34, 1.56, 0.64, 1)",
-    }}>
-      🦁
-    </span>
-  );
-}
-
-function BraveMeter({ confidence }: { confidence: number }) {
+function LionMeter({ confidence }: { confidence: number }) {
   const c = Math.max(0, Math.min(100, confidence));
   const tier: 0 | 1 | 2 | 3 | 4 =
     c >= 80 ? 4 : c >= 60 ? 3 : c >= 40 ? 2 : c >= 20 ? 1 : 0;
@@ -60,23 +103,26 @@ function BraveMeter({ confidence }: { confidence: number }) {
     c >= 60 ? "Strong & Steady!" :
     c >= 40 ? "Getting Braver!" :
     c >= 20 ? "Getting Started!" : "Finding Your Voice!";
+  const emojiSize = [40, 48, 56, 64, 72][tier];
 
   return (
-    <div className="bg-[#FEF3C7] border-[1.5px] border-[#FCD34D] p-6 mb-6 rounded-[24px] shadow-[0_2px_0_rgba(42,31,26,0.06)]">
-      <div className="text-[12px] font-black tracking-[0.08em] mb-4 text-[#B45309] uppercase">
-        HOW BRAVE YOU SOUNDED! 💪
+    <div style={{
+      background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+      borderRadius: 24, padding: 24, marginBottom: 24,
+    }}>
+      <div style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", fontSize: 18, fontWeight: 500, color: "#4C1D95", marginBottom: 16 }}>
+        How Brave You Sounded! 💪
       </div>
-      <div style={{
-        display: "flex", alignItems: "center", gap: 16,
-      }}>
-        <LionIllustration tier={tier} />
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <span style={{
+          fontSize: emojiSize, lineHeight: 1, userSelect: "none",
+          transition: "font-size 600ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+        }}>🦁</span>
         <div style={{ flex: 1 }}>
           <div style={{
-            fontFamily: "'Sora', sans-serif", fontWeight: 800,
-            fontSize: 18, color: "#7C2D12", marginBottom: 2, marginTop: -4,
-          }}>
-            {label}
-          </div>
+            fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500,
+            fontSize: 20, color: "#4C1D95", marginBottom: 4,
+          }}>{label}</div>
           <StarRating stars={scoreToStars(c)} size={28} />
         </div>
       </div>
@@ -85,69 +131,69 @@ function BraveMeter({ confidence }: { confidence: number }) {
 }
 
 function SkillCard({
-  emoji, title, friendly, score, expanded, onToggle, feedback, parentTip, cardColor,
+  icon, title, friendly, score, expanded, onToggle, feedback, parentTip,
 }: {
-  emoji: string;
-  title: string;
-  friendly: string;
-  score: number | null;
-  expanded: boolean;
-  onToggle: () => void;
-  feedback?: string;
-  parentTip: string;
-  cardColor: { bg: string; bd: string; icon: string };
+  icon: React.ReactNode; title: string; friendly: string; score: number | null;
+  expanded: boolean; onToggle: () => void; feedback?: string; parentTip: string;
 }) {
   const stars = score != null ? scoreToStars(score) : 0;
   return (
     <button
       onClick={onToggle}
-      className="p-4 text-left cursor-pointer rounded-[20px] shadow-[0_2px_0_rgba(42,31,26,0.06)] transition-all duration-200 hover:translate-y-[-2px] hover:shadow-[0_4px_12px_rgba(42,31,26,0.08)]"
       style={{
-        gridColumn: expanded ? "1 / -1" : undefined,
-        background: cardColor.bg,
-        border: `1.5px solid ${cardColor.bd}`,
+        alignSelf: "start",
+        background: "rgba(237, 233, 254, 0.45)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        border: "1.5px solid rgba(196, 181, 253, 0.5)",
+        borderRadius: 20, padding: 16, textAlign: "left", cursor: "pointer",
+        boxShadow: "0 4px 16px rgba(124,58,237,0.08)",
+        transition: "all 0.2s",
+        fontFamily: "inherit",
       }}
     >
-      <div className="flex items-center gap-3">
-        <div className="w-[42px] h-[42px] rounded-[12px] flex items-center justify-center text-[24px] shadow-[0_2px_0_rgba(42,31,26,0.06)]" style={{ background: cardColor.icon, border: `1.5px solid ${cardColor.bd}` }}>{emoji}</div>
-        <div className="flex-1">
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{
+          width: 42, height: 42, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+          boxShadow: "0 2px 0 rgba(124,58,237,0.06)",
+        }}>{icon}</div>
+        <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
-              <div className="text-[17px] font-black tracking-[-0.01em] text-[#7C2D12]" style={{ fontFamily: "'Sora', sans-serif" }}>{title}</div>
-              <div className="text-[11px] font-bold text-[#A8603C]">{friendly}</div>
+              <div style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", fontSize: 17, fontWeight: 500, color: "#4C1D95" }}>{title}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#6E5E8A" }}>{friendly}</div>
             </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8603C" strokeWidth="2.5" strokeLinecap="round"
+            <svg className="print-hide" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E5E8A" strokeWidth="2.5" strokeLinecap="round"
               style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s", opacity: 0.5, flexShrink: 0 }}>
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </div>
         </div>
       </div>
-      <div className="mt-3">
+      <div style={{ marginTop: 12 }}>
         <StarRating stars={stars} size={20} />
       </div>
       {!expanded && (
-        <div style={{ fontSize: 11, color: "#A8603C", opacity: 0.5, marginTop: 6, fontWeight: 600 }}>
+        <div className="print-hide" data-print-hide style={{ fontSize: 11, color: "#6E5E8A", opacity: 0.5, marginTop: 6, fontWeight: 600 }}>
           Tap for details
         </div>
       )}
       {expanded && (
-        <div className="mt-4 pt-4 border-t-[1.5px] border-dashed border-[rgba(124,45,18,0.12)] animate-in slide-in-from-top-2 duration-300">
-          {/* AI feedback */}
+        <div className="print-hide" data-print-hide style={{ marginTop: 16, paddingTop: 16, borderTop: "1.5px dashed rgba(124,58,237,0.12)" }}>
           {feedback && (
-            <div style={{ fontSize: 14, lineHeight: 1.6, fontWeight: 600, color: "#7C2D12", marginBottom: 12 }}>
+            <div style={{ fontSize: 14, lineHeight: 1.6, fontWeight: 600, color: "#4C1D95", marginBottom: 12 }}>
               {feedback}
             </div>
           )}
-          {/* Parent/Teacher tip */}
           <div style={{
-            background: "#FEF3C7", border: "1.5px solid #FCD34D",
+            background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
             borderRadius: 14, padding: "10px 14px",
           }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: "#92400E", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#4C1D95", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
               📋 For Teacher & Parent
             </div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: "#92400E", lineHeight: 1.5 }}>
+            <div style={{ fontSize: 13, fontWeight: 500, color: "#6E5E8A", lineHeight: 1.5 }}>
               {parentTip}
             </div>
           </div>
@@ -165,9 +211,10 @@ export default function SchoolReport() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [loadingSpeech, setLoadingSpeech] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [loadingIdeal, setLoadingIdeal] = useState(false);
   const [playingIdeal, setPlayingIdeal] = useState(false);
-
   const [studentName, setStudentName] = useState<string>("");
 
   useEffect(() => {
@@ -187,9 +234,7 @@ export default function SchoolReport() {
         setLoading(false);
       }
     })();
-    return () => {
-      stopAudioPlayback();
-    };
+    return () => { stopAudioPlayback(); };
   }, [id]);
 
   const ar = row?.analysisResult;
@@ -200,42 +245,46 @@ export default function SchoolReport() {
   }, [row, ar]);
 
   async function readAloud() {
-    if (!ar?.winSpeakAnalysis || speaking) return;
-    setSpeaking(true);
+    if (!ar?.winSpeakAnalysis || speaking || loadingSpeech) return;
+    setLoadingSpeech(true);
     try {
-      await synthesizeSpeech(ar.winSpeakAnalysis);
-    } catch {
-      // best-effort
-    } finally {
+      await synthesizeSpeech(ar.winSpeakAnalysis, () => {
+        setLoadingSpeech(false);
+        setSpeaking(true);
+      });
+    } catch {} finally {
+      setLoadingSpeech(false);
       setSpeaking(false);
     }
   }
 
   async function readIdealAloud() {
-    if (!ar?.idealResponse || playingIdeal) return;
-    setPlayingIdeal(true);
+    if (!ar?.idealResponse || playingIdeal || loadingIdeal) return;
+    setLoadingIdeal(true);
     try {
-      await synthesizeSpeech(ar.idealResponse);
-    } catch {
-      // best-effort
-    } finally {
+      // Use cached version — audio was pre-generated during analysis step 4
+      await synthesizeSpeechCached(
+        ar.idealResponse,
+        `school_ideal_${id}`,
+        () => {
+          setLoadingIdeal(false);
+          setPlayingIdeal(true);
+        }
+      );
+    } catch {} finally {
+      setLoadingIdeal(false);
       setPlayingIdeal(false);
     }
   }
 
-  if (loading) {
-    return <div className="flex justify-center py-16"><Spinner size={32} /></div>;
-  }
+  if (loading) return <div className="flex justify-center py-16"><Spinner size={32} /></div>;
   if (error || !row) {
     return (
-      <div className="p-6 text-center">
-        <div className="text-[16px] font-extrabold">Couldn't load report</div>
-        <div className="text-[13px] mt-1 text-[#A8603C]">{error || "Not found."}</div>
-        <button
-          onClick={() => navigate("/school")}
-          className="mt-4 rounded-[12px] px-5 py-2.5 font-extrabold text-[13px] border-none cursor-pointer text-white"
-          style={{ background: "#EA580C" }}
-        >
+      <div style={{ padding: 24, textAlign: "center" }}>
+        <div style={{ fontSize: 16, fontWeight: 800, color: "#4C1D95" }}>Couldn't load report</div>
+        <div style={{ fontSize: 13, marginTop: 4, color: "#6E5E8A" }}>{error || "Not found."}</div>
+        <button onClick={() => navigate("/school")}
+          style={{ marginTop: 16, borderRadius: 12, padding: "10px 20px", fontWeight: 800, fontSize: 13, border: "none", cursor: "pointer", color: "white", background: "linear-gradient(135deg, #7C3AED, #A78BFA)" }}>
           Back to Teacher Home
         </button>
       </div>
@@ -250,13 +299,11 @@ export default function SchoolReport() {
   const idealResponse = ar?.idealResponse;
 
   function handleDownloadPDF() {
-    // Set a filename-friendly document title so the browser suggests it for the PDF
     const originalTitle = document.title;
     const studentLabel = studentName || "Student";
-    const dateStr = new Date(row.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-    document.title = `Winnify Jr Report - ${row.questionTitle} - ${studentLabel} - ${dateStr}`;
+    const dateStr = new Date(row!.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    document.title = `Winnify Jr Report - ${row!.questionTitle} - ${studentLabel} - ${dateStr}`;
     window.print();
-    // Restore original title after a short delay (print dialog is async)
     setTimeout(() => { document.title = originalTitle; }, 1000);
   }
 
@@ -264,83 +311,90 @@ export default function SchoolReport() {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   });
 
+  const cs = { fontFamily: "'Fredoka', 'Sora', sans-serif" };
+
   return (
     <div className="print-area max-w-[800px] mx-auto px-6 py-8 pb-32">
-      {/* ── Print-only branded header ── */}
+      {/* Purple background that covers entire printed page — hidden on screen */}
+      <div className="print-only print-bg" />
+      {/* Print header — only visible in PDF */}
       <div className="print-only print-header">
         <div className="print-header-brand">
           <div className="print-header-logo">W</div>
           <div>
-            <div className="print-header-title">Winnify Jr Report Card</div>
-            <div className="print-header-subtitle">AI Speaking Coach &middot; Grade {row.grade}</div>
+            <div className="print-header-title">{studentName ? `${studentName}'s Report` : "Report Card"}</div>
+            <div className="print-header-subtitle">Grade {row.grade} &middot; {row.questionTitle}</div>
           </div>
         </div>
-        <div className="print-header-date">
-          {reportDate}<br />
-          Student: {studentName || "—"}
+        <div className="print-header-date">{reportDate}<br />Winnify Jr &middot; AI Speaking Coach</div>
+      </div>
+
+      {/* ── Header Card — hidden in print, print-header shows instead ── */}
+      <div className="no-print" style={{
+        background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+        border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+        borderRadius: 24, padding: "24px 28px", marginBottom: 24,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: "50%",
+            background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 24, color: "white", fontWeight: 700, ...cs, flexShrink: 0,
+          }}>
+            {(studentName || "S").charAt(0).toUpperCase()}
+          </div>
+          <div style={{ flex: 1, minWidth: 140 }}>
+            <h1 style={{ ...cs, fontSize: 26, fontWeight: 800, color: "#4C1D95", margin: 0, lineHeight: 1.2 }}>
+              {studentName ? `${studentName}'s Report` : "Report Card"}
+            </h1>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#6E5E8A", marginTop: 2 }}>
+              Grade {row.grade} | {reportDate}
+            </div>
+          </div>
+          <div className="no-print" style={{ display: "flex", gap: 10 }}>
+            <button onClick={handleDownloadPDF} style={{
+              padding: "10px 18px", borderRadius: 14, fontSize: 13, fontWeight: 700,
+              background: "#fff", border: "1.5px solid rgba(124,58,237,0.15)", color: "#4C1D95",
+              cursor: "pointer", display: "flex", alignItems: "center", gap: 6, ...cs,
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4C1D95" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v10M7 12l5 5 5-5"/><path d="M5 19h14"/></svg>
+              Download PDF
+            </button>
+            <button onClick={() => navigate(-1)} style={{
+              padding: "10px 18px", borderRadius: 14, fontSize: 13, fontWeight: 700,
+              background: "linear-gradient(135deg, #7C3AED, #A78BFA)", border: "none", color: "#fff",
+              cursor: "pointer", ...cs,
+            }}>
+              ← Back
+            </button>
+          </div>
+        </div>
+        <div style={{
+          marginTop: 16, padding: "12px 16px", borderRadius: 14,
+          background: "rgba(255,255,255,0.5)", border: "1px solid rgba(124,58,237,0.1)",
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "#6E5E8A", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Challenge</div>
+          <div style={{ ...cs, fontSize: 18, fontWeight: 700, color: "#4C1D95" }}>{row.questionTitle}</div>
         </div>
       </div>
 
-      {/* Header + actions */}
-      <div className="flex justify-between items-center py-4 mb-4 no-print animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-[13px] font-extrabold text-[#EA580C] border-none bg-transparent flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
-        >
-          <span className="w-8 h-8 rounded-[10px] border-[1.5px] border-[#FDBA74] bg-[#FED7AA] inline-flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5.5 8L10 13" stroke="#EA580C" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </span> Back
-        </button>
-        <button
-          onClick={handleDownloadPDF}
-          className="cursor-pointer border-none transition-all hover:translate-y-[-3px] active:translate-y-[1px]"
-          style={{
-            background: "none", padding: 0,
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 0,
-          }}
-        >
-          <svg width="100" height="74" viewBox="0 0 100 74" fill="none" style={{ filter: "drop-shadow(0 4px 0 rgba(13,148,136,0.2)) drop-shadow(0 8px 16px rgba(13,148,136,0.1))" }}>
-            <path d="M80 34a18 18 0 0 0-34.5-8A15 15 0 0 0 15 37a15 15 0 0 0 15 15h50a15 15 0 0 0 0-30z" fill="url(#cloudGrad2)" stroke="#5EEAD4" strokeWidth="2"/>
-            <defs>
-              <linearGradient id="cloudGrad2" x1="0" y1="0" x2="100" y2="74" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#CCFBF1"/>
-                <stop offset="1" stopColor="#F0FDFA"/>
-              </linearGradient>
-            </defs>
-            <path d="M50 26v16M44 36l6 6 6-6" stroke="#0D9488" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <span style={{
-            fontFamily: "'Sora', sans-serif", fontWeight: 800,
-            fontSize: 14, color: "#0D9488", marginTop: 4,
-          }}>Download PDF</span>
-        </button>
+      {/* ── How Brave You Sounded — no numeric % ── */}
+      <div className="print-section print-section-keep">
+        <LionMeter confidence={confidence} />
       </div>
 
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[100ms] mb-8">
-        <div className="inline-block px-3 py-1 mb-3 rounded-full bg-[#CCFBF1] border-[1.5px] border-[#5EEAD4] text-[11px] font-black tracking-widest text-[#0D9488] uppercase">
-          ★ REPORT CARD
-        </div>
-        <h1 className="font-black text-[38px] leading-[1.1] tracking-[-0.02em] text-[#7C2D12]" style={{ fontFamily: "'Sora', sans-serif" }}>{row.questionTitle}</h1>
-        <div className="text-[14px] mt-2 font-bold text-[#A8603C]">
-          Grade {row.grade}{studentName ? ` · ${studentName}` : ""}
-        </div>
-      </div>
-
-      {/* How Brave You Sounded */}
-      <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[200ms]">
-        <BraveMeter confidence={confidence} />
-      </div>
-
-      {/* How Did You Do — 2 × 3 cards */}
-      <h2 className="text-[24px] font-black mb-4 tracking-[-0.02em] text-[#7C2D12] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[300ms]" style={{ fontFamily: "'Sora', sans-serif" }}>How Did You Do? ⭐</h2>
-      <div className="grid grid-cols-2 gap-4 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[350ms]">
-        {SKILL_CARDS.map((sc, idx) => {
+      {/* ── How Did You Do? — 2×3 card grid, stars only, tap to expand ── */}
+      <div className="print-section">
+      <h2 style={{ ...cs, fontSize: 24, fontWeight: 800, color: "#4C1D95", marginBottom: 16 }}>How Did You Do? ⭐</h2>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 24 }}>
+        {SKILL_CARDS.map((sc) => {
           const score = row[sc.key] as number | undefined;
           const fbObj = ar?.skills?.[sc.title as keyof typeof ar.skills];
           return (
             <SkillCard
               key={sc.title}
-              emoji={sc.emoji}
+              icon={sc.icon}
               title={sc.title}
               friendly={sc.friendly}
               score={score ?? null}
@@ -348,75 +402,101 @@ export default function SchoolReport() {
               onToggle={() => setExpanded((p) => ({ ...p, [sc.title]: !p[sc.title] }))}
               feedback={fbObj?.feedback}
               parentTip={sc.parentTip}
-              cardColor={CARD_COLORS[idx]}
             />
           );
         })}
       </div>
+      </div>
 
-      {/* WinSpeak Analysis with Read it to me */}
+      {/* ── WinSpeak Says — 2-3 short sentences + Read it to me ── */}
       {ar?.winSpeakAnalysis && (
-        <div className="bg-[#FEF3C7] border-[1.5px] border-[#FCD34D] p-6 mb-8 rounded-[24px] shadow-[0_2px_0_rgba(42,31,26,0.06)] relative animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[400ms]">
-          <div className="text-[12px] font-black tracking-[0.08em] mb-3 text-[#B45309] uppercase">
+        <div className="print-section print-section-keep" style={{
+          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+          borderRadius: 24, padding: 24, marginBottom: 24,
+        }}>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", color: "#7C3AED", textTransform: "uppercase", marginBottom: 12 }}>
             WINSPEAK SAYS ✨
           </div>
-          <div className="text-[18px] leading-relaxed text-[#7C2D12] font-bold" style={{ fontFamily: "'Sora', sans-serif" }}>{ar.winSpeakAnalysis}</div>
+          <div style={{ ...cs, fontSize: 18, fontWeight: 700, color: "#4C1D95", lineHeight: 1.6 }}>{ar.winSpeakAnalysis}</div>
           <button
             onClick={readAloud}
-            disabled={speaking}
-            className="mt-5 rounded-full px-4 py-2.5 text-[13px] font-black border-[1.5px] border-[#FCD34D] bg-white/60 text-[#B45309] shadow-[0_2px_0_rgba(180,83,9,0.1)] cursor-pointer hover:-translate-y-0.5 transition-all w-fit flex items-center justify-center no-print"
-            style={{ opacity: speaking ? 0.6 : 1 }}
+            disabled={speaking || loadingSpeech}
+            className="no-print"
+            style={{
+              marginTop: 16, borderRadius: 999, padding: "10px 20px",
+              fontSize: 13, fontWeight: 800, cursor: speaking || loadingSpeech ? "default" : "pointer",
+              background: "rgba(255,255,255,0.6)", border: "1.5px solid #C4B5FD", color: "#7C3AED",
+              opacity: speaking || loadingSpeech ? 0.7 : 1, display: "flex", alignItems: "center", gap: 8,
+            }}
           >
-            {speaking ? "Playing…" : "Read it to me 🔊"}
+            {loadingSpeech ? <><Spinner size={14} /> Generating voice...</> : speaking ? "Playing…" : "Read it to me 🔊"}
           </button>
         </div>
       )}
 
-      {/* Strengths — max 2 */}
+      {/* ── What You Did Great 🌟 — max 2 strengths ── */}
       {strengths.length > 0 && (
-        <div className="bg-[#CCFBF1] border-[1.5px] border-[#5EEAD4] p-6 mb-6 rounded-[24px] shadow-[0_2px_0_rgba(42,31,26,0.06)] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[450ms]">
-          <div className="text-[12px] font-black tracking-[0.08em] mb-4 text-[#0D9488] uppercase">
+        <div className="print-section" style={{
+          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+          borderRadius: 24, padding: 24, marginBottom: 24,
+        }}>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", color: "#7C3AED", textTransform: "uppercase", marginBottom: 16 }}>
             WHAT YOU DID GREAT 🌟
           </div>
-          <ul className="flex flex-col gap-3 m-0 p-0">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {strengths.map((s, i) => (
-              <li key={i} className="text-[15px] font-semibold flex items-start gap-3">
-                <span className="text-[20px] bg-white rounded-full w-8 h-8 flex items-center justify-center shrink-0 border-[1px] border-[#5EEAD4]">👏</span>
-                <span className="pt-1.5">{s}</span>
-              </li>
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, fontSize: 15, fontWeight: 600 }}>
+                <span style={{
+                  fontSize: 20, background: "#EDE9FE", borderRadius: "50%", width: 32, height: 32,
+                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                  border: "1px solid #C4B5FD",
+                }}>👏</span>
+                <span style={{ paddingTop: 4, color: "#4C1D95" }}>{s}</span>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
-      {/* Try This Next Time — single tip */}
+      {/* ── Try This Next Time! 💡 — max 1 improvement tip ── */}
       {improvement && (
-        <div className="bg-[#FCE7F3] border-[1.5px] border-[#F9A8D4] p-6 mb-6 rounded-[24px] shadow-[0_2px_0_rgba(219,39,119,0.1)] relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[500ms]">
-          <div className="absolute -right-4 -top-4 text-[80px] opacity-20 rotate-12 pointer-events-none">💡</div>
-          <div className="text-[12px] font-black tracking-[0.08em] mb-3 text-[#DB2777] uppercase">
+        <div className="print-page2-start print-section-keep" style={{
+          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+          borderRadius: 24, padding: 24, marginBottom: 24,
+        }}>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", color: "#7C3AED", textTransform: "uppercase", marginBottom: 12 }}>
             TRY THIS NEXT TIME! 💡
           </div>
-          <div className="text-[18px] font-bold text-[#7C2D12] leading-snug" style={{ fontFamily: "'Sora', sans-serif" }}>{improvement}</div>
+          <div style={{ ...cs, fontSize: 18, fontWeight: 700, color: "#4C1D95", lineHeight: 1.5 }}>{improvement}</div>
         </div>
       )}
 
-      {/* Let's Fix These! */}
-      <div className="bg-[#FEF3C7] border-[1.5px] border-[#FCD34D] p-6 mb-6 rounded-[24px] shadow-[0_2px_0_rgba(42,31,26,0.06)] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[550ms]">
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-[12px] font-black tracking-[0.08em] text-[#B45309] uppercase">
+      {/* ── Let's Fix These! ✏️ — purple badge + What you got right above errors ── */}
+      <div style={{
+        background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+        borderRadius: 24, padding: 24, marginBottom: 24,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", color: "#7C3AED", textTransform: "uppercase" }}>
             LET'S FIX THESE! ✏️
           </div>
-          <span className="bg-white/60 rounded-full px-3 py-1 text-[12px] font-black text-[#B45309]">
+          <span style={{
+            background: "#FCD34D", borderRadius: 999, padding: "4px 12px",
+            fontSize: 12, fontWeight: 800, color: "#92400E",
+          }}>
             {grammarIssues.length} to practise
           </span>
         </div>
 
-        {/* What you got right */}
-        <div className="bg-white/50 border-[1.5px] border-[#FCD34D] rounded-[18px] p-4 mb-4">
-          <div className="text-[12px] font-black mb-1.5 uppercase text-[#B45309]">
+        {/* What you got right 👍 — always shown above errors */}
+        <div style={{
+          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+          borderRadius: 18, padding: 16, marginBottom: 16,
+        }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase", marginBottom: 6 }}>
             What you got right 👍
           </div>
-          <div className="text-[14px] font-bold text-[#92400E]" style={{ lineHeight: 1.5 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#4C1D95", lineHeight: 1.5 }}>
             {whatYouGotRight.length > 0
               ? whatYouGotRight.join(" ")
               : "You spoke up and finished your turn — that's brilliant!"}
@@ -424,85 +504,107 @@ export default function SchoolReport() {
         </div>
 
         {grammarIssues.length === 0 ? (
-          <div className="text-[15px] font-bold text-[#B45309]">
+          <div style={{ fontSize: 15, fontWeight: 700, color: "#6E5E8A" }}>
             Nothing to fix today — wonderful work! 🎉
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {grammarIssues.map((g, i) => (
-              <div key={i} className="bg-white/60 rounded-[14px] p-3 flex items-center gap-3 flex-wrap">
-                <span className="text-[15px] font-semibold text-[#B45309]">{g.wrong}</span>
-                <span className="text-[13px] text-[#FCD34D]">→</span>
-                <span className="text-[15px] font-black text-[#92400E]">{g.correct}</span>
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.6)", borderRadius: 14, padding: 12,
+                display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
+              }}>
+                <span style={{ fontSize: 15, fontWeight: 600, color: "#6E5E8A", textDecoration: "line-through" }}>{g.wrong}</span>
+                <span style={{ fontSize: 13, color: "#A78BFA" }}>→</span>
+                <span style={{ fontSize: 15, fontWeight: 800, color: "#4C1D95" }}>{g.correct}</span>
               </div>
             ))}
           </div>
         )}
 
-        {fillerWords.length > 0 && (
-          <div className="mt-5 pt-4" style={{ borderTop: "1.5px dashed #FCD34D" }}>
-            <div className="text-[12px] font-black uppercase mb-3 text-[#B45309]">Pause Words 🤔</div>
-            <div className="flex flex-wrap gap-2">
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1.5px dashed #C4B5FD" }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase", marginBottom: 12 }}>Pause Words 🤔</div>
+          {fillerWords.length > 0 ? (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {fillerWords.map((f, i) => (
-                <span key={i} className="bg-white/60 rounded-full px-3 py-1.5 text-[13px] font-bold text-[#B45309]">
-                  {f.word} <span className="opacity-50 ml-1">×{f.count}</span>
+                <span key={i} style={{
+                  background: "#EDE9FE", borderRadius: 999, padding: "6px 12px",
+                  fontSize: 13, fontWeight: 700, color: "#4C1D95",
+                }}>
+                  {f.word} <span style={{ opacity: 0.5, marginLeft: 4 }}>×{f.count}</span>
                 </span>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#6E5E8A" }}>
+              No pause words detected — great speaking! 🎉
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* A Better Way to Say It */}
+      {/* ── A Better Way to Say It 💡 — ideal response + audio + Spot the Difference ── */}
       {idealResponse && (
-        <div className="bg-[#CCFBF1] border-[1.5px] border-[#5EEAD4] p-6 mb-6 rounded-[24px] shadow-[0_2px_0_rgba(42,31,26,0.06)] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[600ms]">
+        <div style={{
+          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(124,58,237,0.18)", boxShadow: "0 4px 20px rgba(124,58,237,0.08)",
+          borderRadius: 24, padding: 24, marginBottom: 24,
+        }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-            <div className="text-[22px] font-black tracking-[-0.01em] text-[#0D9488]" style={{ fontFamily: "'Sora', sans-serif" }}>A Better Way to Say It 💡</div>
+            <div style={{ ...cs, fontSize: 22, fontWeight: 800, color: "#4C1D95" }}>A Better Way to Say It 💡</div>
             <button
               onClick={playingIdeal ? () => { stopAudioPlayback(); setPlayingIdeal(false); } : readIdealAloud}
+              disabled={loadingIdeal}
               className="no-print"
               style={{
-                width: 40, height: 40, borderRadius: "50%",
-                background: playingIdeal ? "#0D9488" : "#fff",
-                border: "2px solid #5EEAD4",
-                cursor: "pointer", flexShrink: 0,
-                display: "grid", placeItems: "center",
-                boxShadow: playingIdeal ? "0 0 0 4px rgba(13,148,136,0.15)" : "none",
+                minWidth: loadingIdeal ? 140 : 40, height: 40,
+                borderRadius: loadingIdeal ? 999 : "50%",
+                padding: loadingIdeal ? "0 16px" : 0,
+                background: loadingIdeal ? "#EDE9FE" : playingIdeal ? "#7C3AED" : "#fff",
+                border: "2px solid #C4B5FD", cursor: loadingIdeal ? "default" : "pointer", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                boxShadow: playingIdeal ? "0 0 0 4px rgba(124,58,237,0.15)" : "none",
                 transition: "all 0.2s ease",
+                fontSize: 12, fontWeight: 700, color: "#7C3AED",
               }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={playingIdeal ? "#fff" : "#0D9488"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill={playingIdeal ? "#fff" : "#0D9488"} />
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-              </svg>
+              {loadingIdeal ? (
+                <><Spinner size={14} /> Generating...</>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={playingIdeal ? "#fff" : "#7C3AED"} strokeWidth="2" strokeLinecap="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill={playingIdeal ? "#fff" : "#7C3AED"} />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                </svg>
+              )}
             </button>
           </div>
-          <div className="text-[13px] font-bold mb-4 text-[#0D9488]">
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#6E5E8A", marginBottom: 16 }}>
             Here's one way this speech could sound — use it to practise together!
           </div>
-          <div className="text-[17px] leading-relaxed font-bold bg-white/50 p-4 rounded-[16px] border-[1px] border-[#5EEAD4] text-[#7C2D12]" style={{ fontFamily: "'Sora', sans-serif" }}>
+          <div style={{
+            ...cs, fontSize: 17, fontWeight: 700, lineHeight: 1.6,
+            background: "rgba(255,255,255,0.5)", padding: 16, borderRadius: 16,
+            border: "1px solid #C4B5FD", color: "#4C1D95",
+          }}>
             {idealResponse}
           </div>
-        </div>
-      )}
 
-      {/* Spot the Difference */}
-      {idealResponse && (
-        <div className="bg-[#FCE7F3] border-[1.5px] border-[#F9A8D4] p-6 mb-6 rounded-[24px] shadow-[0_2px_0_rgba(219,39,119,0.1)] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[650ms]">
-          <div className="text-[12px] font-black tracking-[0.08em] mb-3 text-[#DB2777] uppercase">
-            SPOT THE DIFFERENCE 👀
-          </div>
-          <div style={{
-            fontFamily: "'Sora', sans-serif", fontWeight: 700,
-            fontSize: 17, color: "#7C2D12", lineHeight: 1.5,
+          {/* Spot the Difference — hidden in print */}
+          <div className="no-print" style={{
+            marginTop: 16, background: "rgba(124,58,237,0.06)",
+            borderLeft: "3px solid #7C3AED",
+            borderRadius: 12, padding: "14px 18px",
           }}>
-            Can you find <span style={{ fontWeight: 800, color: "#DB2777" }}>2 things</span> that changed from your speech? Ask your teacher!
+            <div style={{ fontSize: 12, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
+              Spot the Difference
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#4C1D95", lineHeight: 1.6 }}>
+              Can you find <span style={{ fontWeight: 800, color: "#7C3AED" }}>2 things</span> that changed from your speech? Ask your teacher!
+            </div>
           </div>
         </div>
       )}
 
-      {/* ── Print-only footer ── */}
       <div className="print-only print-footer">
         Generated by Winnify Jr &middot; AI Speaking Coach for Students &middot; {reportDate}
       </div>

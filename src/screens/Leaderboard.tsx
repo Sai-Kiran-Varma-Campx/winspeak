@@ -18,15 +18,15 @@ function initials(name: string) {
 }
 
 const AVATAR_COLORS = [
-  "linear-gradient(135deg,#7C5CFC,#C084FC)",
-  "linear-gradient(135deg,#22D37A,#0EA5E9)",
-  "linear-gradient(135deg,#FFB830,#FF8C00)",
-  "linear-gradient(135deg,#FF4D6A,#C084FC)",
-  "linear-gradient(135deg,#0EA5E9,#7C5CFC)",
-  "linear-gradient(135deg,#22D37A,#FFB830)",
-  "linear-gradient(135deg,#C084FC,#FF4D6A)",
-  "linear-gradient(135deg,#FFB830,#7C5CFC)",
-  "linear-gradient(135deg,#FF4D6A,#22D37A)",
+  "linear-gradient(135deg,#8B80C0,#B09CD0)",
+  "linear-gradient(135deg,#5BAF7E,#0EA5E9)",
+  "linear-gradient(135deg,#CCA550,#FF8C00)",
+  "linear-gradient(135deg,#CC6B7E,#B09CD0)",
+  "linear-gradient(135deg,#0EA5E9,#8B80C0)",
+  "linear-gradient(135deg,#5BAF7E,#CCA550)",
+  "linear-gradient(135deg,#B09CD0,#CC6B7E)",
+  "linear-gradient(135deg,#CCA550,#8B80C0)",
+  "linear-gradient(135deg,#CC6B7E,#5BAF7E)",
 ];
 
 export default function Leaderboard() {
@@ -111,7 +111,7 @@ export default function Leaderboard() {
           <div className="flex flex-col items-center gap-2 flex-1">
             <div
               className="text-[22px] mb-1"
-              style={{ filter: "drop-shadow(0 0 8px #FFB83088)" }}
+              style={{ filter: "drop-shadow(0 0 8px #CCA55088)" }}
             >
               {"\u{1F451}"}
             </div>
@@ -120,7 +120,7 @@ export default function Leaderboard() {
               style={{
                 background: AVATAR_COLORS[0],
                 borderColor: "#FFD70066",
-                boxShadow: "0 0 20px #FFB83044",
+                boxShadow: "0 0 20px #CCA55044",
                 color: "#fff",
               }}
             >
@@ -133,10 +133,10 @@ export default function Leaderboard() {
             <div
               className="rounded-t-[12px] w-full flex flex-col items-center justify-center py-4 text-[13px] font-bold"
               style={{
-                background: "linear-gradient(135deg,#FFB83022,#1A1D2E)",
-                borderTop: "2px solid #FFB83044",
+                background: "linear-gradient(135deg, #CCA55022, var(--surface))",
+                borderTop: "2px solid #CCA55044",
                 minHeight: 80,
-                color: "#FFB830",
+                color: "#CCA550",
               }}
             >
               <div>{"\u26A1"} {topThree[0].xp.toLocaleString()}</div>
@@ -182,9 +182,9 @@ export default function Leaderboard() {
               className="border rounded-[16px] p-3.5 flex items-center gap-3"
               style={{
                 background: isMe
-                  ? "linear-gradient(135deg,#7C5CFC11,#1A1D2E)"
+                  ? "linear-gradient(135deg,#8B80C011,var(--surface))"
                   : "var(--card)",
-                borderColor: isMe ? "#7C5CFC44" : "var(--border)",
+                borderColor: isMe ? "#8B80C044" : "var(--border)",
               }}
             >
               {/* Rank */}
@@ -225,7 +225,7 @@ export default function Leaderboard() {
               <div className="flex flex-col items-end flex-shrink-0">
                 <div
                   className="text-[13px] font-extrabold"
-                  style={{ color: isMe ? "var(--accent)" : "#FFB830" }}
+                  style={{ color: isMe ? "var(--accent)" : "#CCA550" }}
                 >
                   {"\u26A1"} {leader.xp.toLocaleString()}
                 </div>

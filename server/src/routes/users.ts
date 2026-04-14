@@ -66,7 +66,7 @@ const signupSchema = z.object({
   username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/, "Letters, numbers, underscores only"),
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100).optional(),
-  grades: z.array(z.number().int().min(1).max(4)).max(4).optional(),
+  grades: z.array(z.number().int().min(1).max(10)).max(10).optional(),
 });
 
 app.post("/signup", async (c) => {
@@ -124,7 +124,7 @@ app.post("/login", async (c) => {
   if (!valid) return c.json({ error: "Invalid username or password" }, 401);
 
   const token = await createToken(user.id);
-  return c.json({ token, user: { id: user.id, name: user.name } });
+  return c.json({ token, user: { id: user.id, name: user.name, grades: user.grades } });
 });
 
 // POST /api/users/reset-password — reset password by username

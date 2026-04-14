@@ -69,7 +69,7 @@ export default function AppSidebar() {
             <div
               className="w-8 h-8 rounded-[8px] flex items-center justify-center text-[15px] font-black flex-shrink-0"
               style={{
-                background: "linear-gradient(135deg,#7C5CFC,#C084FC)",
+                background: "linear-gradient(135deg,#8B80C0,#B09CD0)",
                 color: "#fff",
               }}
             >
@@ -93,9 +93,9 @@ export default function AppSidebar() {
                 onClick={() => navigate(path)}
                 className="flex items-center gap-3 px-3.5 py-2.5 rounded-[10px] text-[13.5px] font-medium w-full border-none cursor-pointer transition-all"
                 style={{
-                  background: isActive ? "#7C5CFC18" : "transparent",
-                  color: isActive ? "#A78BFA" : "var(--muted)",
-                  borderLeft: isActive ? "2px solid #7C5CFC" : "2px solid transparent",
+                  background: isActive ? "#8B80C018" : "transparent",
+                  color: isActive ? "#9990B8" : "var(--muted)",
+                  borderLeft: isActive ? "2px solid #8B80C0" : "2px solid transparent",
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
@@ -123,9 +123,9 @@ export default function AppSidebar() {
             onClick={() => navigate("/question")}
             className="w-full rounded-[12px] py-2.5 text-[13px] font-bold border-none cursor-pointer flex items-center justify-center gap-2"
             style={{
-              background: "linear-gradient(135deg,#7C5CFC,#9B7BFF)",
+              background: "linear-gradient(135deg,#8B80C0,#8E84B5)",
               color: "#fff",
-              boxShadow: "0 4px 16px #7C5CFC33",
+              boxShadow: "0 4px 16px #8B80C033",
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -170,9 +170,9 @@ export default function AppSidebar() {
                     background: done
                       ? "var(--accent)"
                       : isNext
-                      ? "#7C5CFC44"
+                      ? "#8B80C044"
                       : "var(--border)",
-                    boxShadow: done ? "0 0 6px #7C5CFC66" : "none",
+                    boxShadow: done ? "0 0 6px #8B80C066" : "none",
                     transition: "background 0.4s ease",
                   }}
                 />
@@ -187,7 +187,7 @@ export default function AppSidebar() {
             >
               <div
                 className="w-7 h-7 rounded-[7px] flex items-center justify-center text-[11px] font-extrabold flex-shrink-0"
-                style={{ background: "#7C5CFC22", color: "var(--accent)" }}
+                style={{ background: "#8B80C022", color: "var(--accent)" }}
               >
                 {activeChallenge.week}
               </div>
@@ -213,7 +213,7 @@ export default function AppSidebar() {
           {/* Avatar */}
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-extrabold flex-shrink-0"
-            style={{ background: "linear-gradient(135deg,#7C5CFC,#C084FC)", color: "#fff" }}
+            style={{ background: "linear-gradient(135deg,#8B80C0,#B09CD0)", color: "#fff" }}
           >
             {store.name.charAt(0).toUpperCase()}
           </div>
@@ -224,12 +224,12 @@ export default function AppSidebar() {
             <div className="flex items-center gap-1.5 mt-0.5">
               <span
                 className="rounded-[4px] px-1.5 py-0.5 text-[9px] font-bold"
-                style={{ background: "#7C5CFC22", color: "#A78BFA" }}
+                style={{ background: "#8B80C022", color: "#9990B8" }}
               >
                 Lv {store.level}
               </span>
               {store.streak > 0 && (
-                <span className="text-[10px] font-semibold" style={{ color: "#FF4D6A" }}>
+                <span className="text-[10px] font-semibold" style={{ color: "#CC6B7E" }}>
                   🔥 {store.streak}
                 </span>
               )}
@@ -246,8 +246,8 @@ export default function AppSidebar() {
             className="w-7 h-7 rounded-[7px] flex items-center justify-center border-none cursor-pointer flex-shrink-0"
             style={{ background: "transparent", color: "var(--muted)" }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = "#FF4D6A18";
-              (e.currentTarget as HTMLButtonElement).style.color = "#FF4D6A";
+              (e.currentTarget as HTMLButtonElement).style.background = "#CC6B7E18";
+              (e.currentTarget as HTMLButtonElement).style.color = "#CC6B7E";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background = "transparent";

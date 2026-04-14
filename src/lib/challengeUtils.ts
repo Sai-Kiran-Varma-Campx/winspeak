@@ -2,9 +2,9 @@ import type { ChallengeCategory } from "@/types";
 
 /** Color based on score thresholds. Used in Dashboard, Report, History, InterviewPrep. */
 export function scoreColor(score: number): string {
-  if (score >= 80) return "#22D37A";
-  if (score >= 60) return "#FFB830";
-  return "#FF4D6A";
+  if (score >= 80) return "#5BAF7E";
+  if (score >= 60) return "#CCA550";
+  return "#CC6B7E";
 }
 
 /** Returns the route to navigate back to based on challenge category. */

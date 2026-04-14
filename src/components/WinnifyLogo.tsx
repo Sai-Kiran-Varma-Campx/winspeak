@@ -27,7 +27,7 @@ export default function WinnifyLogo({
         fontSize: jrSize,
         fontWeight: 900,
         color: "#F59E0B",
-        background: "#6B5DAD",
+        background: "#8578A8",
         padding: `${jrSize * 0.3}px ${jrSize * 0.5}px`,
         borderRadius: jrSize * 0.35,
         lineHeight: 1,

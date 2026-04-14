@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getSchoolCategory,
-  getSchoolQuestionsByCategoryAndGrade,
-  type SchoolQuestion,
-} from "@/constants/challenges-school";
+import { getSchoolCategory, type SchoolQuestion } from "@/constants/challenges-school";
 import { useSchoolSession } from "@/context/SchoolSessionContext";
 import { useStore } from "@/context/UserStoreContext";
+import { api } from "@/lib/api";
+import Spinner from "@/components/Spinner";
 
 export default function ChallengeStep2GradeQuestion() {
   const navigate = useNavigate();
@@ -20,16 +18,35 @@ export default function ChallengeStep2GradeQuestion() {
   const category = session.selectedCategory ? getSchoolCategory(session.selectedCategory) : null;
 
   // Only show grades the teacher is assigned to
-  const teacherGrades = store.grades.length > 0 ? store.grades : [1, 2, 3, 4];
+  const teacherGrades = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   const [grade, setGrade] = useState<number | null>(null);
+  const [gradeDropOpen, setGradeDropOpen] = useState(false);
+  const gradeDropRef = useRef<HTMLDivElement>(null);
   const [picked, setPicked] = useState<SchoolQuestion | null>(null);
 
-  const questions = session.selectedCategory && grade
-    ? getSchoolQuestionsByCategoryAndGrade(session.selectedCategory, grade)
-    : [];
+  useEffect(() => {
+    if (!gradeDropOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (gradeDropRef.current && !gradeDropRef.current.contains(e.target as Node)) setGradeDropOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [gradeDropOpen]);
 
-  // Reset question when grade changes
-  useEffect(() => { setPicked(null); }, [grade]);
+  // Questions fetched from API
+  const [questions, setQuestions] = useState<SchoolQuestion[]>([]);
+  const [loadingQ, setLoadingQ] = useState(false);
+
+  // Fetch questions when grade is selected (all questions for the category, not filtered by grade)
+  useEffect(() => {
+    if (!grade || !session.selectedCategory) return;
+    setLoadingQ(true);
+    setPicked(null);
+    api.listSchoolQuestions(session.selectedCategory).then((rows) => {
+      setQuestions(rows);
+      setLoadingQ(false);
+    }).catch(() => setLoadingQ(false));
+  }, [grade, session.selectedCategory]);
 
   function next() {
     if (!picked || !grade) return;
@@ -42,59 +59,68 @@ export default function ChallengeStep2GradeQuestion() {
 
       {/* Header */}
       <div className="school-reveal school-reveal-1" style={{ paddingTop: 28, marginBottom: 24 }}>
-        <div style={{
-          display: "inline-block", padding: "5px 12px", borderRadius: 999,
-          background: "#FED7AA", border: "1.5px solid #FDBA74",
-          fontSize: 11, fontWeight: 700, letterSpacing: "0.14em",
-          color: "#EA580C", textTransform: "uppercase",
-          marginBottom: 12,
-        }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>
           Step 2 of 3
         </div>
-        <h1 style={{
-          fontFamily: "'Sora', sans-serif", fontWeight: 800,
-          fontSize: 28, letterSpacing: "-0.03em", margin: 0, color: "#7C2D12",
-        }}>
+        <h1 style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", fontSize: 28, fontWeight: 500, color: "#4C1D95", margin: 0, lineHeight: 1.2 }}>
           {category ? `${category.emoji} ${category.title}` : "Pick Grade & Question"}
         </h1>
-        <p style={{ fontSize: 14, color: "#A8603C", fontWeight: 500, marginTop: 6 }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: "#6E5E8A", marginTop: 6 }}>
           Select a grade, then pick a question for your students.
         </p>
       </div>
 
-      {/* Grade selection */}
-      <div className="school-reveal school-reveal-2" style={{ marginBottom: 24 }}>
+      {/* Grade selection — dropdown */}
+      <div className="school-reveal school-reveal-2" style={{ marginBottom: 24, position: "relative", zIndex: 20 }}>
         <div style={{
-          fontSize: 11, fontWeight: 800, color: "#A8603C",
+          fontSize: 11, fontWeight: 500, color: "#6E5E8A",
           textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10,
         }}>Select Grade</div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {teacherGrades.map((g) => {
-            const isActive = grade === g;
-            return (
-              <button
-                key={g}
-                onClick={() => setGrade(g)}
-                style={{
-                  flex: 1, minWidth: 70, padding: "14px 12px",
-                  borderRadius: 18,
-                  border: `2px solid ${isActive ? "#EA580C" : "rgba(124,45,18,0.12)"}`,
-                  background: isActive ? "linear-gradient(135deg, #EA580C, #DB2777)" : "#fff",
-                  color: isActive ? "#fff" : "#7C2D12",
-                  fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 18,
-                  cursor: "pointer",
-                  boxShadow: isActive
-                    ? "0 4px 0 #B7350F, 0 8px 20px -6px rgba(219,39,119,0.3)"
-                    : "0 2px 0 rgba(124,45,18,0.05)",
-                  transform: isActive ? "translateY(-2px)" : "none",
-                  transition: "all 0.2s cubic-bezier(.34,1.56,.64,1)",
-                  textAlign: "center",
-                }}
-              >
-                {g}
-              </button>
-            );
-          })}
+        <div ref={gradeDropRef} style={{ position: "relative", maxWidth: 200 }}>
+          <div
+            onClick={() => setGradeDropOpen((p) => !p)}
+            style={{
+              padding: "12px 40px 12px 24px", borderRadius: 30,
+              background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
+              fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500, fontSize: 15,
+              color: "#fff", cursor: "pointer",
+              userSelect: "none",
+              boxShadow: "0 4px 15px rgba(124,58,237,0.3)",
+            }}
+          >
+            {grade ? `Grade ${grade}` : "Choose grade"}
+          </div>
+          <svg style={{ position: "absolute", right: 16, top: "50%", transform: gradeDropOpen ? "translateY(-50%) rotate(180deg)" : "translateY(-50%)", transition: "transform 0.2s", pointerEvents: "none" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+          {gradeDropOpen && (
+            <div style={{
+              position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0,
+              background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+              border: "1.5px solid rgba(124,58,237,0.18)",
+              borderRadius: 14, padding: 4,
+              boxShadow: "0 8px 24px rgba(124,58,237,0.15)",
+              zIndex: 50, maxHeight: 260, overflowY: "auto",
+            }}>
+              {teacherGrades.map((g) => (
+                <div
+                  key={g}
+                  onClick={() => { setGrade(g); setGradeDropOpen(false); }}
+                  style={{
+                    padding: "10px 14px", borderRadius: 10, cursor: "pointer",
+                    fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500, fontSize: 14,
+                    color: grade === g ? "#fff" : "#4C1D95",
+                    background: grade === g ? "linear-gradient(135deg, #7C3AED, #A78BFA)" : "transparent",
+                    transition: "all 0.15s",
+                  }}
+                  onMouseEnter={(e) => { if (grade !== g) e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}
+                  onMouseLeave={(e) => { if (grade !== g) e.currentTarget.style.background = "transparent"; }}
+                >
+                  Grade {g}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -102,21 +128,25 @@ export default function ChallengeStep2GradeQuestion() {
       {grade && (
         <>
           <div className="school-reveal school-reveal-3" style={{
-            fontSize: 11, fontWeight: 800, color: "#A8603C",
+            fontSize: 11, fontWeight: 800, color: "#6E5E8A",
             textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10,
           }}>Select Question</div>
 
-          {questions.length === 0 ? (
+          {loadingQ ? (
+            <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}>
+              <Spinner size={24} />
+            </div>
+          ) : questions.length === 0 ? (
             <div style={{
-              background: "#fff", border: "1.5px solid rgba(124,45,18,0.12)",
+              background: "#fff", border: "1.5px solid rgba(124,58,237,0.12)",
               borderRadius: 22, padding: "40px 24px", textAlign: "center",
             }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>📝</div>
-              <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, color: "#7C2D12" }}>
+              <div style={{ fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500, color: "#4C1D95" }}>
                 No questions yet
               </div>
-              <div style={{ fontSize: 13, marginTop: 4, color: "#A8603C" }}>
-                No questions available for Grade {grade} in this category.
+              <div style={{ fontSize: 13, marginTop: 4, color: "#6E5E8A" }}>
+                No questions available for this category.
               </div>
             </div>
           ) : (
@@ -130,21 +160,21 @@ export default function ChallengeStep2GradeQuestion() {
                     style={{
                       padding: "18px 20px", textAlign: "left", cursor: "pointer",
                       borderRadius: 22,
-                      border: `1.5px solid ${isSelected ? "#EA580C" : "rgba(124,45,18,0.12)"}`,
-                      background: isSelected ? "linear-gradient(135deg, rgba(234,88,12,0.08), rgba(219,39,119,0.05))" : "#fff",
+                      border: `1.5px solid ${isSelected ? "#7C3AED" : "rgba(124,58,237,0.12)"}`,
+                      background: isSelected ? "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(167,139,250,0.05))" : "#fff",
                       boxShadow: isSelected
-                        ? "0 2px 0 rgba(234,88,12,0.15), 0 8px 20px -10px rgba(234,88,12,0.2)"
-                        : "0 1px 0 rgba(124,45,18,0.05)",
+                        ? "0 2px 0 rgba(124,58,237,0.15), 0 8px 20px -10px rgba(124,58,237,0.2)"
+                        : "0 1px 0 rgba(124,58,237,0.05)",
                       transform: isSelected ? "translateY(-1px)" : "none",
                       transition: "all 0.2s ease",
-                      fontFamily: "inherit", color: "#7C2D12",
+                      fontFamily: "inherit", color: "#4C1D95",
                       display: "flex", alignItems: "flex-start", gap: 14,
                     }}
                   >
                     <div style={{
                       width: 24, height: 24, borderRadius: "50%",
-                      border: `2px solid ${isSelected ? "#EA580C" : "rgba(124,45,18,0.2)"}`,
-                      background: isSelected ? "#EA580C" : "#fff",
+                      border: `2px solid ${isSelected ? "#7C3AED" : "rgba(124,58,237,0.2)"}`,
+                      background: isSelected ? "#7C3AED" : "#fff",
                       display: "grid", placeItems: "center",
                       flexShrink: 0, marginTop: 2,
                     }}>
@@ -152,13 +182,13 @@ export default function ChallengeStep2GradeQuestion() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <span style={{
-                        fontFamily: "'Sora', sans-serif", fontWeight: 700,
+                        fontFamily: "'Fredoka', 'Sora', sans-serif", fontWeight: 500,
                         fontSize: 16, letterSpacing: "-0.01em",
-                        color: isSelected ? "#EA580C" : "#7C2D12",
+                        color: isSelected ? "#7C3AED" : "#4C1D95",
                         display: "block", marginBottom: 4,
                       }}>{q.title}</span>
                       <div style={{
-                        fontSize: 13, color: "#A8603C",
+                        fontSize: 13, color: "#6E5E8A",
                         fontWeight: 500, lineHeight: 1.5,
                       }}>{q.prompt}</div>
                     </div>

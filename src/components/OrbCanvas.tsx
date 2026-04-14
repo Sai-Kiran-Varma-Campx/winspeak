@@ -12,7 +12,7 @@ function drawOrb(canvas: HTMLCanvasElement, pct: number) {
   // Track
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.strokeStyle = "#1E2130";
+  ctx.strokeStyle = "#3A3B44";
   ctx.lineWidth = 8;
   ctx.stroke();
   // Fill
@@ -20,7 +20,7 @@ function drawOrb(canvas: HTMLCanvasElement, pct: number) {
   const end = start + (Math.PI * 2 * pct) / 100;
   ctx.beginPath();
   ctx.arc(cx, cy, r, start, end);
-  ctx.strokeStyle = "#7C5CFC";
+  ctx.strokeStyle = "#8B80C0";
   ctx.lineWidth = 8;
   ctx.lineCap = "round";
   ctx.stroke();

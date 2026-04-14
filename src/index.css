@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Sora:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Sora:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,20 +6,20 @@
 
 /* ── Brand tokens ── */
 :root {
-  --bg: #0A0B0F;
-  --card: #13151C;
-  --border: #1E2130;
-  --accent: #7C5CFC;
-  --accent-glow: #7C5CFC44;
-  --green: #22D37A;
-  --red: #FF4D6A;
-  --yellow: #FFB830;
+  --bg: #1C1D22;
+  --card: #26272E;
+  --border: #3A3B44;
+  --accent: #8B80C0;
+  --accent-glow: #8B80C044;
+  --green: #5BAF7E;
+  --red: #CC6B7E;
+  --yellow: #CCA550;
   --text: #F0F2FF;
   --text-bright: #FFFFFF;
   --text-secondary: #B8BCDA;
   --muted: #8892B8;        /* raised from #6B7194 — passes WCAG AA on all dark surfaces */
   --muted-soft: #A4ABCC;   /* for body copy inside tinted/coloured card backgrounds */
-  --surface: #1A1D2E;
+  --surface: #2F3038;
   --radius: 0.5rem;
   --nav-h: 0px;           /* updated to 48px when DEV nav is present */
 
@@ -81,29 +81,29 @@ h1, h2, h3,
    These rules ensure body copy on coloured surfaces is
    readable without relying on Tailwind inline styles.     */
 
-/* Green tint cards  (#22D37A11 bg) */
-[style*="#22D37A11"] p,
-[style*="#22D37A11"] span:not([style]),
+/* Green tint cards  (#5BAF7E11 bg) */
+[style*="#5BAF7E11"] p,
+[style*="#5BAF7E11"] span:not([style]),
 [style*="22D37A11"] div:not([style]) {
   color: #D4FAE9;
 }
 
-/* Red tint cards (#FF4D6A11 bg) */
-[style*="#FF4D6A11"] p,
-[style*="#FF4D6A11"] span:not([style]),
+/* Red tint cards (#CC6B7E11 bg) */
+[style*="#CC6B7E11"] p,
+[style*="#CC6B7E11"] span:not([style]),
 [style*="FF4D6A11"] div:not([style]) {
   color: #FFD6DD;
 }
 
-/* Accent/purple tint cards (#7C5CFC11) */
-[style*="#7C5CFC11"] p,
-[style*="#7C5CFC11"] span:not([style]) {
+/* Accent/purple tint cards (#8B80C011) */
+[style*="#8B80C011"] p,
+[style*="#8B80C011"] span:not([style]) {
   color: #E0D9FF;
 }
 
-/* Yellow tint cards (#FFB83008 / #FFB83011) */
-[style*="#FFB83008"] p,
-[style*="#FFB83011"] p {
+/* Yellow tint cards (#CCA55008 / #CCA55011) */
+[style*="#CCA55008"] p,
+[style*="#CCA55011"] p {
   color: #FFF3D6;
 }
 
@@ -295,27 +295,28 @@ body.has-dev-nav .app-main {
    Per WinSpeak School POC brief
 ───────────────────────────────────────── */
 html.mode-school {
-  /* Violet + Orange Palette (matching reference) */
-  --ink:#2D2654;
-  --ink-soft:#5B5280;
-  --ink-line:rgba(107,93,173,0.15);
-  --orange:#F59E0B;
-  --orange-light:#FEF3C7;
-  --orange-bd:#FCD34D;
-  --orange-deep:#D97706;
-  --violet:#7B6FBF;
-  --violet-light:#EDE9F6;
-  --violet-bd:#B8B0DA;
-  --violet-deep:#6B5DAD;
-  --pink:#DB2777;
-  --pink-light:#FCE7F3;
-  --pink-bd:#F9A8D4;
-  --s-yellow:#F59E0B;
-  --yellow-light:#FEF3C7;
-  --yellow-bd:#FCD34D;
-  --teal:#0D9488;
-  --teal-light:#CCFBF1;
-  --teal-bd:#5EEAD4;
+  filter: saturate(1);
+  /* Muted, softer palette */
+  --ink:#3D3660;
+  --ink-soft:#6E6890;
+  --ink-line:rgba(107,93,173,0.10);
+  --orange:#D4A748;
+  --orange-light:#FEF6DC;
+  --orange-bd:#E8D08A;
+  --orange-deep:#B8923E;
+  --violet:#8A84A8;
+  --violet-light:#F0EDF6;
+  --violet-bd:#C4BFDA;
+  --violet-deep:#7D739A;
+  --pink:#B85A80;
+  --pink-light:#F9E8EF;
+  --pink-bd:#E0B0C4;
+  --s-yellow:#D4A748;
+  --yellow-light:#FEF6DC;
+  --yellow-bd:#E8D08A;
+  --teal:#5A9F98;
+  --teal-light:#DDF5F0;
+  --teal-bd:#8FD4CA;
   --card-radius:26px;
   --card-shadow:0 2px 0 rgba(107,93,173,0.08), 0 16px 32px -20px rgba(107,93,173,0.18);
   --card-shadow-hover:0 3px 0 rgba(107,93,173,0.10), 0 24px 44px -22px rgba(107,93,173,0.25);
@@ -348,7 +349,8 @@ html.mode-school {
 }
 
 html.mode-school body {
-  background: url("/school-bg.png") center center / cover no-repeat fixed;
+  background: linear-gradient(165deg, #EDE9FE 0%, #F3EEFF 30%, #DDD6FE 70%, #EDE9FE 100%);
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-body);
   font-weight: 500;
@@ -356,12 +358,107 @@ html.mode-school body {
   position: relative;
 }
 
-/* ── Background overlay removed — using school-bg.png ── */
-html.mode-school body::before {
-  display: none;
+.clouds-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-/* ── School layout (no sidebar, top navbar) ── */
+/* ── Soft white wash over the background ── */
+html.mode-school body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+/* ── Floating numbers & symbols decoration ── */
+.school-decorations {
+  position: fixed;
+  top: 0;
+  left: 240px;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.school-deco-item {
+  position: absolute;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 500;
+  opacity: 0.22;
+  user-select: none;
+}
+
+.school-deco-rocket {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.85;
+  animation: rocketFloat 4s ease-in-out infinite;
+}
+
+@keyframes rocketFloat {
+  0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  50%      { transform: translateY(-18px) rotate(var(--rot, 0deg)); }
+}
+
+@keyframes decoFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25%      { transform: translateY(-12px) rotate(5deg); }
+  50%      { transform: translateY(-6px) rotate(-3deg); }
+  75%      { transform: translateY(-14px) rotate(2deg); }
+}
+
+/* ── Twinkling stars ── */
+.school-deco-star {
+  position: absolute;
+  pointer-events: none;
+  animation: starTwinkle 2s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8) rotate(0deg); }
+  50%      { opacity: 0.9; transform: scale(1.2) rotate(45deg); }
+}
+
+/* ── Floating books & calculators ── */
+.school-deco-object {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.45;
+  animation: objectFloat ease-in-out infinite;
+  filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1));
+}
+
+@keyframes objectFloat {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  30%      { transform: translateY(-10px) rotate(calc(var(--r, 0deg) + 3deg)); }
+  60%      { transform: translateY(-4px) rotate(calc(var(--r, 0deg) - 2deg)); }
+}
+
+/* Rockets get a bobbing + slight drift */
+.school-deco-rocket {
+  opacity: 0.55;
+  animation-name: rocketFloat !important;
+}
+
+@keyframes rocketFloat {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25%      { transform: translateY(-18px) translateX(4px); }
+  50%      { transform: translateY(-8px) translateX(-3px); }
+  75%      { transform: translateY(-20px) translateX(2px); }
+}
+
+/* ── School layout ── */
 .school-layout {
   min-height: 100vh;
   position: relative;
@@ -374,128 +471,180 @@ html.mode-school body::before {
   flex: 1;
   display: flex;
   flex-direction: column;
+  margin-left: 240px;
 }
 
-/* ── School Navbar ── */
-.school-navbar {
-  position: relative;
-  z-index: 10;
+@media (max-width: 768px) {
+  .school-content {
+    margin-left: 0;
+  }
+}
+
+/* ── Top Bar ── */
+.topbar {
+  height: 85px;
+  background: #6A2D8E;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 40px;
-  background: linear-gradient(135deg, #4a1a7a 0%, #6b2fa0 50%, #5a2590 100%);
-  border-radius: 0 0 20px 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
-
-.school-navbar-logo {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
-
-.school-navbar-logo-img {
-  height: 45px;
-  width: auto;
-}
-
-.school-navbar-links {
-  display: flex;
-  gap: 8px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.school-navbar-link {
+  padding: 0 25px;
   color: white;
-  font-family: 'Nunito', 'Poppins', sans-serif;
-  font-weight: 600;
-  font-size: 15px;
-  padding: 8px 20px;
-  border-radius: 25px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  position: relative;
+  z-index: 20;
 }
 
-.school-navbar-link:hover,
-.school-navbar-link.active {
-  background: rgba(255, 255, 255, 0.2);
-  transform: none !important;
-  filter: none !important;
+.logo {
+  width: 100%;
+  margin-bottom: 10px;
 }
 
-.school-navbar-link.active {
-  background: rgba(255, 215, 0, 0.25);
-  color: #ffd700;
+.logo-blend img {
+  width: 100%;
+  display: block;
 }
 
-.school-navbar-avatar:hover {
-  transform: none !important;
-  filter: none !important;
-}
-
-.school-navbar-logo:hover {
-  transform: none !important;
-  filter: none !important;
-}
-
-.school-navbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.school-navbar-avatar {
+.profile img {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FED7AA, #FEF3C7);
-  border: 2.5px solid rgba(255,255,255,0.4);
-  display: grid;
-  place-items: center;
-  font-family: 'Sora', sans-serif;
-  font-weight: 800;
-  font-size: 16px;
-  color: #7C5C3E;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(167,139,250,0.08));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-right: 1.5px solid rgba(124,58,237,0.15);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 20;
+}
+
+.menu-item {
+  padding: 14px 16px;
+  border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  font-size: 17px;
+  font-weight: 600;
+  color: #4C1D95;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Poppins', sans-serif;
+  border: none;
+  background: transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(106, 45, 142, 0.15);
+}
+
+.menu-item:hover {
+  background: rgba(106, 45, 142, 0.12);
+  transform: translateX(3px);
+}
+
+.menu-item.active {
+  background: rgba(106, 45, 142, 0.18);
+  color: #3B0764;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(106, 45, 142, 0.15);
+}
+
+.menu-item svg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.menu-item.active svg path,
+.menu-item.active svg rect,
+.menu-item.active svg circle,
+.menu-item.active svg line,
+.menu-item.active svg polyline {
+  filter: hue-rotate(0deg);
+}
+
+/* ── School body (sidebar + content) ── */
+.school-body {
+  display: flex;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
 }
 
 /* Glassmorphism utility classes */
 .school-glass {
-  background: rgba(255, 255, 255, 0.25);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(167, 139, 250, 0.12) 100%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 30px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.08);
+  border: 1.5px solid rgba(124, 58, 237, 0.25);
 }
 
 .school-glass-card {
-  background: rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(167, 139, 250, 0.12) 100%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.08);
+  border: 1.5px solid rgba(124, 58, 237, 0.25);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .school-glass-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.15);
+}
+
+/* Home page animated icons */
+.home-icon {
+  margin-bottom: 15px;
+  display: inline-block;
+}
+
+.home-icon-float {
+  animation: homeFloat 3s ease-in-out infinite;
+}
+
+.home-icon-pulse {
+  animation: homePulse 2.5s ease-in-out infinite;
+}
+
+.home-icon-bounce {
+  animation: homeBounce 2s ease-in-out infinite;
+}
+
+@keyframes homeFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes homePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes homeBounce {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-8px); }
+  60% { transform: translateY(-4px); }
 }
 
 /* Page container for inner school pages */
 .school-page-container {
-  min-height: calc(100vh - 70px);
+  min-height: 100vh;
   padding: 40px;
   display: flex;
   flex-direction: column;
@@ -503,14 +652,14 @@ html.mode-school body::before {
 }
 
 .school-page-header {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 20px;
   padding: 30px 50px;
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.08);
+  border: 1.5px solid rgba(124, 58, 237, 0.15);
   margin-bottom: 30px;
   width: 100%;
   max-width: 900px;
@@ -520,12 +669,12 @@ html.mode-school body::before {
   font-family: 'Fredoka', 'Sora', sans-serif;
   font-size: 36px;
   font-weight: 700;
-  color: #2d1b69;
+  color: #4C1D95;
   margin-bottom: 8px;
 }
 
 .school-page-header p {
-  color: #5a3e8a;
+  color: #6E5E8A;
   font-size: 16px;
   font-weight: 600;
 }
@@ -539,18 +688,6 @@ html.mode-school body::before {
 }
 
 @media (max-width: 768px) {
-  .school-navbar {
-    padding: 10px 20px;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .school-navbar-links {
-    gap: 4px;
-  }
-  .school-navbar-link {
-    padding: 6px 14px;
-    font-size: 13px;
-  }
   .school-page-container {
     padding: 20px;
   }
@@ -645,7 +782,7 @@ html.mode-school .school-card-pink {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #7B6FBF, #6B5DAD);
+  background: linear-gradient(135deg, #8A84A8, #7D739A);
   display: grid;
   place-items: center;
   box-shadow: 0 2px 10px rgba(107,93,173,0.3);
@@ -842,7 +979,7 @@ html.mode-school .school-card-pink {
 .school-bottom-bar {
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: 240px;
   right: 0;
   z-index: 40;
   display: flex;
@@ -853,22 +990,21 @@ html.mode-school .school-card-pink {
 
 .school-bottom-bar-inner {
   width: 100%;
-  max-width: 644px;
-  padding: 0 22px calc(22px + env(safe-area-inset-bottom, 0px));
+  padding: 0 32px calc(22px + env(safe-area-inset-bottom, 0px));
   padding-top: 32px;
   display: flex;
   align-items: center;
   gap: 14px;
   background: linear-gradient(to top,
-    rgba(255,248,243,1) 0%,
-    rgba(255,248,243,1) 50%,
-    rgba(255,248,243,0.92) 75%,
-    rgba(255,248,243,0) 100%
+    rgba(237,233,254,1) 0%,
+    rgba(237,233,254,1) 50%,
+    rgba(237,233,254,0.92) 75%,
+    rgba(237,233,254,0) 100%
   );
   pointer-events: auto;
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 768px) {
   .school-bottom-bar {
     left: 0;
   }
@@ -891,11 +1027,11 @@ html.mode-school .school-card-pink {
 .school-step-dot.active {
   width: 28px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #EA580C, #DB2777);
-  box-shadow: 0 2px 8px rgba(234,88,12,0.35);
+  background: linear-gradient(135deg, #C0845A, #B85A80);
+  box-shadow: 0 2px 8px rgba(192,132,90,0.25);
 }
 .school-step-dot.done {
-  background: #0D9488;
+  background: #5A9F98;
   box-shadow: 0 1px 4px rgba(13,148,136,0.3);
 }
 
@@ -905,16 +1041,16 @@ html.mode-school .school-card-pink {
   width: 58px;
   height: 58px;
   border-radius: 20px;
-  border: 2.5px solid rgba(124,45,18,0.1);
+  border: 2.5px solid rgba(124,58,237,0.12);
   background: #fff;
-  color: #7C2D12;
+  color: #4C1D95;
   font-size: 0;
   cursor: pointer;
   display: grid;
   place-items: center;
   box-shadow:
-    0 4px 0 rgba(124,45,18,0.08),
-    0 8px 24px -10px rgba(124,45,18,0.18);
+    0 4px 0 rgba(124,58,237,0.08),
+    0 8px 24px -10px rgba(124,58,237,0.18);
   transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
   position: relative;
   overflow: hidden;
@@ -943,9 +1079,9 @@ html.mode-school .school-card-pink {
 .school-btn-back:hover {
   transform: translateY(-3px);
   box-shadow:
-    0 6px 0 rgba(124,45,18,0.08),
-    0 14px 32px -10px rgba(124,45,18,0.22);
-  border-color: rgba(124,45,18,0.16);
+    0 6px 0 rgba(124,58,237,0.08),
+    0 14px 32px -10px rgba(124,58,237,0.22);
+  border-color: rgba(124,58,237,0.18);
 }
 .school-btn-back:hover svg {
   transform: translateX(-2px);
@@ -953,7 +1089,7 @@ html.mode-school .school-card-pink {
 
 .school-btn-back:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 rgba(124,45,18,0.06);
+  box-shadow: 0 1px 0 rgba(124,58,237,0.06);
 }
 
 /* Next button — big, chunky, fun gradient */
@@ -1037,9 +1173,9 @@ html.mode-school .school-card-pink {
 }
 
 .school-btn-next:disabled {
-  background: rgba(124,45,18,0.08);
-  color: rgba(124,45,18,0.25);
-  box-shadow: 0 3px 0 rgba(124,45,18,0.04);
+  background: rgba(124,58,237,0.08);
+  color: rgba(124,58,237,0.25);
+  box-shadow: 0 3px 0 rgba(124,58,237,0.04);
   cursor: not-allowed;
   animation: none;
 }
@@ -1068,7 +1204,7 @@ html.mode-school .school-card-pink {
 /* Step progress bar (colored line above bottom bar) */
 .school-progress-track {
   height: 4px;
-  background: rgba(124,45,18,0.06);
+  background: rgba(124,58,237,0.08);
   border-radius: 999px;
   overflow: hidden;
   margin-bottom: 16px;
@@ -1077,9 +1213,9 @@ html.mode-school .school-card-pink {
 .school-progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #EA580C, #DB2777);
+  background: linear-gradient(90deg, #7C3AED, #A78BFA);
   transition: width 0.5s cubic-bezier(.34,1.56,.64,1);
-  box-shadow: 0 0 10px rgba(234,88,12,0.4);
+  box-shadow: 0 0 10px rgba(124,58,237,0.4);
 }
 
 /* ── Step 1 category card hover ── */
@@ -1204,203 +1340,142 @@ html.mode-school .page-enter {
 
 /* ───── Print stylesheet for school report PDF download ───── */
 @media print {
-  /* ── Force color printing ── */
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
 
-  /* ── Page setup ── */
-  @page {
-    size: A4;
-    margin: 18mm 16mm 18mm 16mm;
-  }
+  @page { size: A4; margin: 10mm; }
 
-  /* ── Base reset for print ── */
+  * { animation: none !important; transition: none !important; }
+
+  /* ── Reset ── */
   html, body {
-    background: #fff !important;
-    color: #7C2D12 !important;
-    font-family: 'Poppins', 'Inter', system-ui, sans-serif !important;
-    font-size: 12pt !important;
-    line-height: 1.5 !important;
-    -webkit-font-smoothing: auto !important;
-    width: 100% !important;
-    min-height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    background: transparent !important;
+    color: #4C1D95 !important;
+    font-family: 'Poppins', system-ui, sans-serif !important;
+    font-size: 9pt !important;
+    line-height: 1.4 !important;
+    margin: 0 !important; padding: 0 !important;
+    width: 100% !important; overflow: visible !important;
   }
-
   html.mode-school body {
-    background: #fff !important;
+    background: transparent !important;
     background-image: none !important;
   }
+  html.mode-school body::before { display: none !important; }
 
-  /* ── Show print-only elements ── */
-  .print-only {
-    display: block !important;
-  }
+  .print-only { display: block !important; }
+  .no-print, .sidebar, .school-sidebar, .school-mobile-nav,
+  .school-bottom-bar, .app-sidebar, .screen-nav, .school-decorations,
+  nav, .mobile-nav, [role="navigation"] { display: none !important; }
 
-  /* ── Hide everything not needed ── */
-  .no-print,
-  .app-sidebar,
-  .school-sidebar,
-  .school-mobile-nav,
-  .school-bottom-bar,
-  .screen-nav,
-  nav,
-  .mobile-nav,
-  button,
-  [role="navigation"] {
-    display: none !important;
-  }
+  .school-content { margin-left: 0 !important; }
 
-  /* ── Print header branding ── */
-  .print-header {
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 16pt;
-    margin-bottom: 16pt;
-    border-bottom: 2.5pt solid #EA580C;
-  }
-
-  .print-header-brand {
-    display: flex;
-    align-items: center;
-    gap: 10pt;
-  }
-
-  .print-header-logo {
-    width: 36pt;
-    height: 36pt;
-    border-radius: 8pt;
-    background: linear-gradient(135deg, #EA580C, #DB2777) !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-family: 'Sora', 'Poppins', sans-serif;
-    font-weight: 900;
-    font-size: 16pt;
-    letter-spacing: -0.03em;
-  }
-
-  .print-header-title {
-    font-family: 'Sora', 'Poppins', sans-serif;
-    font-weight: 800;
-    font-size: 18pt;
-    color: #7C2D12;
-    letter-spacing: -0.02em;
-  }
-
-  .print-header-subtitle {
-    font-size: 9pt;
-    color: #A8603C;
-    font-weight: 600;
-    margin-top: 1pt;
-  }
-
-  .print-header-date {
-    font-size: 9pt;
-    font-weight: 600;
-    color: #A8603C;
-    text-align: right;
-  }
-
-  /* ── Report content area ── */
+  /* ── Print area ── */
   .print-area {
     max-width: 100% !important;
-    padding: 0 !important;
+    padding: 12pt !important;
     margin: 0 !important;
+    overflow: visible !important;
+    position: relative !important;
+    background: transparent !important;
   }
 
-  /* ── Cards: clean, bordered, no shadows ── */
-  .school-card,
-  [class*="rounded-[24px]"],
-  [class*="rounded-[20px]"] {
+  /* ── Full-page purple bg — fixed position so it covers every page entirely ── */
+  .print-bg {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: linear-gradient(160deg, #E8DEFF 0%, #F3EEFF 30%, #DDD6FE 60%, #EDE9FE 100%) !important;
+    z-index: -1 !important;
+  }
+
+  /* ── Fix glass effects for print ── */
+  .print-area * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     box-shadow: none !important;
-    border: 1pt solid #E8D5C4 !important;
-    border-radius: 10pt !important;
+  }
+  .print-area div, .print-area button, .print-area span {
+    overflow: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+
+  /* ── Hide: buttons, audio, tap-text, expanded, chevrons ── */
+  .print-area button.no-print,
+  .print-area .print-hide,
+  .print-area .no-print { display: none !important; }
+
+  /* ── Cards: solid bg for print (no backdrop-filter) ── */
+  .print-area div[style*="borderRadius"] {
+    background: rgba(255,255,255,0.92) !important;
+    border: 0.75pt solid rgba(124,58,237,0.2) !important;
+  }
+
+  /* ── Sections ── */
+  .print-section-keep {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* ── Skill grid: 2 columns ── */
+  .print-area div[style*="grid-template-columns"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .print-area div[style*="grid-template-columns"] button {
+    background: rgba(255,255,255,0.92) !important;
+    border: 0.75pt solid rgba(124,58,237,0.2) !important;
+    grid-column: auto !important;
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
-  /* ── Skill cards grid stays 2-col ── */
-  .grid.grid-cols-2 {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 8pt !important;
-  }
+  .pb-32 { padding-bottom: 0 !important; }
 
-  /* ── Section spacing ── */
-  .mb-8 { margin-bottom: 14pt !important; }
-  .mb-6 { margin-bottom: 12pt !important; }
-  .p-6  { padding: 12pt !important; }
-  .p-4  { padding: 8pt !important; }
-
-  /* ── Typography adjustments ── */
-  h1 {
-    font-size: 22pt !important;
-    line-height: 1.15 !important;
-    color: #7C2D12 !important;
+  /* ── Page 2 starts here — forced break + top spacing ── */
+  .print-page2-start {
+    page-break-before: always !important;
+    break-before: always !important;
+    margin-top: 20pt !important;
   }
-  h2 {
-    font-size: 16pt !important;
-    color: #7C2D12 !important;
-  }
+  a { color: #4C1D95 !important; text-decoration: none !important; }
 
-  /* ── Brave Meter: simplify for print ── */
-  .bg-\[\#FEF3C7\] {
-    background: #FEF3C7 !important;
-    border: 1pt solid #FCD34D !important;
+  /* ── Print header ── */
+  .print-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10pt;
+    margin-bottom: 10pt;
+    border-bottom: 2pt solid #7C3AED;
   }
-
-  /* ── Strengths section ── */
-  .bg-\[\#CCFBF1\] {
-    background: #CCFBF1 !important;
-    border: 1pt solid #5EEAD4 !important;
+  .print-header-brand { display: flex; align-items: center; gap: 8pt; }
+  .print-header-logo {
+    width: 30pt; height: 30pt; border-radius: 6pt;
+    background: #7C3AED !important;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 900; font-size: 14pt;
   }
-
-  /* ── WinSpeak Says section ── */
-  .bg-\[\#FCE7F3\] {
-    background: #FCE7F3 !important;
-    border: 1pt solid #F9A8D4 !important;
-  }
-
-  /* ── Improvement section ── */
-  .bg-\[\#FEF2E8\] {
-    background: #FEF2E8 !important;
-    border: 1pt solid #FCD34D !important;
-  }
-
-  /* ── Remove all animations in print ── */
-  * {
-    animation: none !important;
-    transition: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  /* ── Remove bottom padding meant for mobile nav ── */
-  .pb-32 {
-    padding-bottom: 0 !important;
-  }
-
-  /* ── Links print as text ── */
-  a { color: #7C2D12 !important; text-decoration: none !important; }
+  .print-header-title { font-weight: 800; font-size: 14pt; color: #4C1D95; }
+  .print-header-subtitle { font-size: 7pt; color: #6E5E8A; font-weight: 600; }
+  .print-header-date { font-size: 7pt; font-weight: 600; color: #6E5E8A; text-align: right; }
 
   /* ── Print footer ── */
   .print-footer {
     display: block !important;
-    margin-top: 20pt;
-    padding-top: 12pt;
-    border-top: 1pt solid #E8D5C4;
+    margin-top: 12pt;
+    padding-top: 8pt;
+    border-top: 0.75pt solid #C4B5FD;
     text-align: center;
-    font-size: 8pt;
-    color: #A8603C;
-    font-weight: 500;
+    font-size: 6pt;
+    color: #6E5E8A;
   }
 }

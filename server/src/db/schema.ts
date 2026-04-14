@@ -111,6 +111,24 @@ export const studentAttempts = pgTable(
   ]
 );
 
+// ── School questions (content from PDF, 5 per category) ───────────────────
+export const schoolQuestions = pgTable(
+  "school_questions",
+  {
+    id: text("id").primaryKey(),
+    categoryId: text("category_id").notNull(),
+    questionNumber: integer("question_number").notNull(),
+    title: text("title").notNull(),
+    prompt: text("prompt").notNull(),
+    scenario: text("scenario").notNull(),
+    durationSecs: integer("duration_secs").notNull().default(60),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("idx_school_questions_category").on(t.categoryId),
+  ]
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Attempt = typeof attempts.$inferSelect;
@@ -119,3 +137,5 @@ export type Student = typeof students.$inferSelect;
 export type NewStudent = typeof students.$inferInsert;
 export type StudentAttempt = typeof studentAttempts.$inferSelect;
 export type NewStudentAttempt = typeof studentAttempts.$inferInsert;
+export type SchoolQuestionRow = typeof schoolQuestions.$inferSelect;
+export type NewSchoolQuestion = typeof schoolQuestions.$inferInsert;

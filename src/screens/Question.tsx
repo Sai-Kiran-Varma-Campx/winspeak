@@ -20,9 +20,9 @@ const TIER_STYLES: Record<
   ChallengeTier,
   { bg: string; color: string; border: string }
 > = {
-  Beginner: { bg: "#22D37A11", color: "#22D37A", border: "#22D37A44" },
-  Intermediate: { bg: "#7C5CFC11", color: "#7C5CFC", border: "#7C5CFC44" },
-  Advanced: { bg: "#FFB83011", color: "#FFB830", border: "#FFB83044" },
+  Beginner: { bg: "#5BAF7E11", color: "#5BAF7E", border: "#5BAF7E44" },
+  Intermediate: { bg: "#8B80C011", color: "#8B80C0", border: "#8B80C044" },
+  Advanced: { bg: "#CCA55011", color: "#CCA550", border: "#CCA55044" },
 };
 
 export default function Question() {
@@ -128,7 +128,7 @@ export default function Question() {
           <div
             className="border rounded-[22px] flex flex-col items-center justify-center gap-2.5 relative overflow-hidden max-h-[200px] sm:max-h-none"
             style={{
-              background: "linear-gradient(135deg,#1A1D2E,#0F1018)",
+              background: "linear-gradient(135deg, var(--surface), var(--bg))",
               borderColor: "var(--border)",
               aspectRatio: "16/9",
             }}
@@ -137,12 +137,12 @@ export default function Question() {
               className="absolute inset-0"
               style={{
                 background:
-                  "radial-gradient(ellipse at 40% 50%, #22D37A22, transparent 60%)",
+                  "radial-gradient(ellipse at 40% 50%, #5BAF7E22, transparent 60%)",
               }}
             />
             <div
               className="w-[60px] h-[60px] rounded-full flex items-center justify-center text-[28px]"
-              style={{ background: "linear-gradient(135deg,#22D37A,#7C5CFC)" }}
+              style={{ background: "linear-gradient(135deg,#5BAF7E,#8B80C0)" }}
             >
               🤖
             </div>
@@ -152,7 +152,7 @@ export default function Question() {
                   <span
                     className="w-4 h-4 rounded-full border-2 border-t-transparent inline-block flex-shrink-0"
                     style={{
-                      borderColor: "#22D37A",
+                      borderColor: "#5BAF7E",
                       animation: "spin 0.8s linear infinite",
                     }}
                   />
@@ -167,7 +167,7 @@ export default function Question() {
                         className="w-[3px] rounded-full block"
                         style={{
                           height: h * 3,
-                          background: "#22D37A",
+                          background: "#5BAF7E",
                           animation: `soundwave 0.8s ${i * 0.1}s ease-in-out infinite alternate`,
                         }}
                       />
@@ -176,7 +176,7 @@ export default function Question() {
                   Coach speaking...
                 </>
               ) : ttsError ? (
-                <span style={{ color: "#FF4D6A" }}>
+                <span style={{ color: "#CC6B7E" }}>
                   Issue fetching audio. Please read the instructions to
                   continue.
                 </span>
@@ -195,8 +195,8 @@ export default function Question() {
                 style={{
                   width: `${progress}%`,
                   background: ttsError
-                    ? "#FF4D6A"
-                    : "linear-gradient(90deg,var(--accent),#22D37A)",
+                    ? "#CC6B7E"
+                    : "linear-gradient(90deg,var(--accent),#5BAF7E)",
                 }}
               />
             </div>
@@ -220,7 +220,7 @@ export default function Question() {
         <div className="flex flex-col gap-5">
           <div
             className="border rounded-[20px] p-5 relative overflow-hidden"
-            style={{ background: "var(--card)", borderColor: "#7C5CFC44" }}
+            style={{ background: "var(--card)", borderColor: "#8B80C044" }}
           >
             <div
               className="absolute"
@@ -266,12 +266,12 @@ export default function Question() {
               className="rounded-[12px] p-3.5 mb-3"
               style={{
                 background: "var(--surface)",
-                borderLeft: "3px solid #FFB830",
+                borderLeft: "3px solid #CCA550",
               }}
             >
               <div
                 className="text-[10px] font-bold tracking-[1px] mb-1.5"
-                style={{ color: "#FFB830" }}
+                style={{ color: "#CCA550" }}
               >
                 THE SITUATION
               </div>
@@ -306,11 +306,11 @@ export default function Question() {
             <div className="flex gap-2.5">
               {[
                 { value: "60s", label: "Max Time", color: "var(--accent)" },
-                { value: "2", label: "Retries", color: "#22D37A" },
+                { value: "2", label: "Retries", color: "#5BAF7E" },
                 {
                   value: `${challenge.xp}`,
                   label: "XP Reward",
-                  color: "#FFB830",
+                  color: "#CCA550",
                 },
               ].map(({ value, label, color }) => (
                 <div

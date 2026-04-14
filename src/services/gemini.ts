@@ -215,7 +215,7 @@ export async function transcribeAudio(blob: Blob): Promise<string> {
 
 const TTS_MODELS = [
   "gemini-2.5-flash-preview-tts",
-  "gemini-2.5-pro-preview-tts",
+  "gemini-2.5-flash",
 ];
 
 /**
@@ -233,7 +233,7 @@ async function generateTtsBytes(text: string): Promise<Uint8Array> {
           responseModalities: ["AUDIO"],
           speechConfig: {
             voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: "Charon" },
+              prebuiltVoiceConfig: { voiceName: "Kore" },
             },
           },
         } as Record<string, unknown>,
@@ -311,7 +311,7 @@ export async function synthesizeSpeechCached(
 
 // ── Coach voice playback from Vercel Blob CDN ───────────────────────────────
 
-import { VOICE_URLS } from "@/constants/voiceUrls";
+import { VOICE_URLS, SCHOOL_VOICE_URLS } from "@/constants/voiceUrls";
 
 /**
  * Play coach voice from Vercel Blob CDN. Throws if not available.
@@ -322,7 +322,7 @@ export async function playCoachVoice(
   _coachScript: string,
   onStart?: () => void
 ): Promise<void> {
-  const blobUrl = VOICE_URLS[challengeId];
+  const blobUrl = VOICE_URLS[challengeId] || SCHOOL_VOICE_URLS[challengeId];
   if (!blobUrl) {
     throw new Error("Coach voice not available for this challenge");
   }
@@ -434,7 +434,7 @@ export async function analyzeAnswer(
   challenge: Challenge,
   previousAttempts?: Attempt[],
   /** Optional school-mode context: grade level for grade-aware calibration */
-  schoolContext?: { grade: 1 | 2 | 3 | 4; ageHint?: string }
+  schoolContext?: { grade: number; ageHint?: string }
 ): Promise<AnalysisResult> {
   const tier = challenge.tier ?? "Beginner";
   const rubric = TIER_RUBRICS[tier] ?? TIER_RUBRICS["Beginner"];
@@ -449,9 +449,19 @@ export async function analyzeAnswer(
     2: "Grade 2 (~7 years old): Expect 4-6 sentence answers, some descriptive words, clear topic. Reward storytelling. Some grammar slips are normal.",
     3: "Grade 3 (~8 years old): Expect linked sentences, clear opening and ending, basic structure. Reward specific examples and varied vocabulary.",
     4: "Grade 4 (~9 years old): Expect a coherent mini-speech with clear structure, specific vocabulary, and confident delivery. Hold to a higher bar but stay age-appropriate.",
+    5: "Grade 5 (~10 years old): Expect organized paragraphs of connected ideas with reasoning (because/therefore). Should use topic-specific vocabulary and basic persuasion. Expect 1-2 minute responses with clear intro and conclusion.",
+    6: "Grade 6 (~11 years old): Expect clear arguments with supporting examples, audience awareness, and varied sentence structures. Should demonstrate some formal register and ability to explain complex ideas simply.",
+    7: "Grade 7 (~12 years old): Expect well-reasoned arguments with specific evidence, logical transitions, and rhetorical awareness. Should demonstrate academic vocabulary and ability to address counterpoints.",
+    8: "Grade 8 (~13 years old): Expect structured arguments with evidence, counterpoint awareness, and confident delivery. Should sound prepared and polished. Demand precision in word choice and logical flow.",
+    9: "Grade 9 (~14 years old): Expect sophisticated arguments with rhetorical techniques, nuanced reasoning, and commanding delivery. Should demonstrate deep understanding and the ability to persuade or analyze critically.",
+    10: "Grade 10 (~15 years old): Expect well-crafted, rhetorically sophisticated speeches. Must demonstrate command of topic, advanced vocabulary, flawless grammar, and engaging delivery. Hold to a high standard appropriate for a mature teen speaker.",
   };
+  const minimalSpeechRule = schoolContext
+    ? `\n═══ CRITICAL: MINIMAL SPEECH DETECTION ═══\nIf the transcript has fewer than 10 words or is mostly silence/noise/gibberish:\n- ALL skill scores MUST be 10 or below\n- overallScore MUST be 10 or below\n- confidenceScore MUST be 10 or below\n- Do NOT give encouraging feedback about content — there was no real content\n- strengths should acknowledge courage for trying, nothing else\n- improvements should encourage speaking more next time\nIf the transcript has 10-20 words: ALL scores MUST be capped at 30 maximum. The student barely spoke.\nDo NOT inflate scores for minimal effort. A student who spoke 3 words cannot get 3 or 4 stars.\n`
+    : "";
+
   const gradeBlock = schoolContext
-    ? `\n═══ GRADE-AWARE CALIBRATION ═══\nThis student is in ${gradeBaselines[schoolContext.grade] ?? gradeBaselines[1]}\nScore against the expected baseline FOR THIS GRADE — not against an adult standard.\nFeedback must use age-appropriate, encouraging language a young child can understand.\n`
+    ? `\n═══ GRADE-AWARE CALIBRATION ═══\nThis student is in ${gradeBaselines[schoolContext.grade] ?? gradeBaselines[1]}\nScore against the expected baseline FOR THIS GRADE — not against an adult standard.\nFeedback must use age-appropriate, encouraging language a young child can understand.\n${minimalSpeechRule}`
     : "";
 
   const skillRubricBlock = Object.entries(rubric.skillGuidelines)
